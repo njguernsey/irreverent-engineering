@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irreverent Engineering | Disruption by Design</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #f0f2ef; 
+            --bg-cool: #d8e0da; 
+            --bg-warm: #e8e4d8; 
+            --text-main: #1a1a1a;
+            --text-muted: #5a5f5b;
+            --acid-lime: #c5fb29; 
+            --deep-clay: #b39ddb; 
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --transition-speed: 0.5s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; 
+        }
+
+        body {
+            background-color: #191a1f;
+            color: #fff;
+            font-family: "Google Sans", sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s;
+        }
+
+        /* CUSTOM CURSOR */
+        #cursor-follower {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--acid-lime);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999999999;
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0px;
+            mix-blend-mode: difference;
+        }
+
+        @keyframes rainbow-text {
+            0% { color: #a84a4a; }
+            20% { color: #a87d4a; }
+            40% { color: #a8a84a; }
+            60% { color: #4a8a4a; }
+            80% { color: #4a4aa8; }
+            100% { color: #8a4a8a; }
+        }
+
+        @keyframes rotate { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
+
+        /* HERO SECTION */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            line-height: 0.9;
+            text-transform: uppercase;
+            letter-spacing: -4px;
+            text-align: center;
+        }
+
+        .hero-tagline {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            margin-top: 25px;
+            background: var(--acid-lime);
+            padding: 5px 15px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* WORK SECTION */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+        .work-section { padding: 150px 0; }
+
+        .work-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+            background-color: #ccc;
+            border: 1px solid #ccc;
+        }
+
+        .project-card {
+            background-color: var(--bg-base);
+            padding: 80px 50px;
+            transition: all var(--transition-speed) cubic-bezier(0.19, 1, 0.22, 1);
+            text-decoration: none;
+            color: var(--text-main);
+            border: 1px solid #ccc;
+        }
+
+        .project-card:hover {
+            background-color: var(--text-main);
+            color: #fff;
+            border-color: var(--text-main);
+        }
+
+        body.prank-mode {
+            background-color: #ff00ff;
+            animation: rainbow-bg 5s infinite;
+        }
+
+        body.prank-mode .hero-title,
+        body.prank-mode .hero-tagline,
+        body.prank-mode .project-card,
+        body.prank-mode .project-title,
+        body.prank-mode .project-desc,
+        body.prank-mode .project-link,
+        body.prank-mode .quote-text,
+        body.prank-mode .quote-attribution,
+        body.prank-mode .footer-big,
+        body.prank-mode .social-link {
+            animation: rainbow-text 2s linear infinite;
+        }
+
+        body.prank-mode .project-card {
+            animation: shake 0.5s infinite;
+            border: 5px dashed #00ff00;
+            transform: rotate(2deg);
+        }
+
+        body.prank-mode .project-card:hover {
+            animation: shake 0.1s infinite, rainbow-bg 2s infinite;
+            z-index: 1;
+        }
+
+        @keyframes rainbow-bg {
+            0% { background-color: #e68a8a; }
+            20% { background-color: #e6b88a; }
+            40% { background-color: #e6e68a; }
+            60% { background-color: #8ae68a; }
+            80% { background-color: #8a8ae6; }
+            100% { background-color: #b88ae6; }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            50% { transform: translate(-1px, 2px) rotate(1deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .project-meta { font-family: var(--font-mono); font-size: 0.75rem; color: var(--deep-clay); margin-bottom: 20px; }
+        .project-title { font-size: 2.4rem; font-weight: 800; margin-bottom: 20px; letter-spacing: -1px; }
+        .project-desc { font-size: 1rem; color: var(--text-muted); margin-bottom: 40px; max-width: 320px; }
+        .project-link { font-family: var(--font-mono); border-bottom: 2px solid var(--acid-lime); align-self: flex-start; padding-bottom: 4px; }
+
+        /* RECOGNITION */
+        .quotes-section { padding: 150px 0; background: var(--bg-cool); position: relative; }
+        .quotes-section::before {
+            content: "";
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: var(--acid-lime);
+            margin: 0 auto 80px auto;
+        }
+        .quote-text { font-size: 2.8rem; font-weight: 800; line-height: 1; margin-bottom: 20px; letter-spacing: -2px; color: var(--text-main); }
+        .quote-attribution { color: var(--deep-clay); font-family: var(--font-mono); margin-bottom: 60px; }
+
+        /* PRANK TOGGLE */
+        #prank-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #000;
+            color: var(--acid-lime);
+            border: none;
+            padding: 15px 20px;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 5px 5px 0px var(--deep-clay);
+            transition: transform 0.1s;
+        }
+
+        #prank-toggle:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--deep-clay); }
+
+        /* WEBGL BACKGROUND */
+        #webgl-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        header, .container, footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* FOOTER */
+        footer { padding: 120px 0; background: #000; color: #fff; text-align: left; }
+        .footer-big { font-size: 5rem; font-weight: 900; letter-spacing: -4px; margin-bottom: 40px; color: var(--bg-base); }
+        .social-link { color: var(--acid-lime); text-decoration: none; font-family: var(--font-mono); margin-right: 30px; }
+
+        @media (max-width: 768px) {
+            .work-grid { grid-template-columns: 1fr; }
+            .hero-title { font-size: 3.5rem; }
+            #cursor-follower, #prank-toggle { display: none; }
+            * { cursor: auto; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="webgl-canvas" aria-hidden="true"></canvas>
+
+    <div id="cursor-follower"></div>
+
+    <button id="prank-toggle">INITIALIZE_OVERRIDE.exe</button>
+
+    <header>
+        <h1 class="hero-title">Irrev<span style="font-family: 'Comic Sans MS', 'Comic Sans', cursive;">e</span>rent<br>Engineering</h1>
+        <p class="hero-tagline">We make ideas happen. Unfortunately.</p>
+    </header>
+
+    <div class="container">
+        <section class="work-section">
+            <div class="work-grid">
+                <a href="#" class="project-card">
+                    <span class="project-meta">PROJECT_01</span>
+                    <h3 class="project-title">Broccoli Facts</h3>
+                    <p class="project-desc">A deeply unnecessary subscription service for broccoli facts. Now featuring an AI that will absolutely talk to you about broccoli longer than you’d like.</p>
+                    <span class="project-link">GET_FACTS</span>
+                </a>
+                <a href="#" class="project-card">
+                    <span class="project-meta">PROJECT_02</span>
+                    <h3 class="project-title">Meeting Overlord</h3>
+                    <p class="project-desc">An add-on that schedules meetings you didn’t ask for, at times you won’t enjoy. You know you needed even more meetings.</p>
+                    <span class="project-link">SCHEDULE_CHAOS</span>
+                </a>
+                <a href="#" class="project-card">
+                    <span class="project-meta">PROJECT_03</span>
+                    <h3 class="project-title">Ad-pocalypse</h3>
+                    <p class="project-desc">A browser add-on that weaponizes ads and interruptions to force you off the screen after a set time.</p>
+                    <span class="project-link">FORCE_QUIT</span>
+                </a>
+                <a href="#" class="project-card">
+                    <span class="project-meta">PROJECT_04</span>
+                    <h3 class="project-title">Reality Alarm</h3>
+                    <p class="project-desc">An alarm clock that uses psychological discomfort—like playing your own voice or reading your bank balance—to get you out of bed.</p>
+                    <span class="project-link">WAKE_UP</span>
+                </a>
+                <a href="#" class="project-card">
+                    <span class="project-meta">PROJECT_05</span>
+                    <h3 class="project-title">Joy-Based Flavor Mapper</h3>
+                    <p class="project-desc">A nutrition app that ignores calories and focuses entirely on your sensory experience to help you discover food you actually love.</p>
+                    <span class="project-link">MAP_FLAVOR</span>
+                </a>
+                <a href="#" class="project-card">
+                    <span class="project-meta">PROJECT_06</span>
+                    <h3 class="project-title">Plant-Whisperer AI</h3>
+                    <p class="project-desc">An app that gives your houseplants a voice and a personality based on their species, health, and physical characteristics.</p>
+                    <span class="project-link">TALK_TO_PLANTS</span>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <section class="quotes-section">
+        <div class="container">
+            <p class="quote-text">"It really was annoying. 10/10"</p>
+            <p class="quote-attribution">— DOUG, FIRST ADOPTER</p>
+            <p class="quote-text" style="margin-top: 40px;">"It started funny. Now it’s personal."</p>
+            <p class="quote-attribution">— ALSO DOUG</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <h2 class="footer-big">Smart ideas, slightly sideways.</h2>
+            <div class="footer-links">
+                <a href="#" class="social-link">GITHUB</a>
+                <a href="#" class="social-link">LINKEDIN</a>
+                <a href="#" class="social-link">EMAIL</a>
+            </div>
+            <p style="margin-top: 80px; font-size: 0.7rem; opacity: 0.5; font-family: var(--font-mono);">
+                &copy; 2026 IRREVERENT ENGINEERING. THOUGHTFUL WORK. DUBIOUS APPLICATIONS.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const cursor = document.getElementById('cursor-follower');
+        const toggle = document.getElementById('prank-toggle');
+        const canvas = document.getElementById('webgl-canvas');
+        const gl = canvas.getContext('webgl');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Simple WebGL shader for blurred gradient background
+        const vsSource = `
+            attribute vec2 position;
+            void main() { gl_Position = vec4(position, 0.0, 1.0); }
+        `;
+        const fsSource = `
+            precision mediump float;
+            uniform vec2 u_resolution;
+            uniform vec2 u_mouse;
+            uniform float u_time;
+            uniform float u_is_prank;
+
+            // Simple hash function for noise
+            float hash(vec2 p) {
+                return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+            }
+
+            void main() {
+                vec2 uv = gl_FragCoord.xy / u_resolution;
+                
+                // 1. Noisy, flowy gradient background
+                vec3 color = vec3(0.098, 0.102, 0.122); // #191a1f
+                float noise = hash(uv + vec2(u_time * 0.05));
+                color += 0.05 * noise;
+                color += 0.05 * sin(uv.x * 10.0 + u_time * 0.2) * cos(uv.y * 10.0 + u_time * 0.3);
+
+                // 2. Dot grid graph paper pattern
+                vec2 gridUV = gl_FragCoord.xy;
+                // Gravity/Weight effect: distort grid based on mouse
+                vec2 mouseDist = (gl_FragCoord.xy - u_mouse);
+                float d = length(mouseDist);
+                float force = smoothstep(300.0, 0.0, d) * 20.0;
+                gridUV -= normalize(mouseDist) * force;
+
+                float dotSize = 1.5;
+                float grid = step(0.95, fract(gridUV.x / 30.0)) * step(0.95, fract(gridUV.y / 30.0));
+                
+                // Combine
+                vec3 finalColor = color + (grid * 0.3);
+                
+                // Rainbow effect
+                if (u_is_prank > 0.5) {
+                    vec3 rainbow = 0.5 + 0.5 * cos(u_time + uv.xyx + vec3(0, 2, 4));
+                    finalColor = mix(finalColor, rainbow, 0.5);
+                }
+
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            return shader;
+        }
+
+        const program = gl.createProgram();
+        gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+        gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+        const pos = gl.getAttribLocation(program, "position");
+        gl.enableVertexAttribArray(pos);
+        gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+        const uRes = gl.getUniformLocation(program, "u_resolution");
+        const uMouse = gl.getUniformLocation(program, "u_mouse");
+        const uTime = gl.getUniformLocation(program, "u_time");
+        const uIsPrank = gl.getUniformLocation(program, "u_is_prank");
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+            gl.uniform2f(uMouse, e.clientX, e.clientY);
+        });
+
+        function render(time) {
+            gl.uniform2f(uRes, canvas.width, canvas.height);
+            gl.uniform1f(uTime, time * 0.001);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('prank-mode');
+            const isPrank = document.body.classList.contains('prank-mode');
+            toggle.innerText = isPrank ? 'RESTORE_SANITY.sh' : 'INITIALIZE_OVERRIDE.exe';
+            // Pass flag to shader
+            gl.uniform1f(uIsPrank, isPrank ? 1.0 : 0.0);
+        });
+
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                cursor.style.width = '100px';
+                cursor.style.height = '100px';
+            });
+            link.addEventListener('mouseleave', () => {
+                cursor.style.width = '24px';
+                cursor.style.height = '24px';
+            });
+        });
+    </script>
+</body>
+</html>
