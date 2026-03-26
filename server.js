@@ -316,7 +316,10 @@ function searchBroccoli(query, index) {
     return { answer: top.item.answer };
 }
 
-app.post('/api/chat', async (req, res) => {
+app.all('/api/chat', async (req, res) => {
+    if (req.method !== 'POST') {
+        return res.status(405).send('Method Not Allowed');
+    }
     const { message } = req.body;
     console.log('Received message:', message);
     const searchResult = searchBroccoli(message, index);
