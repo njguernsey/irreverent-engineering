@@ -9,9 +9,23 @@ app.use(express.json());
 
 const genAI = new GoogleGenerativeAI('AIzaSyB8wi79eyw4qlJmyhchUkcCGAdYZkonIhQ');
 
+const broccoliFacts = {
+    "what is broccoli": "Broccoli is an edible green plant in the cabbage family whose large flowering head, stalk and small associated leaves are eaten as a vegetable.",
+    "is broccoli healthy": "Yes, broccoli is highly nutritious, rich in vitamins C and K, fiber, and various antioxidants.",
+    "how do you cook broccoli": "Broccoli can be steamed, roasted, sautéed, or eaten raw. Steaming is often recommended to retain the most nutrients.",
+    "what color is broccoli": "Broccoli is typically green, though some varieties can be purple."
+};
+
 app.post('/api/chat', async (req, res) => {
     const { message } = req.body;
+    const lowerMessage = message.toLowerCase().replace(/[?]/g, '');
 
+    // Check database first
+    if (broccoliFacts[lowerMessage]) {
+        return res.json({ reply: broccoliFacts[lowerMessage] });
+    }
+
+    // Fallback to AI
     try {
         const model = genAI.getGenerativeModel({ 
             model: 'gemini-2.0-flash',
