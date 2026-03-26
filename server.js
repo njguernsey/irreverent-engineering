@@ -13,7 +13,13 @@ const broccoliFacts = {
     "what is broccoli": "Broccoli is an edible green plant in the cabbage family whose large flowering head, stalk and small associated leaves are eaten as a vegetable.",
     "is broccoli healthy": "Yes, broccoli is highly nutritious, rich in vitamins C and K, fiber, and various antioxidants.",
     "how do you cook broccoli": "Broccoli can be steamed, roasted, sautéed, or eaten raw. Steaming is often recommended to retain the most nutrients.",
-    "what color is broccoli": "Broccoli is typically green, though some varieties can be purple."
+    "what color is broccoli": "Broccoli is typically green, though some varieties can be purple.",
+    "does broccoli have protein": "Yes, broccoli contains a small amount of protein, about 2.5 grams per cup of chopped raw broccoli.",
+    "is broccoli a vegetable": "Yes, broccoli is a cruciferous vegetable.",
+    "can dogs eat broccoli": "Yes, dogs can eat broccoli in small quantities, but it should be plain and not seasoned.",
+    "how long does broccoli last": "Fresh broccoli typically lasts 3-5 days in the refrigerator when stored properly in a plastic bag.",
+    "is broccoli good for weight loss": "Yes, broccoli is low in calories and high in fiber, making it a great addition to a weight loss diet.",
+    "what is the best way to store broccoli": "Store broccoli in the refrigerator, ideally in a perforated plastic bag to allow for air circulation."
 };
 
 app.post('/api/chat', async (req, res) => {
