@@ -323,6 +323,8 @@ app.post('/api/chat', async (req, res) => {
         return res.json({ reply: searchResult.answer });
     }
 
+    // AI component commented out as requested
+    /*
     try {
         const model = genAI.getGenerativeModel({ 
             model: 'gemini-2.0-flash',
@@ -335,6 +337,8 @@ app.post('/api/chat', async (req, res) => {
         console.error('Error:', error);
         res.json({ reply: "Sorry, I'm having trouble connecting to my brain right now." });
     }
+    */
+    res.json({ reply: "I'm sorry, I don't have an answer for that about broccoli right now." });
 });
 
 const PORT = process.env.PORT || 3000;
