@@ -311,7 +311,8 @@ function searchBroccoli(query, index) {
     const scored = index.map(item => ({ item, score: scoreItem(query, item) }));
     scored.sort((a, b) => b.score - a.score);
     const top = scored[0];
-    if (!top || top.score < 20) return { answer: null };
+    console.log('Query:', query, 'Top score:', top ? top.score : 'none', 'Top item:', top ? top.item.question : 'none');
+    if (!top || top.score < 10) return { answer: null };
     return { answer: top.item.answer };
 }
 
