@@ -333,7 +333,7 @@ app.post('/api/chat', async (req, res) => {
         res.json({ reply: response.text() });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'Failed to get response from Gemini' });
+        res.json({ reply: "Sorry, I'm having trouble connecting to my brain right now." });
     }
 });
 
