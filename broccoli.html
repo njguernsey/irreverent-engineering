@@ -250,23 +250,23 @@
             const scored = index.map(item => {
                 let score = 0;
                 // Exact match
-                if (item.normalized.includes(q)) score += 200;
+                if (item.normalized.includes(q)) score += 1000;
                 // Partial match
                 item.normalized.forEach(phrase => { 
-                    if (phrase.includes(q)) score += 100; 
-                    if (q.includes(phrase)) score += 80;
+                    if (phrase.includes(q)) score += 500; 
+                    if (q.includes(phrase)) score += 400;
                     // Levenshtein distance for typos
-                    if (levenshtein(q, phrase) <= Math.max(2, Math.floor(phrase.length / 4))) score += 60;
+                    if (levenshtein(q, phrase) <= Math.max(2, Math.floor(phrase.length / 4))) score += 300;
                 });
                 // Token match
-                score += qTokens.filter(t => item.tokens.includes(t)).length * 30;
+                score += qTokens.filter(t => item.tokens.includes(t)).length * 100;
                 // Length penalty
-                score -= Math.abs(item.tokens.length - qTokens.length) * 2;
+                score -= Math.abs(item.tokens.length - qTokens.length) * 20;
                 return { item, score };
             });
             scored.sort((a, b) => b.score - a.score);
             console.log("Query:", query, "Top match:", scored[0]);
-            return scored[0] && scored[0].score >= 30 ? scored[0].item.answer : null;
+            return scored[0] && scored[0].score >= 100 ? scored[0].item.answer : null;
         }
 
         function sendMessage() {
