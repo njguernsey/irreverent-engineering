@@ -195,19 +195,40 @@
         function tokenize(text) { return normalize(text).split(" "); }
         const index = broccoliQA.map(item => ({ ...item, normalized: [normalize(item.question), ...(item.aliases || []).map(normalize)], tokens: [item.question, ...(item.aliases || [])].flatMap(p => tokenize(p)) }));
 
+        function levenshtein(a, b) {
+            const tmp = [];
+            for (let i = 0; i <= a.length; i++) tmp[i] = [i];
+            for (let j = 0; j <= b.length; j++) tmp[0][j] = j;
+            for (let i = 1; i <= a.length; i++) {
+                for (let j = 1; j <= b.length; j++) {
+                    tmp[i][j] = Math.min(tmp[i - 1][j] + 1, tmp[i][j - 1] + 1, tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+                }
+            }
+            return tmp[a.length][b.length];
+        }
+
         function searchBroccoli(query) {
             const q = normalize(query);
             const qTokens = tokenize(query);
             const scored = index.map(item => {
                 let score = 0;
-                if (item.normalized.includes(q)) score += 100;
-                item.normalized.forEach(phrase => { if (phrase.includes(q)) score += 40; if (q.includes(phrase)) score += 30; });
-                score += qTokens.filter(t => item.tokens.includes(t)).length * 10;
-                score -= Math.abs(item.tokens.length - qTokens.length);
+                // Exact match
+                if (item.normalized.includes(q)) score += 200;
+                // Partial match
+                item.normalized.forEach(phrase => { 
+                    if (phrase.includes(q)) score += 100; 
+                    if (q.includes(phrase)) score += 80;
+                    // Levenshtein distance for typos
+                    if (levenshtein(q, phrase) <= Math.max(2, Math.floor(phrase.length / 4))) score += 60;
+                });
+                // Token match
+                score += qTokens.filter(t => item.tokens.includes(t)).length * 20;
+                // Length penalty
+                score -= Math.abs(item.tokens.length - qTokens.length) * 5;
                 return { item, score };
             });
             scored.sort((a, b) => b.score - a.score);
-            return scored[0] && scored[0].score >= 10 ? scored[0].item.answer : null;
+            return scored[0] && scored[0].score >= 20 ? scored[0].item.answer : null;
         }
 
         function sendMessage() {
