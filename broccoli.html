@@ -110,15 +110,21 @@
             display: flex;
             gap: 10px;
             background: #f8f8f8;
+            align-items: flex-end;
         }
 
-        input {
+        textarea {
             flex: 1;
             padding: 15px;
-            border-radius: 25px;
+            border-radius: 20px;
             border: 1px solid #ddd;
             outline: none;
             font-size: 1rem;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            line-height: 1.4;
+            font-family: inherit;
         }
 
         button {
@@ -145,7 +151,7 @@
             <div class="message bot">Hello! I am the Broccoli Facts Bot. Ask me anything about broccoli!</div>
         </div>
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Type a message...">
+            <textarea id="userInput" placeholder="Type a message..." rows="1" oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 120) + 'px';"></textarea>
             <button onclick="sendMessage()">Send</button>
         </div>
     </div>
@@ -281,6 +287,7 @@
             userMsg.innerText = text;
             chat.appendChild(userMsg);
             input.value = '';
+            input.style.height = 'auto';
             chat.scrollTop = chat.scrollHeight;
 
             const reply = searchBroccoli(text) || "I'm sorry, I don't have an answer for that about broccoli right now.";
