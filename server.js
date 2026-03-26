@@ -318,27 +318,13 @@ function searchBroccoli(query, index) {
 
 app.post('/api/chat', async (req, res) => {
     const { message } = req.body;
+    console.log('Received message:', message);
     const searchResult = searchBroccoli(message, index);
 
     if (searchResult.answer) {
         return res.json({ reply: searchResult.answer });
     }
 
-    // AI component commented out as requested
-    /*
-    try {
-        const model = genAI.getGenerativeModel({ 
-            model: 'gemini-2.0-flash',
-            systemInstruction: 'You are a helpful assistant that only answers questions about broccoli. If the user asks about anything else, politely steer the conversation back to broccoli.'
-        });
-        const result = await model.generateContent(message);
-        const response = await result.response;
-        res.json({ reply: response.text() });
-    } catch (error) {
-        console.error('Error:', error);
-        res.json({ reply: "Sorry, I'm having trouble connecting to my brain right now." });
-    }
-    */
     res.json({ reply: "I'm sorry, I don't have an answer for that about broccoli right now." });
 });
 
