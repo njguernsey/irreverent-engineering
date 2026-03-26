@@ -259,13 +259,14 @@
                     if (levenshtein(q, phrase) <= Math.max(2, Math.floor(phrase.length / 4))) score += 60;
                 });
                 // Token match
-                score += qTokens.filter(t => item.tokens.includes(t)).length * 20;
+                score += qTokens.filter(t => item.tokens.includes(t)).length * 30;
                 // Length penalty
-                score -= Math.abs(item.tokens.length - qTokens.length) * 5;
+                score -= Math.abs(item.tokens.length - qTokens.length) * 2;
                 return { item, score };
             });
             scored.sort((a, b) => b.score - a.score);
-            return scored[0] && scored[0].score >= 20 ? scored[0].item.answer : null;
+            console.log("Query:", query, "Top match:", scored[0]);
+            return scored[0] && scored[0].score >= 30 ? scored[0].item.answer : null;
         }
 
         function sendMessage() {
