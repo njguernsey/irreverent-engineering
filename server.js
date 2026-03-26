@@ -1,13 +1,10 @@
 require('dotenv').config();
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-const genAI = new GoogleGenerativeAI('AIzaSyB8wi79eyw4qlJmyhchUkcCGAdYZkonIhQ');
 
 const broccoliQA = [
   {
@@ -316,10 +313,7 @@ function searchBroccoli(query, index) {
     return { answer: top.item.answer };
 }
 
-app.all('/api/chat', async (req, res) => {
-    if (req.method !== 'POST') {
-        return res.status(405).send('Method Not Allowed');
-    }
+app.post('/api/chat', (req, res) => {
     const { message } = req.body;
     console.log('Received message:', message);
     const searchResult = searchBroccoli(message, index);
