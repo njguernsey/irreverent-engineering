@@ -57,6 +57,24 @@
             padding: 40px;
             border-radius: 10px;
             margin-top: 40px;
+            position: relative;
+        }
+        .tone-tabs {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            display: flex;
+            gap: 15px;
+        }
+        .tone-tab {
+            cursor: pointer;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        .tone-tab.active {
+            color: #c5fb29;
+            font-weight: bold;
+            border-bottom: 2px solid #c5fb29;
         }
         .progress-bar {
             display: flex;
@@ -120,6 +138,7 @@
         const startBtn = document.getElementById('start-quiz');
         
         let answers = [];
+        let currentResultData = null;
 
         const questions = [
             { text: "What usually sparks you into action?", options: [{t: "A sudden idea I want to explore", v: "BIL"}, {t: "A responsibility I feel I shouldn’t ignore", v: "FAR"}, {t: "Something interesting I want to experience", v: "BIL"}, {t: "A situation that requires careful judgment", v: "FAR"}] },
@@ -188,7 +207,6 @@
             container.classList.add('selected');
             document.getElementById(`opt${optionIndex}`).checked = true;
             
-            // If it's a new answer (not editing), proceed automatically
             if (!answers[questionIndex]) {
                 answers[questionIndex] = {
                     val: questions[questionIndex].options[optionIndex].v,
@@ -196,7 +214,6 @@
                 };
                 setTimeout(() => showQuestion(questionIndex + 1), 300);
             } else {
-                // If editing, just update the answer
                 answers[questionIndex] = {
                     val: questions[questionIndex].options[optionIndex].v,
                     text: questions[questionIndex].options[optionIndex].t
@@ -214,7 +231,6 @@
             const emojis = ['🧙‍♂️', '💍', '🗡️', '📜', '🌳', '🛡️', '🥧', '🏔️'];
             const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
             
-            // Add dot to scale
             const scaleLine = document.getElementById('scale-line');
             const dot = document.createElement('div');
             dot.className = 'result-dot';
@@ -222,10 +238,18 @@
             dot.innerText = randomEmoji;
             scaleLine.appendChild(dot);
             
-            // Persist dot
             const dots = JSON.parse(localStorage.getItem('scaleDots') || '[]');
             dots.push({ left: dot.style.left, emoji: randomEmoji });
             localStorage.setItem('scaleDots', JSON.stringify(dots));
+            
+            currentResultData = { bilCount, farCount, bilPct, farPct, randomEmoji };
+            renderResults();
+        }
+
+        function renderResults() {
+            const { bilCount, farCount, bilPct, farPct, randomEmoji } = currentResultData;
+            // Get tone from data attribute, default to "1"
+            const tone = quizContainer.dataset.tone || "1";
             
             let resultText = "";
             if (bilCount > farCount) {
@@ -310,19 +334,33 @@
             }, {});
 
             let paragraphs = [];
-            if (traitCounts.creative > 3 || traitCounts.curious > 3) {
-                paragraphs.push("You move through the world driven by curiosity and possibility. When something captures your attention, you don’t just observe it—you feel a pull to engage, explore, and create in response. Ideas aren’t abstract to you; they’re invitations. You tend to follow what interests you rather than forcing direction, which gives your work and choices a sense of authenticity and momentum.");
-            } else {
-                paragraphs.push("You approach life with a steady, thoughtful gaze. You are less interested in chasing fleeting sparks and more focused on understanding the deeper meaning behind your experiences. You value clarity and substance, preferring to build your path on a foundation of understanding rather than impulse.");
-            }
+            if (tone === "1") {
+                if (traitCounts.creative > 3 || traitCounts.curious > 3) {
+                    paragraphs.push("You move through the world driven by curiosity and possibility. When something captures your attention, you don’t just observe it—you feel a pull to engage, explore, and create in response. Ideas aren’t abstract to you; they’re invitations. You tend to follow what interests you rather than forcing direction, which gives your work and choices a sense of authenticity and momentum.");
+                } else {
+                    paragraphs.push("You approach life with a steady, thoughtful gaze. You are less interested in chasing fleeting sparks and more focused on understanding the deeper meaning behind your experiences. You value clarity and substance, preferring to build your path on a foundation of understanding rather than impulse.");
+                }
 
-            if (traitCounts.analytical > 2 || traitCounts.deliberate > 2) {
-                paragraphs.push("When it comes to decision-making, you are deliberate and analytical. You don't rush into action; instead, you weigh the long-term consequences and align your choices with your core values. Your process is one of careful consideration, ensuring that your actions are not just effective, but also true to what you believe is right.");
-            } else {
-                paragraphs.push("Your process is exploratory and adaptive. You prefer to try things, iterate, and let your work evolve rather than locking into a fixed plan from the start. You are comfortable with ambiguity, trusting your intuition to guide you toward the most interesting or effective outcome.");
-            }
+                if (traitCounts.analytical > 2 || traitCounts.deliberate > 2) {
+                    paragraphs.push("When it comes to decision-making, you are deliberate and analytical. You don't rush into action; instead, you weigh the long-term consequences and align your choices with your core values. Your process is one of careful consideration, ensuring that your actions are not just effective, but also true to what you believe is right.");
+                } else {
+                    paragraphs.push("Your process is exploratory and adaptive. You prefer to try things, iterate, and let your work evolve rather than locking into a fixed plan from the start. You are comfortable with ambiguity, trusting your intuition to guide you toward the most interesting or effective outcome.");
+                }
 
-            paragraphs.push("Your environment and social connections play a significant role in your energy. You are deeply influenced by the atmosphere around you, finding motivation in spaces that feel intentional and well-considered. In your relationships, you prioritize depth and quality, seeking out connections that offer genuine meaning rather than just casual interaction.");
+                paragraphs.push("Your environment and social connections play a significant role in your energy. You are deeply influenced by the atmosphere around you, finding motivation in spaces that feel intentional and well-considered. In your relationships, you prioritize depth and quality, seeking out connections that offer genuine meaning rather than just casual interaction.");
+            } else if (tone === "2") {
+                paragraphs = [
+                    "The subject demonstrates a pronounced orientation toward conceptual exploration, exhibiting a consistent tendency to translate abstract inspiration into tangible creative output. This cognitive pattern suggests a high degree of adaptability and a preference for iterative, exploratory methodologies over rigid, pre-defined structures.",
+                    "Decision-making processes are characterized by a deliberate, analytical framework, prioritizing long-term consequences over immediate gratification. The subject consistently evaluates potential outcomes against a set of internalized principles, demonstrating a high degree of foresight and cognitive discipline.",
+                    "Environmental and social stimuli function as primary determinants of motivational energy, with a clear preference for intentional, structured contexts. The subject exhibits a marked tendency to seek out environments that facilitate deep reflection and meaningful engagement, rather than those characterized by superficial or transient interactions."
+                ];
+            } else if (tone === "3") {
+                paragraphs = [
+                    "There is in you a marked inclination toward the shaping of things born first in thought. You are not driven by necessity alone, but by the quiet pull of what might be, finding joy in the act of creation itself, much like the makers of old who sought to capture the light of the stars in glass.",
+                    "You walk with a measured step, weighing the path before you with a care that speaks of a mind seeking not just the way, but the truth of the way. Your choices are not made in haste, but are the fruit of long reflection, rooted in a deep understanding of the world and your place within it.",
+                    "The places you dwell and the company you keep are not mere accidents, but reflections of a spirit that seeks depth and meaning in all things. You are drawn to the quiet corners where wisdom is found, and you value the bonds of fellowship that are forged in shared purpose and mutual respect, rather than the fleeting noise of the world."
+                ];
+            }
 
             let finalAlignment = (bilCount > farCount) 
                 ? "This pattern aligns most closely with Bilbo Baggins." 
@@ -331,15 +369,27 @@
                     : "This pattern is truly the midpoint between Bilbo and Faramir. Almost a paradox.";
 
             quizContainer.innerHTML = `
->>>>>>>
                 <div class="quiz-card">
                     <h2>Your Results <span>${randomEmoji}</span></h2>
-                    <p>${resultText}</p>
-                    ${paragraphs.map(p => `<p>${p}</p>`).join('')}
-                    <p><strong>${finalAlignment}</strong></p>
+                    <div class="tone-tabs">
+                        <span class="tone-tab ${tone === "1" ? "active" : ""}" onclick="setTone('1')">Original</span>
+                        <span class="tone-tab ${tone === "2" ? "active" : ""}" onclick="setTone('2')">Academic</span>
+                        <span class="tone-tab ${tone === "3" ? "active" : ""}" onclick="setTone('3')">Tolkien</span>
+                    </div>
+                    <div id="result-content" style="margin-top: 40px;">
+                        <p>${resultText}</p>
+                        ${paragraphs.map(p => `<p>${p}</p>`).join('')}
+                        <p><strong>${finalAlignment}</strong></p>
+                    </div>
                     <button onclick="location.reload()">Retake Quiz</button>
                 </div>
             `;
+        }
+
+        function setTone(t) {
+            // Store the selected tone in a data attribute on the container
+            quizContainer.dataset.tone = t;
+            renderResults();
         }
 
         window.onload = () => {
