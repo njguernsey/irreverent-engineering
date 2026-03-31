@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bilbo-Faramir Scale | Irreverent Engineering</title>
+    <style>
+        body {
+            background-image: url('images/lotr-background-2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #fff;
+            font-family: "Inter", sans-serif;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 0; }
+        .main-card {
+            background: rgba(37, 38, 43, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 { font-size: 3rem; margin-bottom: 20px; color: #c5fb29; }
+        p { margin-bottom: 20px; color: #eee; }
+        a { color: #c5fb29; text-decoration: none; border-bottom: 1px solid #c5fb29; }
+        
+        .scale-visual {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 40px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            position: relative;
+        }
+        #scale-line {
+            flex-grow: 1;
+            height: 4px;
+            background: #c5fb29;
+            margin: 0 20px;
+            position: relative;
+        }
+        .result-dot {
+            position: absolute;
+            top: -12px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .character-img { width: 150px; height: 150px; background: #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
+        .quiz-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            border-radius: 10px;
+            margin-top: 40px;
+        }
+        .progress-bar {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .progress-step {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .progress-step.active { background: #c5fb29; }
+        .option-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .option-container:hover { background: rgba(255, 255, 255, 0.1); }
+        .option-container.selected { background: rgba(197, 251, 41, 0.2); border: 1px solid #c5fb29; }
+        button {
+            background: #c5fb29;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-right: 10px;
+        }
+        button:disabled { background: #555; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-card">
+            <a href="index.html">&larr; Back to Irreverence</a>
+            <h1>The Bilbo-Faramir Scale</h1>
+            
+            <div class="scale-visual">
+                <img src="images/bilbo.jpeg" alt="Bilbo" class="character-img" style="object-fit: cover;">
+                <div id="scale-line"></div>
+                <img src="images/faramir-lotr-2.avif" alt="Faramir" class="character-img" style="object-fit: cover; object-position: center;">
+            </div>
+
+            <p>The definitive, highly scientific, and completely arbitrary scale for measuring the "hobbit-ness" of a situation versus its "steward-of-gondor-ness".</p>
+            
+            <div id="quiz-container">
+                <p>Want to see where you fall on this scale?</p>
+                <button id="start-quiz">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const startBtn = document.getElementById('start-quiz');
+        
+        let answers = [];
+
+        const questions = [
+            { text: "What usually sparks you into action?", options: [{t: "A sudden idea I want to explore", v: "BIL"}, {t: "A responsibility I feel I shouldn’t ignore", v: "FAR"}, {t: "Something interesting I want to experience", v: "BIL"}, {t: "A situation that requires careful judgment", v: "FAR"}] },
+            { text: "When creating something, your priority is:", options: [{t: "Getting the idea out into the world", v: "BIL"}, {t: "Making sure it’s thoughtful and well-considered", v: "FAR"}, {t: "Capturing the feeling or inspiration", v: "BIL"}, {t: "Refining it until it aligns with your standards", v: "FAR"}] },
+            { text: "Your ideal environment feels:", options: [{t: "Cozy, expressive, and full of personality", v: "BIL"}, {t: "Calm, structured, and intentional", v: "FAR"}, {t: "Aesthetic and creatively stimulating", v: "BIL"}, {t: "Grounded, natural, and peaceful", v: "FAR"}] },
+            { text: "When making a difficult decision:", options: [{t: "You go with what feels right in the moment", v: "BIL"}, {t: "You think through long-term consequences", v: "FAR"}, {t: "You follow what excites or interests you most", v: "BIL"}, {t: "You align with your values, even if it’s harder", v: "FAR"}] },
+            { text: "Your curiosity is mostly about:", options: [{t: "Experiencing new things", v: "BIL"}, {t: "Understanding deeper meaning", v: "FAR"}, {t: "Exploring ideas and possibilities", v: "BIL"}, {t: "Analyzing how things work", v: "FAR"}] },
+            { text: "Socially, you tend to:", options: [{t: "Engage when it feels fun or interesting", v: "BIL"}, {t: "Engage when it feels meaningful", v: "FAR"}, {t: "Enjoy conversation and shared moments", v: "BIL"}, {t: "Prefer depth over frequency", v: "FAR"}] },
+            { text: "When something inspires you:", options: [{t: "You immediately want to make something", v: "BIL"}, {t: "You reflect on it before acting", v: "FAR"}, {t: "You explore it playfully", v: "BIL"}, {t: "You internalize and interpret it", v: "FAR"}] },
+            { text: "Your relationship to comfort:", options: [{t: "It’s important—I enjoy a well-crafted environment", v: "BIL"}, {t: "It’s secondary to purpose", v: "FAR"}, {t: "It enhances creativity and mood", v: "BIL"}, {t: "It’s nice, but not necessary", v: "FAR"}] },
+            { text: "When someone wrongs you:", options: [{t: "You respond based on instinct", v: "BIL"}, {t: "You assess before responding", v: "FAR"}, {t: "You adapt based on the situation", v: "BIL"}, {t: "You track patterns and respond accordingly", v: "FAR"}] },
+            { text: "Your energy pattern is:", options: [{t: "Driven by bursts of inspiration", v: "BIL"}, {t: "Consistent and steady", v: "FAR"}, {t: "Motivated by interesting opportunities", v: "BIL"}, {t: "Sustained by discipline and intention", v: "FAR"}] },
+            { text: "You’re more drawn to:", options: [{t: "Stories and imagination", v: "BIL"}, {t: "History and meaning", v: "FAR"}, {t: "Creative expression", v: "BIL"}, {t: "Truth and understanding", v: "FAR"}] },
+            { text: "In new situations:", options: [{t: "You jump in and explore", v: "BIL"}, {t: "You observe before acting", v: "FAR"}, {t: "You experiment and adapt", v: "BIL"}, {t: "You assess and choose deliberately", v: "FAR"}] },
+            { text: "What feels more like you?", options: [{t: "“I want to create and explore”", v: "BIL"}, {t: "“I want to understand and uphold what matters”", v: "FAR"}, {t: "“I follow what interests me”", v: "BIL"}, {t: "“I follow what feels right”", v: "BIL"}] },
+            { text: "Your decision-making style:", options: [{t: "Flexible and intuitive", v: "BIL"}, {t: "Careful and reasoned", v: "FAR"}, {t: "Influenced by curiosity", v: "BIL"}, {t: "Guided by principle", v: "FAR"}] },
+            { text: "What motivates you more?", options: [{t: "Inspiration", v: "BIL"}, {t: "Integrity", v: "FAR"}, {t: "Possibility", v: "BIL"}, {t: "Responsibility", v: "FAR"}] },
+            { text: "If you had to choose:", options: [{t: "A life full of interesting experiences", v: "BIL"}, {t: "A life guided by strong values", v: "FAR"}, {t: "A life of creativity and expression", v: "BIL"}, {t: "A life of meaning and purpose", v: "FAR"}] }
+        ];
+
+        startBtn.addEventListener('click', () => {
+            showQuestion(0);
+        });
+
+        function showQuestion(index, isBack = false) {
+            if (index >= questions.length) {
+                showResults();
+                return;
+            }
+            
+            const q = questions[index];
+            const currentAnswer = answers[index];
+            
+            quizContainer.innerHTML = `
+                <div class="quiz-card">
+                    <div class="progress-bar">
+                        ${questions.map((_, i) => `<div class="progress-step ${i <= index ? 'active' : ''}" onclick="showQuestion(${i})"></div>`).join('')}
+                    </div>
+                    <p>${q.text}</p>
+                    ${q.options.map((opt, i) => `
+                        <div class="option-container ${currentAnswer && currentAnswer.val === opt.v && currentAnswer.text === opt.t ? 'selected' : ''}" onclick="selectOption(this, ${i}, ${index})">
+                            <input type="radio" name="q" value="${i}" id="opt${i}" style="display:none;" ${currentAnswer && currentAnswer.val === opt.v && currentAnswer.text === opt.t ? 'checked' : ''}>
+                            <label for="opt${i}" style="cursor:pointer;">${opt.t}</label>
+                        </div>
+                    `).join('')}
+                    <button id="back-btn" ${index === 0 ? 'disabled' : ''}>Back</button>
+                    <button id="next-btn">${index === questions.length - 1 ? 'See My Results' : 'Next'}</button>
+                </div>
+            `;
+            
+            document.getElementById('back-btn').addEventListener('click', () => showQuestion(index - 1, true));
+            document.getElementById('next-btn').addEventListener('click', () => {
+                const selected = document.querySelector('input[name="q"]:checked');
+                if (!selected) return alert('Please select an answer');
+                const optionIndex = parseInt(selected.value);
+                answers[index] = {
+                    val: q.options[optionIndex].v,
+                    text: q.options[optionIndex].t
+                };
+                showQuestion(index + 1);
+            });
+        }
+
+        function selectOption(container, optionIndex, questionIndex) {
+            document.querySelectorAll('.option-container').forEach(el => el.classList.remove('selected'));
+            container.classList.add('selected');
+            document.getElementById(`opt${optionIndex}`).checked = true;
+            
+            // If it's a new answer (not editing), proceed automatically
+            if (!answers[questionIndex]) {
+                answers[questionIndex] = {
+                    val: questions[questionIndex].options[optionIndex].v,
+                    text: questions[questionIndex].options[optionIndex].t
+                };
+                setTimeout(() => showQuestion(questionIndex + 1), 300);
+            } else {
+                // If editing, just update the answer
+                answers[questionIndex] = {
+                    val: questions[questionIndex].options[optionIndex].v,
+                    text: questions[questionIndex].options[optionIndex].t
+                };
+            }
+        }
+
+        function showResults() {
+            const bilCount = answers.filter(a => a.val === 'BIL').length;
+            const farCount = answers.filter(a => a.val === 'FAR').length;
+            const total = bilCount + farCount;
+            const bilPct = Math.round((bilCount / total) * 100);
+            const farPct = Math.round((farCount / total) * 100);
+            
+            const emojis = ['🧙‍♂️', '💍', '🗡️', '📜', '🌳', '🛡️', '🥧', '🏔️'];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            // Add dot to scale
+            const scaleLine = document.getElementById('scale-line');
+            const dot = document.createElement('div');
+            dot.className = 'result-dot';
+            dot.style.left = `${farPct}%`;
+            dot.innerText = randomEmoji;
+            scaleLine.appendChild(dot);
+            
+            // Persist dot
+            const dots = JSON.parse(localStorage.getItem('scaleDots') || '[]');
+            dots.push({ left: dot.style.left, emoji: randomEmoji });
+            localStorage.setItem('scaleDots', JSON.stringify(dots));
+            
+            let resultText = "";
+            if (bilCount > farCount) {
+                resultText = `You are ${bilPct}% Bilbo and ${farPct}% Faramir.`;
+            } else if (farCount > bilCount) {
+                resultText = `You are ${farPct}% Faramir and ${bilPct}% Bilbo.`;
+            } else {
+                resultText = `You are a true hybrid: ${bilPct}% Bilbo and ${farPct}% Faramir.`;
+            }
+
+            const traitMap = {
+                "A sudden idea I want to explore": ["curious", "idea-oriented"],
+                "A responsibility I feel I shouldn’t ignore": ["responsible", "duty-driven"],
+                "Something interesting I want to experience": ["curious", "experience-driven"],
+                "A situation that requires careful judgment": ["analytical", "deliberate"],
+                "Getting the idea out into the world": ["action-oriented", "creative"],
+                "Making sure it’s thoughtful and well-considered": ["thoughtful", "deliberate"],
+                "Capturing the feeling or inspiration": ["creative", "emotionally expressive"],
+                "Refining it until it aligns with your standards": ["perfectionist", "principled"],
+                "Cozy, expressive, and full of personality": ["aesthetic sensitivity", "comfort-seeking"],
+                "Calm, structured, and intentional": ["structured", "intentional"],
+                "Aesthetic and creatively stimulating": ["aesthetic sensitivity", "creative"],
+                "Grounded, natural, and peaceful": ["grounded", "peaceful"],
+                "You go with what feels right in the moment": ["intuitive", "spontaneous"],
+                "You think through long-term consequences": ["analytical", "foresighted"],
+                "You follow what excites or interests you most": ["intrinsic motivation", "curious"],
+                "You align with your values, even if it’s harder": ["principled", "integrity-driven"],
+                "Experiencing new things": ["curious", "experience-driven"],
+                "Understanding deeper meaning": ["reflective", "meaning-seeking"],
+                "Exploring ideas and possibilities": ["idea-oriented", "possibility-oriented"],
+                "Analyzing how things work": ["analytical", "logical"],
+                "Engage when it feels fun or interesting": ["socially engaged", "fun-seeking"],
+                "Engage when it feels meaningful": ["socially engaged", "meaning-seeking"],
+                "Enjoy conversation and shared moments": ["socially engaged", "relational"],
+                "Prefer depth over frequency": ["reflective", "depth-oriented"],
+                "You immediately want to make something": ["action-oriented", "creative"],
+                "You reflect on it before acting": ["reflective", "deliberate"],
+                "You explore it playfully": ["playful", "creative"],
+                "You internalize and interpret it": ["reflective", "analytical"],
+                "It’s important—I enjoy a well-crafted environment": ["aesthetic sensitivity", "comfort-seeking"],
+                "It’s secondary to purpose": ["purpose-driven", "disciplined"],
+                "It enhances creativity and mood": ["environmentally influenced", "creative"],
+                "It’s nice, but not necessary": ["pragmatic", "disciplined"],
+                "You respond based on instinct": ["intuitive", "spontaneous"],
+                "You assess before responding": ["analytical", "deliberate"],
+                "You adapt based on the situation": ["flexible", "adaptive"],
+                "You track patterns and respond accordingly": ["analytical", "observant"],
+                "Driven by bursts of inspiration": ["creative", "spontaneous"],
+                "Consistent and steady": ["disciplined", "steady"],
+                "Motivated by interesting opportunities": ["opportunity-driven", "curious"],
+                "Sustained by discipline and intention": ["disciplined", "intentional"],
+                "Stories and imagination": ["imaginative", "creative"],
+                "History and meaning": ["reflective", "meaning-seeking"],
+                "Creative expression": ["creative", "expressive"],
+                "Truth and understanding": ["truth-seeking", "analytical"],
+                "You jump in and explore": ["spontaneous", "curious"],
+                "You observe before acting": ["observant", "deliberate"],
+                "You experiment and adapt": ["adaptive", "iterative"],
+                "You assess and choose deliberately": ["analytical", "deliberate"],
+                "“I want to create and explore”": ["creative", "curious"],
+                "“I want to understand and uphold what matters”": ["principled", "meaning-seeking"],
+                "“I follow what interests me”": ["intrinsic motivation", "curious"],
+                "“I follow what feels right”": ["intuitive", "spontaneous"],
+                "Flexible and intuitive": ["flexible", "intuitive"],
+                "Careful and reasoned": ["analytical", "deliberate"],
+                "Influenced by curiosity": ["curious", "idea-oriented"],
+                "Guided by principle": ["principled", "integrity-driven"],
+                "Inspiration": ["creative", "spontaneous"],
+                "Integrity": ["principled", "integrity-driven"],
+                "Possibility": ["possibility-oriented", "idea-oriented"],
+                "Responsibility": ["responsible", "duty-driven"],
+                "A life full of interesting experiences": ["experience-driven", "curious"],
+                "A life guided by strong values": ["principled", "meaning-seeking"],
+                "A life of creativity and expression": ["creative", "expressive"],
+                "A life of meaning and purpose": ["meaning-seeking", "purpose-driven"]
+            };
+
+            const allTraits = answers.flatMap(a => traitMap[a.text] || []);
+            const traitCounts = allTraits.reduce((acc, trait) => {
+                acc[trait] = (acc[trait] || 0) + 1;
+                return acc;
+            }, {});
+
+            let paragraphs = [];
+            if (traitCounts.creative > 3 || traitCounts.curious > 3) {
+                paragraphs.push("You move through the world driven by curiosity and possibility. When something captures your attention, you don’t just observe it—you feel a pull to engage, explore, and create in response. Ideas aren’t abstract to you; they’re invitations. You tend to follow what interests you rather than forcing direction, which gives your work and choices a sense of authenticity and momentum.");
+            } else {
+                paragraphs.push("You approach life with a steady, thoughtful gaze. You are less interested in chasing fleeting sparks and more focused on understanding the deeper meaning behind your experiences. You value clarity and substance, preferring to build your path on a foundation of understanding rather than impulse.");
+            }
+
+            if (traitCounts.analytical > 2 || traitCounts.deliberate > 2) {
+                paragraphs.push("When it comes to decision-making, you are deliberate and analytical. You don't rush into action; instead, you weigh the long-term consequences and align your choices with your core values. Your process is one of careful consideration, ensuring that your actions are not just effective, but also true to what you believe is right.");
+            } else {
+                paragraphs.push("Your process is exploratory and adaptive. You prefer to try things, iterate, and let your work evolve rather than locking into a fixed plan from the start. You are comfortable with ambiguity, trusting your intuition to guide you toward the most interesting or effective outcome.");
+            }
+
+            paragraphs.push("Your environment and social connections play a significant role in your energy. You are deeply influenced by the atmosphere around you, finding motivation in spaces that feel intentional and well-considered. In your relationships, you prioritize depth and quality, seeking out connections that offer genuine meaning rather than just casual interaction.");
+
+            let finalAlignment = (bilCount > farCount) 
+                ? "This pattern aligns most closely with Bilbo Baggins." 
+                : (farCount > bilCount) 
+                    ? "This pattern aligns most closely with Faramir."
+                    : "This pattern is truly the midpoint between Bilbo and Faramir. Almost a paradox.";
+
+            quizContainer.innerHTML = `
+>>>>>>>
+                <div class="quiz-card">
+                    <h2>Your Results <span>${randomEmoji}</span></h2>
+                    <p>${resultText}</p>
+                    ${paragraphs.map(p => `<p>${p}</p>`).join('')}
+                    <p><strong>${finalAlignment}</strong></p>
+                    <button onclick="location.reload()">Retake Quiz</button>
+                </div>
+            `;
+        }
+
+        window.onload = () => {
+            const dots = JSON.parse(localStorage.getItem('scaleDots') || '[]');
+            const scaleLine = document.getElementById('scale-line');
+            dots.forEach(d => {
+                const dot = document.createElement('div');
+                dot.className = 'result-dot';
+                dot.style.left = d.left;
+                dot.innerText = d.emoji || '❓';
+                scaleLine.appendChild(dot);
+            });
+        };
+    </script>
+</body>
+</html>
