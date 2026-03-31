@@ -139,6 +139,7 @@
         
         let answers = [];
         let currentResultData = null;
+        let audio;
 
         const questions = [
             { text: "What usually sparks you into action?", options: [{t: "A sudden idea I want to explore", v: "BIL"}, {t: "A responsibility I feel I shouldn’t ignore", v: "FAR"}, {t: "Something interesting I want to experience", v: "BIL"}, {t: "A situation that requires careful judgment", v: "FAR"}] },
@@ -160,6 +161,9 @@
         ];
 
         startBtn.addEventListener('click', () => {
+            audio = new Audio('audio/shire-theme.mp3');
+            audio.loop = true;
+            audio.play().catch(e => console.log("Audio playback prevented by browser"));
             showQuestion(0);
         });
 
@@ -187,8 +191,27 @@
                     <button id="back-btn" ${index === 0 ? 'disabled' : ''}>Back</button>
                     <button id="next-btn">${index === questions.length - 1 ? 'See My Results' : 'Next'}</button>
                 </div>
+                <div id="music-controls" style="position: absolute; right: 80px; bottom: 80px; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 30px; height: 38px;">
+                    <button id="play-pause-btn" style="background: #c5fb29; color: #000; border-radius: 50%; width: 28px; height: 28px; padding: 0; margin: 0; border: none; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center;">&#10074;&#10074;</button>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1" style="width: 60px; cursor: pointer; accent-color: #c5fb29;">
+                </div>
             `;
             
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            playPauseBtn.addEventListener('click', () => {
+                if (audio.paused) {
+                    audio.play();
+                    playPauseBtn.innerHTML = '&#10074;&#10074;';
+                } else {
+                    audio.pause();
+                    playPauseBtn.innerHTML = '&#9658;';
+                }
+            });
+
+            document.getElementById('volume-slider').addEventListener('input', (e) => {
+                audio.volume = e.target.value;
+            });
+
             document.getElementById('back-btn').addEventListener('click', () => showQuestion(index - 1, true));
             document.getElementById('next-btn').addEventListener('click', () => {
                 const selected = document.querySelector('input[name="q"]:checked');
