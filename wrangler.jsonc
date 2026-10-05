@@ -1,0 +1,16 @@
+{
+  // Static site on Workers. No script; Cloudflare serves the files directly.
+  "name": "irreverent-engineering",
+  "compatibility_date": "2026-10-05",
+
+  "assets": {
+    "directory": "./",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+
+  "routes": [
+    { "pattern": "irreverent.engineering", "custom_domain": true },
+    { "pattern": "www.irreverent.engineering", "custom_domain": true }
+  ]
+}

@@ -1,0 +1,17 @@
+# Repo files that aren't part of the site
+.git
+.gitignore
+.assetsignore
+.env
+.DS_Store
+node_modules
+src
+babys-first-reactapp
+wrangler.jsonc
+package.json
+package-lock.json
+vite.config.js
+server.js
+CNAME
+*.md
+layout-experiment1*
