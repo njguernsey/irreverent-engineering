@@ -250,12 +250,14 @@ body,
             backdrop-filter: blur(6px);
             opacity: 0;
             visibility: hidden;
+            pointer-events: none;
             transition: opacity 0.3s, visibility 0s 0.3s;
         }
 
         #project-modal.open {
             opacity: 1;
             visibility: visible;
+            pointer-events: auto;
             transition: opacity 0.3s;
         }
 
@@ -513,6 +515,8 @@ document.addEventListener('mousemove', hideSystemCursor);
 
         document.addEventListener('mousemove', (e) => {
             cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+            // Mouse events here mean the pointer is on this page, not over a project frame
+            cursor.style.visibility = '';
             gl.uniform2f(uMouse, e.clientX, canvas.height - e.clientY); // WebGL y runs bottom-up
         });
 
@@ -572,8 +576,7 @@ document.addEventListener('mousemove', hideSystemCursor);
                 doc.addEventListener('keydown', e => { if (e.key === 'Escape') requestClose(); });
             });
             // The project pages use the normal cursor, so hide the follower dot over the frame
-            frame.addEventListener('mouseenter', () => cursor.style.visibility = 'hidden');
-            frame.addEventListener('mouseleave', () => cursor.style.visibility = '');
+            frame.addEventListener('mouseenter', () => { if (openCard) cursor.style.visibility = 'hidden'; });
             return frame;
         }
 
