@@ -512,8 +512,8 @@ document.addEventListener('mousemove', hideSystemCursor);
         const uIsPrank = gl.getUniformLocation(program, "u_is_prank");
 
         document.addEventListener('mousemove', (e) => {
-            cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-            gl.uniform2f(uMouse, e.clientX, e.clientY);
+            cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+            gl.uniform2f(uMouse, e.clientX, canvas.height - e.clientY); // WebGL y runs bottom-up
         });
 
         function render(time) {
