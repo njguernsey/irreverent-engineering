@@ -237,11 +237,78 @@ body,
         .footer-big { font-size: 5rem; font-weight: 900; letter-spacing: -4px; margin-bottom: 40px; color: var(--bg-base); }
         .social-link { color: var(--acid-lime); text-decoration: none; font-family: var(--font-mono); margin-right: 30px; }
 
+        /* PROJECT MODAL */
+        #project-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background: rgba(10, 10, 12, 0.6);
+            backdrop-filter: blur(6px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0s 0.3s;
+        }
+
+        #project-modal.open {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s;
+        }
+
+        .modal-panel {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 100%;
+            background: #191a1f;
+            box-shadow: 8px 8px 0px var(--deep-clay);
+            transform: translateY(40px);
+            transition: transform var(--transition-speed) cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        #project-modal.open .modal-panel { transform: none; }
+
+        .modal-frame {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 1;
+            width: 44px;
+            height: 44px;
+            background: #000;
+            color: var(--acid-lime);
+            border: none;
+            font-size: 1.6rem;
+            line-height: 1;
+            box-shadow: 4px 4px 0px var(--deep-clay);
+            transition: transform 0.1s;
+        }
+
+        .modal-close:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--deep-clay); }
+
+        html.modal-open { overflow: hidden; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .modal-panel { transform: none; transition: none; }
+        }
+
         @media (max-width: 768px) {
             .work-grid { grid-template-columns: 1fr; }
             .hero-title { font-size: 3.5rem; }
             #cursor-follower, #prank-toggle { display: none; }
-            
+            #project-modal { padding: 0; }
+            .modal-panel { box-shadow: none; }
         }
     </style>
 </head>
@@ -336,6 +403,12 @@ body,
             </p>
         </div>
     </footer>
+
+    <div id="project-modal" role="dialog" aria-modal="true" aria-label="Project" aria-hidden="true">
+        <div class="modal-panel">
+            <button class="modal-close" aria-label="Close">&times;</button>
+        </div>
+    </div>
 
     <script>
         // Add this at the very beginning of your <script>
@@ -459,7 +532,7 @@ document.addEventListener('mousemove', hideSystemCursor);
             gl.uniform1f(uIsPrank, isPrank ? 1.0 : 0.0);
         });
 
-        document.querySelectorAll('a').forEach(link => {
+        document.querySelectorAll('a, .modal-close').forEach(link => {
             link.addEventListener('mouseenter', () => {
                 cursor.style.width = '100px';
                 cursor.style.height = '100px';
@@ -469,6 +542,101 @@ document.addEventListener('mousemove', hideSystemCursor);
                 cursor.style.height = '24px';
             });
         });
+
+        // Project pages open in a modal instead of navigating away.
+        // The URL hash (#broccoli) makes a project linkable and lets Back close it.
+        // Each open gets a fresh iframe: changing an existing frame's src adds browser
+        // history entries, which would make Back step through the frame instead.
+        const modal = document.getElementById('project-modal');
+        const panel = modal.querySelector('.modal-panel');
+        const closeBtn = modal.querySelector('.modal-close');
+        const pageTitle = document.title;
+        const projectCards = [...document.querySelectorAll('.project-card[href$=".html"]')];
+        const slugOf = card => card.getAttribute('href').replace(/\.html$/, '');
+        let openCard = null;
+
+        function createFrame(src) {
+            const frame = document.createElement('iframe');
+            frame.className = 'modal-frame';
+            frame.title = 'Project';
+            frame.src = src;
+            frame.addEventListener('load', () => {
+                const doc = frame.contentDocument;
+                if (!doc) return;
+                if (doc.title) document.title = doc.title;
+                // The pages' own "Back" links close the modal instead of loading the home page inside it
+                doc.querySelectorAll('a[href="index.html"]').forEach(a => a.addEventListener('click', e => {
+                    e.preventDefault();
+                    requestClose();
+                }));
+                doc.addEventListener('keydown', e => { if (e.key === 'Escape') requestClose(); });
+            });
+            // The project pages use the normal cursor, so hide the follower dot over the frame
+            frame.addEventListener('mouseenter', () => cursor.style.visibility = 'hidden');
+            frame.addEventListener('mouseleave', () => cursor.style.visibility = '');
+            return frame;
+        }
+
+        function openProject(card) {
+            if (card === openCard) return;
+            openCard = card;
+            panel.querySelector('.modal-frame')?.remove();
+            panel.appendChild(createFrame(card.getAttribute('href')));
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.documentElement.classList.add('modal-open');
+            document.querySelectorAll('header, .container, .quotes-section, footer, #prank-toggle')
+                .forEach(el => el.inert = true);
+            closeBtn.focus();
+        }
+
+        function closeProject() {
+            if (!openCard) return;
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.documentElement.classList.remove('modal-open');
+            document.querySelectorAll('header, .container, .quotes-section, footer, #prank-toggle')
+                .forEach(el => el.inert = false);
+            document.title = pageTitle;
+            cursor.style.visibility = '';
+            openCard.focus();
+            openCard = null;
+            // Remove the frame after the fade, which also stops any audio
+            setTimeout(() => { if (!openCard) panel.querySelector('.modal-frame')?.remove(); }, 300);
+        }
+
+        // Closing goes through history so Back and the close button agree
+        function requestClose() {
+            if (!openCard) return;
+            // Entries we pushed carry state; Back returns to the grid entry before it
+            if (history.state && history.state.project) return history.back();
+            // Arrived on a #project link: drop the hash without leaving the site
+            history.replaceState(null, '', location.pathname + location.search);
+            closeProject();
+        }
+
+        function syncToHash() {
+            const card = projectCards.find(c => '#' + slugOf(c) === location.hash);
+            if (card) openProject(card);
+            else closeProject();
+        }
+
+        projectCards.forEach(card => {
+            card.addEventListener('click', e => {
+                // Let cmd/ctrl/shift/middle clicks open the page in a new tab
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+                e.preventDefault();
+                history.pushState({ project: true }, '', '#' + slugOf(card));
+                openProject(card);
+            });
+        });
+
+        window.addEventListener('popstate', syncToHash);
+        closeBtn.addEventListener('click', requestClose);
+        modal.addEventListener('click', e => { if (e.target === modal) requestClose(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') requestClose(); });
+
+        syncToHash();
     </script>
 </body>
 </html>
