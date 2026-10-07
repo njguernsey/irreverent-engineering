@@ -48,14 +48,13 @@
 
         .stage {
             flex: 1;
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) 300px;
-            gap: 56px;
-            align-items: center;
-            max-width: 1180px;
+            display: flex;
+            flex-direction: column;
+            gap: 64px;
+            max-width: 1280px;
             width: 100%;
             margin: 0 auto;
-            padding: 72px 48px 56px;
+            padding: 64px 7% 72px;
         }
 
         /* LAPTOP */
@@ -89,13 +88,13 @@
             position: relative;
         }
 
-        /* The browser window is laid out at 1440×900 and scaled to fit the screen */
+        /* The browser window is laid out at 1280×800 and scaled to fit the screen */
         .window {
             position: absolute;
             top: 0;
             left: 0;
-            width: 1440px;
-            height: 900px;
+            width: 1280px;
+            height: 800px;
             transform-origin: 0 0;
             display: flex;
             flex-direction: column;
@@ -187,7 +186,15 @@
         }
 
         /* PITCH */
-        .pitch { display: flex; flex-direction: column; gap: 28px; }
+        .pitch {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+            gap: 28px 64px;
+            align-items: start;
+        }
+
+        .pitch-head { display: flex; flex-direction: column; gap: 20px; }
+        .pitch-body { display: flex; flex-direction: column; gap: 28px; }
 
         .kicker { color: var(--deep-clay); font-weight: 500; font-size: 0.95rem; margin-bottom: 8px; }
 
@@ -239,13 +246,10 @@
             .download { transition: none; }
         }
 
-        @media (max-width: 900px) {
-            .stage {
-                grid-template-columns: 1fr;
-                gap: 40px;
-                padding: 72px 24px 40px;
-            }
+        @media (max-width: 760px) {
+            .stage { gap: 40px; padding: 64px 24px 40px; }
             .laptop { padding: 0 6%; }
+            .pitch { grid-template-columns: 1fr; }
             .pitch h2 { font-size: 2.2rem; }
         }
     </style>
@@ -277,42 +281,46 @@
         </div>
 
         <section class="pitch">
-            <div>
-                <p class="kicker">Browser add-on</p>
-                <h2>Meeting Overlord</h2>
-            </div>
-
-            <div class="rating" aria-label="Rated 5 out of 5 stars">
-                <div class="stars" aria-hidden="true">
-                    <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
-                    <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
-                    <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
-                    <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
-                    <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+            <div class="pitch-head">
+                <div>
+                    <p class="kicker">Browser add-on</p>
+                    <h2>Meeting Overlord</h2>
                 </div>
-                <span class="rating-text">5/5</span>
+
+                <div class="rating" aria-label="Rated 5 out of 5 stars">
+                    <div class="stars" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                    </div>
+                    <span class="rating-text">5/5</span>
+                </div>
             </div>
 
-            <blockquote>
-                &ldquo;How did this get on to my computer? This is a nightmare, get this thing out of here.&rdquo;
-                <footer>&mdash; Doug, first adopter</footer>
-            </blockquote>
+            <div class="pitch-body">
+                <blockquote>
+                    &ldquo;How did this get on to my computer? This is a nightmare, get this thing out of here.&rdquo;
+                    <footer>&mdash; Doug, first adopter</footer>
+                </blockquote>
 
-            <a href="#" class="download" id="download">
-                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
-                Download the browser add-on
-            </a>
+                <a href="#" class="download" id="download">
+                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
+                    Download the browser add-on
+                </a>
+            </div>
         </section>
     </main>
 
     <script>
         if (window.self !== window.top) document.documentElement.classList.add('framed');
 
-        // Scale the 1440-wide browser window to the laptop screen
+        // Scale the 1280-wide browser window to the laptop screen
         const screenEl = document.getElementById('screen');
         const win = document.getElementById('window');
         function fit() {
-            const s = screenEl.clientWidth / 1440;
+            const s = screenEl.clientWidth / 1280;
             win.style.transform = `scale(${s})`;
         }
         fit();

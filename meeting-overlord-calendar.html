@@ -55,6 +55,9 @@
         html.framed .topbar { padding-right: 76px; }
         html.framed .back-link, html.in-device .back-link { display: none; }
 
+        /* Shorter hours on the promo laptop so the whole day fits its screen */
+        html.in-device { --hour: 42px; }
+
         .back-link {
             color: var(--ink-soft);
             text-decoration: none;
@@ -555,6 +558,7 @@
         });
 
         const hidden = new Set();
+        const hourPx = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hour'));
         const $ = id => document.getElementById(id);
         const grid = $('grid');
         const pop = $('popover');
@@ -840,7 +844,7 @@
         $('create-btn').addEventListener('click', () => snack('Meeting Overlord has already scheduled that.'));
         $('view-btn').addEventListener('click', () => snack('Day view hides how productive your week is. Staying on week view.'));
         $('today-btn').addEventListener('click', () => {
-            $('cal-scroll').scrollTo({ top: (9 - START_HOUR) * 48, behavior: reduceMotion ? 'auto' : 'smooth' });
+            $('cal-scroll').scrollTo({ top: (9 - START_HOUR) * hourPx(), behavior: reduceMotion ? 'auto' : 'smooth' });
             const today = events.filter(e => e.day === TODAY && !e.mine).length;
             snack(`Today: ${today} meetings and counting.`);
         });
@@ -871,7 +875,7 @@
         buildChrome();
         render();
         // Open on the working day
-        $('cal-scroll').scrollTop = (8.5 - START_HOUR) * 48;
+        $('cal-scroll').scrollTop = (8.5 - START_HOUR) * hourPx();
     </script>
 </body>
 </html>
