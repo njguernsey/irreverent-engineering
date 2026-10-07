@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Overlord | Irreverent Engineering</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --hour: 48px;
+            --start-hour: 7;
+            --line: #dadce0;
+            --ink: #3c4043;
+            --ink-soft: #70757a;
+            --accent: #1a73e8;
+            --mine: #039be5;
+            --overlord: #8e24aa;
+            --now: #ea4335;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: var(--ink);
+            background: #fff;
+            display: grid;
+            grid-template-rows: 64px 1fr;
+            overflow: hidden;
+        }
+
+        p, li { text-wrap: pretty; }
+        h1, h2, h3 { text-wrap: balance; }
+
+        button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+        /* TOP BAR */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--line);
+            min-width: 0;
+        }
+
+        /* Inside the homepage modal, leave room for its close button */
+        html.framed .topbar { padding-right: 76px; }
+        html.framed .back-link, html.in-device .back-link { display: none; }
+
+        .back-link {
+            color: var(--ink-soft);
+            text-decoration: none;
+            font-weight: 500;
+            white-space: nowrap;
+            margin-right: 4px;
+        }
+
+        .brand { display: flex; align-items: center; gap: 10px; min-width: 196px; }
+        .brand svg { flex: none; }
+        .brand-name { font-size: 20px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+
+        .today-btn {
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+
+        .today-btn:hover, .icon-btn:hover { background: #f1f3f4; }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: var(--ink-soft);
+            flex: none;
+        }
+
+        .range-title { font-size: 22px; font-weight: 400; white-space: nowrap; }
+
+        .spacer { flex: 1; }
+
+        .free-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #f3e8fd;
+            color: #5b1a78;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: background-color 0.3s;
+        }
+
+        .free-pill.bump { background: #f9d7dc; }
+
+        .view-btn {
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #33b679;
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 600;
+            flex: none;
+        }
+
+        /* LAYOUT */
+        .main { display: grid; grid-template-columns: 256px 1fr; min-height: 0; }
+
+        /* SIDEBAR */
+        .sidebar { padding: 16px 12px 16px 8px; overflow-y: auto; }
+
+        .create-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px 12px 16px;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+            font-weight: 500;
+            margin: 0 0 20px 8px;
+            transition: box-shadow 0.2s;
+        }
+
+        .create-btn:hover { box-shadow: 0 1px 3px rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15); }
+
+        .mini { padding: 0 8px 0 16px; margin-bottom: 20px; }
+        .mini-head { display: flex; justify-content: space-between; align-items: center; font-weight: 500; margin-bottom: 8px; }
+        .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; row-gap: 2px; }
+        .mini-grid span { height: 24px; line-height: 24px; border-radius: 50%; }
+        .mini-grid .dow { color: var(--ink-soft); font-weight: 500; }
+        .mini-grid .other { color: #b0b3b8; }
+        .mini-grid .in-week { background: #e8f0fe; border-radius: 0; }
+        .mini-grid .today { background: var(--accent); color: #fff; border-radius: 50%; }
+
+        .cal-list h3 { font-size: 14px; font-weight: 500; padding: 8px 16px; }
+
+        .cal-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 16px;
+            border-radius: 0 16px 16px 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cal-item:hover { background: #f1f3f4; }
+
+        .cal-item input { position: absolute; opacity: 0; pointer-events: none; }
+
+        .check {
+            width: 18px;
+            height: 18px;
+            border-radius: 2px;
+            border: 2px solid currentColor;
+            display: grid;
+            place-items: center;
+            flex: none;
+        }
+
+        .cal-item input:checked + .check { background: currentColor; }
+        .cal-item input:checked + .check::after {
+            content: "";
+            width: 5px;
+            height: 10px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: translateY(-1px) rotate(45deg);
+        }
+
+        .cal-item .label { color: var(--ink); }
+
+        .sidebar-note {
+            margin: 20px 16px 0;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--ink-soft);
+        }
+
+        /* CALENDAR */
+        .cal { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-left: 1px solid var(--line); }
+
+        .cal-scroll { overflow: auto; flex: 1; min-height: 0; }
+
+        .week { min-width: 720px; }
+
+        .day-heads {
+            display: grid;
+            grid-template-columns: 56px repeat(7, 1fr);
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            background: #fff;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .day-head { text-align: center; padding: 10px 0 8px; border-left: 1px solid var(--line); }
+        .day-head .dow { font-size: 11px; font-weight: 500; color: var(--ink-soft); }
+        .day-head .num {
+            width: 46px;
+            height: 46px;
+            margin: 4px auto 0;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+        }
+
+        .day-head.is-today .dow { color: var(--accent); }
+        .day-head.is-today .num { background: var(--accent); color: #fff; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 56px repeat(7, 1fr);
+            position: relative;
+        }
+
+        .gutter { position: relative; }
+        .gutter span {
+            position: absolute;
+            right: 8px;
+            font-size: 10px;
+            color: var(--ink-soft);
+            transform: translateY(-50%);
+        }
+
+        .day-col {
+            position: relative;
+            border-left: 1px solid var(--line);
+            background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+            background-size: 100% var(--hour);
+        }
+
+        .now-line {
+            position: absolute;
+            left: -1px;
+            right: 0;
+            height: 2px;
+            background: var(--now);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .now-line::before {
+            content: "";
+            position: absolute;
+            left: -6px;
+            top: -5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--now);
+        }
+
+        /* EVENTS */
+        .event {
+            position: absolute;
+            border-radius: 4px;
+            padding: 2px 6px;
+            color: #fff;
+            text-align: left;
+            font-size: 12px;
+            line-height: 1.3;
+            overflow: hidden;
+            border: 1px solid #fff;
+            z-index: 1;
+            transition: top 0.4s cubic-bezier(0.19, 1, 0.22, 1), left 0.4s, width 0.4s, height 0.4s;
+        }
+
+        .event:hover { z-index: 2; box-shadow: 0 2px 6px rgba(0,0,0,.3); }
+        .event:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; z-index: 2; }
+
+        .event .title { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; }
+        .event .time { opacity: 0.9; display: block; white-space: nowrap; }
+        .event.short { padding-top: 0; padding-bottom: 0; }
+        .event.short .title { white-space: nowrap; }
+        .event.short .time { display: none; }
+
+        .event.mine { background: #fff; color: #0b6fa4; border: 1px solid var(--mine); border-left-width: 4px; }
+
+        .event.new { animation: drop-in 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
+
+        @keyframes drop-in {
+            from { transform: translateY(-24px) scale(0.92); opacity: 0; }
+            to { transform: none; opacity: 1; }
+        }
+
+        /* POPOVER */
+        .popover {
+            position: fixed;
+            z-index: 10;
+            width: 400px;
+            max-width: calc(100vw - 32px);
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 24px 38px 3px rgba(0,0,0,.14), 0 9px 46px 8px rgba(0,0,0,.12), 0 11px 15px -7px rgba(0,0,0,.2);
+            padding: 8px 16px 16px;
+        }
+
+        .popover[hidden] { display: none; }
+
+        .pop-tools { display: flex; justify-content: flex-end; margin-bottom: 4px; }
+
+        .pop-row { display: grid; grid-template-columns: 24px 1fr; gap: 16px; align-items: start; margin-bottom: 14px; }
+        .pop-row .ico { display: grid; place-items: center; height: 24px; color: var(--ink-soft); }
+        .swatch { width: 14px; height: 14px; border-radius: 4px; margin-top: 6px; }
+
+        .pop-title { font-size: 22px; font-weight: 400; line-height: 1.25; }
+        .pop-when { color: var(--ink); margin-top: 4px; }
+        .pop-meta { line-height: 1.5; }
+        .pop-meta .soft { color: var(--ink-soft); font-size: 12px; }
+
+        .rsvp {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-top: 1px solid var(--line);
+            padding-top: 12px;
+            margin-top: 4px;
+        }
+
+        .rsvp .q { flex: 1; color: var(--ink); font-weight: 500; }
+
+        .rsvp button {
+            padding: 6px 14px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            font-weight: 500;
+        }
+
+        .rsvp button:hover { background: #f1f3f4; }
+
+        /* SNACKBAR */
+        .snackbar {
+            position: fixed;
+            left: 24px;
+            bottom: 24px;
+            z-index: 20;
+            max-width: min(520px, calc(100vw - 48px));
+            background: #323232;
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 4px;
+            box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px rgba(0,0,0,.14);
+            line-height: 1.4;
+            transform: translateY(16px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s, transform 0.25s, visibility 0s 0.25s;
+        }
+
+        .snackbar.show { opacity: 1; transform: none; visibility: visible; transition: opacity 0.25s, transform 0.25s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .event, .snackbar { transition: none; }
+            .event.new { animation: none; }
+        }
+
+        @media (max-width: 900px) {
+            .main { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .cal { border-left: 0; }
+            .brand { min-width: 0; }
+            .view-btn, .range-title { display: none; }
+        }
+
+        @media (max-width: 560px) {
+            .brand-name, .icon-btn.nav, .today-btn, .avatar { display: none; }
+            .topbar { gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <a href="index.html" class="back-link">&larr; Back</a>
+        <div class="brand">
+            <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+                <rect x="4" y="7" width="32" height="29" rx="4" fill="#fff" stroke="#8e24aa" stroke-width="2.5"/>
+                <rect x="4" y="7" width="32" height="8" rx="4" fill="#8e24aa"/>
+                <path d="M11 30 L13 20 L17 25 L20 18 L23 25 L27 20 L29 30 Z" fill="#f6bf26" stroke="#b07d00" stroke-width="1" stroke-linejoin="round"/>
+            </svg>
+            <span class="brand-name">Meeting Overlord</span>
+        </div>
+        <button class="today-btn" id="today-btn">Today</button>
+        <button class="icon-btn nav" aria-label="Previous week" data-nav="-1">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg>
+        </button>
+        <button class="icon-btn nav" aria-label="Next week" data-nav="1">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z"/></svg>
+        </button>
+        <h1 class="range-title">October 2026</h1>
+        <div class="spacer"></div>
+        <div class="free-pill" id="free-pill" title="Free time between 9 and 5 this week">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7z"/></svg>
+            <span id="free-time">Free this week: …</span>
+        </div>
+        <button class="view-btn" id="view-btn">Week
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+        </button>
+        <div class="avatar" aria-label="You">Y</div>
+    </header>
+
+    <div class="main">
+        <aside class="sidebar">
+            <button class="create-btn" id="create-btn">
+                <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path fill="#8e24aa" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
+                Create
+            </button>
+
+            <div class="mini">
+                <div class="mini-head">
+                    <span>October 2026</span>
+                </div>
+                <div class="mini-grid" id="mini-grid"></div>
+            </div>
+
+            <div class="cal-list">
+                <h3>My calendars</h3>
+                <label class="cal-item" style="color: var(--mine)">
+                    <input type="checkbox" checked data-cal="mine"><span class="check"></span><span class="label">You</span>
+                </label>
+                <label class="cal-item" style="color: var(--overlord)">
+                    <input type="checkbox" checked data-cal="overlord"><span class="check"></span><span class="label">Meeting Overlord</span>
+                </label>
+                <label class="cal-item" style="color: #33b679">
+                    <input type="checkbox" checked data-cal="free"><span class="check"></span><span class="label">Free time</span>
+                </label>
+            </div>
+
+            <p class="sidebar-note">Meeting Overlord finds the gaps in your week and fills them, so you never have to wonder what to do with yourself.</p>
+        </aside>
+
+        <section class="cal" aria-label="Week of October 4, 2026">
+            <div class="cal-scroll" id="cal-scroll">
+                <div class="week">
+                    <div class="day-heads" id="day-heads"></div>
+                    <div class="grid" id="grid"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="popover" id="popover" role="dialog" aria-modal="false" aria-labelledby="pop-title" hidden></div>
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite"></div>
+
+    <script>
+        // On the laptop screen of the promo page, or straight inside the homepage modal
+        const host = window.frameElement;
+        if (host && host.dataset.device) document.documentElement.classList.add('in-device');
+        else if (host) document.documentElement.classList.add('framed');
+
+        // The week of Sun Oct 4 – Sat Oct 10, 2026. Day 0 is Sunday; Tuesday is "today".
+        const START_HOUR = 7, END_HOUR = 21, TODAY = 2;
+        const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const DATES = [4, 5, 6, 7, 8, 9, 10];
+        const COLORS = ['#8e24aa', '#d50000', '#f4511e', '#3f51b5', '#e67c73', '#0b8043', '#7986cb', '#616161'];
+        const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const DESCRIPTIONS = [
+            'Agenda to be decided in the agenda meeting.',
+            'Cameras on. Microphones on. Hope off.',
+            'This meeting replaces the email that replaced the previous meeting.',
+            'Please come prepared to schedule the next one.',
+            'Recurring until further notice. There will be no further notice.',
+            'Light snacks will be described but not provided.',
+            'If you cannot attend, please send a representative to explain why.',
+            'We will review action items from meetings nobody remembers.'
+        ];
+
+        let nextId = 1;
+        const ev = (day, start, end, title, opts = {}) =>
+            ({ id: nextId++, day, start, end, title, mine: !!opts.mine, color: opts.color, guests: opts.guests });
+
+        const events = [
+            // Your plans
+            ev(1, 9, 9.5, 'Standup', { mine: true }),
+            ev(2, 9, 12, 'Focus time', { mine: true }),
+            ev(3, 12, 13, 'Lunch', { mine: true }),
+            ev(4, 14, 15, 'Dentist', { mine: true }),
+            ev(5, 15, 17, 'Leave early', { mine: true }),
+
+            // Meeting Overlord's improvements
+            ev(0, 7, 7.5, 'Weekend touch base (optional)'),
+            ev(1, 8, 8.5, 'Pre-standup'),
+            ev(1, 9.5, 10, 'Post-standup debrief'),
+            ev(1, 10, 11, 'Sync about the sync'),
+            ev(1, 11, 12, 'Agenda review for the 2pm'),
+            ev(1, 14, 15, 'The 2pm'),
+            ev(1, 15, 16, 'Recap of the 2pm'),
+            ev(1, 16, 17, 'Brainstorm: fewer meetings'),
+            ev(2, 9.5, 10.5, 'Focus time alignment'),
+            ev(2, 10.5, 12, 'Quick 5-min chat'),
+            ev(2, 13, 14, 'Retro on last week’s retro'),
+            ev(2, 14, 15.5, 'Should this have been an email? (decision meeting)'),
+            ev(2, 16, 16.5, '1:1 with someone you’ve never met'),
+            ev(3, 9, 10, 'Kickoff for the kickoff'),
+            ev(3, 10, 11.5, 'Standup (sit-down)'),
+            ev(3, 12, 13, 'Lunch & learn: skipping lunch'),
+            ev(3, 15, 17, 'Calendar audit'),
+            ev(4, 9, 9.5, 'Optional (mandatory)'),
+            ev(4, 11, 12, 'All-hands about hands'),
+            ev(4, 14, 14.5, 'Quick sync (from the dentist chair)'),
+            ev(4, 16, 18, 'Status update on status updates'),
+            ev(5, 9, 10, 'Week-ahead planning (last week)'),
+            ev(5, 13, 14, 'Celebration of fewer meetings'),
+            ev(5, 16.5, 18, 'Friday wrap-up kickoff'),
+            ev(6, 8, 9, 'Saturday standup (lying down)')
+        ];
+
+        // More meetings, added one at a time while the page is open
+        const QUEUE = [
+            'Pre-mortem for the post-mortem',
+            'Touch base re: touching base',
+            'Sync (async)',
+            'Quick question (90 min)',
+            'Meeting-free Friday planning session',
+            'Office hours for your office hours',
+            'Debrief on the briefing',
+            'Prep for prep',
+            'Feedback on the feedback form',
+            'Huddle',
+            'Alignment on what alignment means',
+            'Re-sync'
+        ];
+
+        events.forEach((e, i) => {
+            if (!e.color) e.color = COLORS[i % COLORS.length];
+            if (!e.guests) e.guests = 8 + ((e.id * 37) % 53);
+        });
+
+        const hidden = new Set();
+        const $ = id => document.getElementById(id);
+        const grid = $('grid');
+        const pop = $('popover');
+
+        function fmtTime(h, withSuffix = true) {
+            const hr = Math.floor(h), min = Math.round((h - hr) * 60);
+            const suffix = hr >= 12 ? 'pm' : 'am';
+            const h12 = hr % 12 === 0 ? 12 : hr % 12;
+            return h12 + (min ? ':' + String(min).padStart(2, '0') : '') + (withSuffix ? suffix : '');
+        }
+
+        function fmtRange(e) {
+            const sameHalf = (e.start < 12) === (e.end < 12);
+            return fmtTime(e.start, !sameHalf) + ' – ' + fmtTime(e.end);
+        }
+
+        /* Static chrome: day headings, hour labels, mini month */
+        function buildChrome() {
+            const heads = $('day-heads');
+            heads.innerHTML = '<div></div>' + DAYS.map((d, i) =>
+                `<div class="day-head${i === TODAY ? ' is-today' : ''}"><div class="dow">${d}</div><div class="num">${DATES[i]}</div></div>`
+            ).join('');
+
+            const hours = END_HOUR - START_HOUR;
+            let gutter = '<div class="gutter" style="height:calc(var(--hour) * ' + hours + ')">';
+            for (let h = START_HOUR + 1; h < END_HOUR; h++) {
+                gutter += `<span style="top:calc(var(--hour) * ${h - START_HOUR})">${fmtTime(h)}</span>`;
+            }
+            gutter += '</div>';
+            grid.innerHTML = gutter + DAYS.map((_, i) =>
+                `<div class="day-col" data-day="${i}" style="height:calc(var(--hour) * ${hours})"></div>`
+            ).join('');
+
+            // October 2026 starts on a Thursday
+            const mini = $('mini-grid');
+            let html = ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => `<span class="dow">${d}</span>`).join('');
+            for (let i = 0; i < 42; i++) {
+                const n = i - 4 + 1;
+                const inMonth = n >= 1 && n <= 31;
+                const label = inMonth ? n : (n < 1 ? 30 + n : n - 31);
+                const cls = [!inMonth && 'other', n >= 4 && n <= 10 && 'in-week', n === 6 && 'today'].filter(Boolean).join(' ');
+                html += `<span class="${cls}">${label}</span>`;
+            }
+            mini.innerHTML = html;
+        }
+
+        /* Lay out one day's events side by side where they overlap */
+        function layoutDay(dayEvents) {
+            const sorted = [...dayEvents].sort((a, b) => a.start - b.start || b.end - a.end);
+            const placed = [];
+            let cluster = [], clusterEnd = -1;
+
+            const flush = () => {
+                const cols = [];
+                cluster.forEach(e => {
+                    let c = cols.findIndex(end => end <= e.start);
+                    if (c === -1) { c = cols.length; cols.push(0); }
+                    cols[c] = e.end;
+                    e._col = c;
+                });
+                cluster.forEach(e => { e._cols = cols.length; placed.push(e); });
+                cluster = [];
+            };
+
+            sorted.forEach(e => {
+                if (e.start >= clusterEnd && cluster.length) flush();
+                cluster.push(e);
+                clusterEnd = Math.max(clusterEnd, e.end);
+            });
+            if (cluster.length) flush();
+            return placed;
+        }
+
+        function render(newId) {
+            grid.querySelectorAll('.event').forEach(el => el.remove());
+            for (let d = 0; d < 7; d++) {
+                const col = grid.querySelector(`.day-col[data-day="${d}"]`);
+                const visible = events.filter(e => e.day === d && !hidden.has(e.mine ? 'mine' : 'overlord'));
+                layoutDay(visible).forEach(e => {
+                    const el = document.createElement('button');
+                    el.className = 'event' + (e.mine ? ' mine' : '') + (e.end - e.start <= 0.5 ? ' short' : '') + (e.id === newId ? ' new' : '');
+                    el.dataset.id = e.id;
+                    const width = 100 / e._cols;
+                    el.style.top = `calc(var(--hour) * ${e.start - START_HOUR})`;
+                    el.style.height = `calc(var(--hour) * ${e.end - e.start} - 1px)`;
+                    el.style.left = `calc(${e._col * width}% + 1px)`;
+                    el.style.width = `calc(${width}% - 3px)`;
+                    if (!e.mine) el.style.background = e.color;
+                    el.innerHTML = `<span class="title"></span><span class="time">${fmtRange(e)}</span>`;
+                    el.querySelector('.title').textContent = e.title;
+                    el.setAttribute('aria-label', `${e.title}, ${DAY_NAMES[d]} ${fmtRange(e)}`);
+                    el.addEventListener('click', ev => { ev.stopPropagation(); openPopover(e, el); });
+                    col.appendChild(el);
+                });
+            }
+            drawNowLine();
+            updateFreeTime();
+        }
+
+        function drawNowLine() {
+            grid.querySelector('.now-line')?.remove();
+            const now = new Date();
+            let h = now.getHours() + now.getMinutes() / 60;
+            if (h < START_HOUR + 0.5 || h > END_HOUR - 0.5) h = 10 + 40 / 60;
+            const line = document.createElement('div');
+            line.className = 'now-line';
+            line.style.top = `calc(var(--hour) * ${h - START_HOUR})`;
+            grid.querySelector(`.day-col[data-day="${TODAY}"]`).appendChild(line);
+        }
+
+        /* Free time = weekday 9–5 hours not covered by anything Meeting Overlord booked */
+        function updateFreeTime() {
+            let free = 0;
+            for (let d = 1; d <= 5; d++) {
+                const busy = events.filter(e => e.day === d && !e.mine)
+                    .map(e => [Math.max(9, e.start), Math.min(17, e.end)])
+                    .filter(([s, t]) => t > s)
+                    .sort((a, b) => a[0] - b[0]);
+                let cursor = 9;
+                busy.forEach(([s, t]) => {
+                    if (s > cursor) free += s - cursor;
+                    cursor = Math.max(cursor, t);
+                });
+                if (cursor < 17) free += 17 - cursor;
+            }
+            const h = Math.floor(free), m = Math.round((free - h) * 60);
+            $('free-time').textContent = `Free this week: ${h}h${m ? ' ' + m + 'm' : ''}`;
+        }
+
+        /* Snackbar */
+        let snackTimer;
+        function snack(msg) {
+            const s = $('snackbar');
+            s.textContent = msg;
+            s.classList.add('show');
+            clearTimeout(snackTimer);
+            snackTimer = setTimeout(() => s.classList.remove('show'), 4200);
+        }
+
+        /* Event details */
+        let popEvent = null, popAnchor = null;
+
+        function openPopover(e, anchor) {
+            popEvent = e;
+            popAnchor = anchor;
+            const accepted = e.mine ? e.guests : 1;
+            pop.innerHTML = `
+                <div class="pop-tools">
+                    <button class="icon-btn" id="pop-close" aria-label="Close">
+                        <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>
+                    </button>
+                </div>
+                <div class="pop-row">
+                    <div class="ico"><span class="swatch" style="background:${e.mine ? 'var(--mine)' : e.color}"></span></div>
+                    <div>
+                        <h2 class="pop-title" id="pop-title"></h2>
+                        <p class="pop-when">${DAY_NAMES[e.day]}, October ${DATES[e.day]} · ${fmtRange(e)}</p>
+                    </div>
+                </div>
+                ${e.mine ? `
+                <div class="pop-row">
+                    <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></svg></div>
+                    <div class="pop-meta">You<br><span class="soft">Meeting Overlord has been notified and is working on it.</span></div>
+                </div>` : `
+                <div class="pop-row">
+                    <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1 1.2.8 2 2 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z"/></svg></div>
+                    <div class="pop-meta">${e.guests} guests<br><span class="soft">${accepted} yes, ${e.guests - accepted} awaiting · Organizer: Meeting Overlord</span></div>
+                </div>
+                <div class="pop-row">
+                    <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"/></svg></div>
+                    <p class="pop-meta">${DESCRIPTIONS[e.id % DESCRIPTIONS.length]}</p>
+                </div>
+                <div class="rsvp">
+                    <span class="q">Going?</span>
+                    <button data-rsvp="yes">Yes</button>
+                    <button data-rsvp="maybe">Maybe</button>
+                    <button data-rsvp="no">No</button>
+                </div>`}`;
+            pop.querySelector('#pop-title').textContent = e.title;
+            pop.hidden = false;
+            positionPopover(anchor);
+            pop.querySelector('#pop-close').addEventListener('click', closePopover);
+            pop.querySelectorAll('[data-rsvp]').forEach(b => b.addEventListener('click', () => rsvp(e, b.dataset.rsvp)));
+            pop.querySelector('#pop-close').focus();
+        }
+
+        function positionPopover(anchor) {
+            const r = anchor.getBoundingClientRect();
+            const pw = pop.offsetWidth, ph = pop.offsetHeight;
+            let left = r.right + 8;
+            if (left + pw > innerWidth - 16) left = r.left - pw - 8;
+            if (left < 16) left = Math.max(16, (innerWidth - pw) / 2);
+            const top = Math.min(Math.max(16, r.top), innerHeight - ph - 16);
+            pop.style.left = left + 'px';
+            pop.style.top = Math.max(16, top) + 'px';
+        }
+
+        function closePopover() {
+            if (pop.hidden) return;
+            pop.hidden = true;
+            const id = popEvent && popEvent.id;
+            popEvent = null;
+            const el = id && grid.querySelector(`.event[data-id="${id}"]`);
+            if (el) el.focus();
+        }
+
+        // Every answer leads to more meetings
+        const WORSE_SLOTS = [
+            [1, 7, '7am Monday so everyone can make it'],
+            [5, 18.5, '6:30pm Friday, when calendars are clearest'],
+            [6, 9, 'Saturday morning, a fresh start'],
+            [0, 19, 'Sunday evening, to get ahead of the week'],
+            [3, 7.5, '7:30am Wednesday, before the day gets busy'],
+            [2, 19.5, '7:30pm Tuesday, the quiet hours']
+        ];
+        let worseIdx = 0;
+
+        function rsvp(e, answer) {
+            closePopover();
+            if (answer === 'no') {
+                const [day, start, why] = WORSE_SLOTS[worseIdx++ % WORSE_SLOTS.length];
+                const len = e.end - e.start;
+                Object.assign(e, { day, start, end: Math.min(END_HOUR, start + len) });
+                render();
+                snack(`Declined. “${e.title}” moved to ${why}.`);
+                scrollToEvent(e);
+            } else if (answer === 'maybe') {
+                snack('Maybe counts as yes. Added a meeting to discuss your hesitation.');
+                addMeeting('Your hesitation is noted', e.day);
+            } else {
+                snack('Great. Added a follow-up to keep the momentum going.');
+                addMeeting('Follow-up: ' + e.title, e.day);
+            }
+        }
+
+        function scrollToEvent(e) {
+            const el = grid.querySelector(`.event[data-id="${e.id}"]`);
+            if (el) el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
+        }
+
+        /* Find the emptiest weekday half-hour, preferring the given day */
+        function findSlot(preferDay, len) {
+            const days = preferDay != null && preferDay >= 1 && preferDay <= 5 ? [preferDay, 1, 2, 3, 4, 5] : [1, 2, 3, 4, 5];
+            let best = null;
+            days.forEach((d, i) => {
+                for (let s = 9; s + len <= 17.5; s += 0.5) {
+                    const overlaps = events.filter(e => e.day === d && e.start < s + len && e.end > s).length;
+                    const score = overlaps * 10 + i + Math.random();
+                    if (!best || score < best.score) best = { day: d, start: s, score };
+                }
+            });
+            return best;
+        }
+
+        function addMeeting(title, preferDay) {
+            const len = [0.5, 1, 1, 1.5][Math.floor(Math.random() * 4)];
+            const slot = findSlot(preferDay, len);
+            const e = ev(slot.day, slot.start, slot.start + len, title);
+            e.color = COLORS[e.id % COLORS.length];
+            e.guests = 8 + ((e.id * 37) % 53);
+            events.push(e);
+            render(e.id);
+            const pill = $('free-pill');
+            pill.classList.add('bump');
+            setTimeout(() => pill.classList.remove('bump'), 600);
+            return e;
+        }
+
+        /* Meeting Overlord keeps working while the page is open */
+        let queueTimer = setInterval(() => {
+            if (document.hidden || !pop.hidden) return;
+            const title = QUEUE.shift();
+            if (!title) {
+                clearInterval(queueTimer);
+                snack('Your week is fully optimized. Meeting Overlord will check again in 5 minutes.');
+                return;
+            }
+            const e = addMeeting(title);
+            snack(`Meeting Overlord added “${title}” to ${DAY_NAMES[e.day]}.`);
+        }, 7000);
+
+        /* Controls that politely refuse */
+        $('create-btn').addEventListener('click', () => snack('Meeting Overlord has already scheduled that.'));
+        $('view-btn').addEventListener('click', () => snack('Day view hides how productive your week is. Staying on week view.'));
+        $('today-btn').addEventListener('click', () => {
+            $('cal-scroll').scrollTo({ top: (9 - START_HOUR) * 48, behavior: reduceMotion ? 'auto' : 'smooth' });
+            const today = events.filter(e => e.day === TODAY && !e.mine).length;
+            snack(`Today: ${today} meetings and counting.`);
+        });
+        document.querySelectorAll('[data-nav]').forEach(b => b.addEventListener('click', () =>
+            snack(b.dataset.nav === '1' ? 'Next week is already full. You’ll love it.' : 'Last week is in the past. So were your free afternoons.')
+        ));
+
+        document.querySelectorAll('.cal-item input').forEach(input => input.addEventListener('change', () => {
+            const cal = input.dataset.cal;
+            if (cal === 'overlord' && !input.checked) {
+                input.checked = true;
+                snack('Meeting Overlord can’t be hidden. It is always with you.');
+                return;
+            }
+            if (cal === 'free') {
+                input.checked = !input.checked;
+                snack('There is no free time to show.');
+                return;
+            }
+            if (input.checked) hidden.delete(cal); else hidden.add(cal);
+            render();
+        }));
+
+        document.addEventListener('click', e => { if (!pop.hidden && !pop.contains(e.target)) closePopover(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) { e.stopPropagation(); closePopover(); } }, true);
+        window.addEventListener('resize', () => { if (!pop.hidden && popAnchor) positionPopover(popAnchor); });
+
+        buildChrome();
+        render();
+        // Open on the working day
+        $('cal-scroll').scrollTop = (8.5 - START_HOUR) * 48;
+    </script>
+</body>
+</html>
