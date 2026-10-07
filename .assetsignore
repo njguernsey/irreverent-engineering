@@ -15,3 +15,5 @@ server.js
 CNAME
 *.md
 layout-experiment1*
+worker
+.wrangler
