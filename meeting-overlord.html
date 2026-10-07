@@ -780,7 +780,7 @@
                 scrollToEvent(e);
             } else if (answer === 'maybe') {
                 snack('Maybe counts as yes. Added a meeting to discuss your hesitation.');
-                addMeeting('Your hesitation, discussed', e.day);
+                addMeeting('Your hesitation is noted', e.day);
             } else {
                 snack('Great. Added a follow-up to keep the momentum going.');
                 addMeeting('Follow-up: ' + e.title, e.day);
