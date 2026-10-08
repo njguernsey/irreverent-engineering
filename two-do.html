@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Do | Irreverent Engineering</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✌️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            /* One soft surface, lit from the top left */
+            --surface: #e7eaf0;
+            --hi: rgba(255, 255, 255, 0.95);
+            --lo: rgba(158, 170, 192, 0.55);
+            --lo-strong: rgba(140, 152, 176, 0.7);
+            --ink: #141a2e;
+            --ink-soft: #7a8296;
+            --acid-lime: #c5fb29;
+            --lavender: #b39ddb;
+            --write: 'Inter', sans-serif;
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease: cubic-bezier(0.19, 1, 0.22, 1);
+            /* Barely-there grain so the soft gradients never band */
+            --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.55 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        p, li { text-wrap: pretty; }
+        h1 { text-wrap: balance; }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--ink);
+            background: var(--grain), radial-gradient(ellipse at 30% 20%, #f1f3f7, var(--surface) 60%);
+            overflow: hidden;
+        }
+
+        button, input { font: inherit; color: inherit; background: none; border: 0; }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 24px;
+            z-index: 30;
+            color: var(--ink-soft);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        html.framed .back-link { display: none; }
+
+        .stage {
+            position: relative;
+            height: 100%;
+            min-height: 680px;
+            display: grid;
+            place-items: center;
+            padding: 40px 20px;
+        }
+
+        /* THE PAD: one extruded slab */
+        .pad {
+            position: relative;
+            width: min(620px, 92vw);
+            padding: 58px 34px 30px;
+            border-radius: 34px;
+            background: linear-gradient(145deg, #eef1f6, #e2e5ec);
+            box-shadow:
+                22px 22px 50px var(--lo),
+                -20px -20px 46px var(--hi),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.9),
+                inset -1px -1px 0 rgba(160, 172, 194, 0.35);
+        }
+
+        .pad.wobble { animation: wobble 0.6s var(--spring); }
+
+        @keyframes wobble {
+            0%, 100% { transform: none; }
+            20% { transform: rotate(-1.2deg) translateX(-6px); }
+            45% { transform: rotate(0.9deg) translateX(5px); }
+            70% { transform: rotate(-0.4deg) translateX(-2px); }
+        }
+
+        /* Binding: a row of pressed-in holes along the top */
+        .binding {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 22px;
+        }
+
+        .binding span {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #dfe3ea;
+            box-shadow: inset 3px 3px 5px var(--lo-strong), inset -2px -2px 4px var(--hi);
+        }
+
+        /* HEADER */
+        .head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 26px;
+        }
+
+        .title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+        }
+
+        /* "Two" on a raised lime capsule */
+        .title .two {
+            display: inline-block;
+            padding: 2px 16px 6px;
+            border-radius: 999px;
+            background: linear-gradient(145deg, #d6ff5a, #b5ea17);
+            box-shadow: 6px 6px 14px rgba(150, 190, 40, 0.35), -6px -6px 14px rgba(255, 255, 255, 0.9), inset 1px 1px 0 rgba(255, 255, 255, 0.7);
+            transform: rotate(-3deg);
+        }
+
+        .count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            box-shadow: inset 4px 4px 9px var(--lo), inset -4px -4px 9px var(--hi);
+            color: var(--ink-soft);
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .count b { color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; display: inline-block; }
+        .count b.pop { animation: pop 0.5s var(--spring); }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.6) rotate(-8deg); color: #5a8a00; }
+            100% { transform: scale(1); }
+        }
+
+        /* THE WELLS */
+        .wells { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+
+        .well {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 76px;
+            padding: 0 18px 0 14px;
+            border-radius: 22px;
+            background: linear-gradient(145deg, #dfe2e9, #eaedf2);
+            box-shadow: inset 6px 6px 12px var(--lo), inset -6px -6px 12px var(--hi);
+            transition: transform 0.5s var(--spring), opacity 0.4s;
+        }
+
+        /* A faint baseline, like the rule on a notepad line */
+        .well::after {
+            content: "";
+            position: absolute;
+            left: 76px;
+            right: 22px;
+            bottom: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(120, 132, 160, 0.22), rgba(120, 132, 160, 0.06));
+            pointer-events: none;
+        }
+
+        .well.squish { animation: squish 0.5s var(--spring); }
+
+        @keyframes squish {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.03, 0.9); }
+            60% { transform: scale(0.98, 1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* The + under the slots: adds a task, or refuses once both are taken */
+        .plus {
+            display: grid;
+            place-items: center;
+            flex: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            color: var(--ink-soft);
+            background: linear-gradient(145deg, #f2f4f8, #dde1e8);
+            box-shadow: 6px 6px 12px var(--lo), -6px -6px 12px var(--hi), inset 1px 1px 0 rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.25s var(--spring), color 0.2s;
+        }
+
+        .add-row { display: flex; align-items: center; gap: 18px; min-height: 46px; margin: 18px 0 0 14px; }
+
+        .plus:hover { color: var(--ink); transform: scale(1.06); }
+
+        /* Switched off while both slots are taken: sunk into the pad and greyed */
+        .plus.off {
+            color: rgba(122, 130, 150, 0.45);
+            background: linear-gradient(145deg, #dfe2e9, #eaedf2);
+            box-shadow: inset 4px 4px 8px var(--lo), inset -4px -4px 8px var(--hi);
+            cursor: not-allowed;
+        }
+        .plus.off:hover { transform: none; color: rgba(122, 130, 150, 0.45); }
+        .plus.on-again { animation: spring-up 0.6s var(--spring); }
+
+        @keyframes spring-up {
+            0% { transform: scale(0.85); }
+            60% { transform: scale(1.12); }
+            100% { transform: none; }
+        }
+        .plus:active { transform: scale(0.94); box-shadow: inset 4px 4px 8px var(--lo), inset -4px -4px 8px var(--hi); }
+        .plus:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+        .plus svg { width: 18px; height: 18px; }
+        .plus path { stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+
+        /* Refused: pressed in, then a rubbery bounce back */
+        .plus.nope { animation: nope 0.55s var(--spring); }
+
+        @keyframes nope {
+            0% { transform: scale(1); }
+            25% { transform: scale(0.82); box-shadow: inset 4px 4px 8px var(--lo), inset -4px -4px 8px var(--hi); }
+            55% { transform: scale(1.12) rotate(8deg); }
+            75% { transform: scale(0.96) rotate(-5deg); }
+            100% { transform: none; }
+        }
+
+        /* Round button: raised, presses in when done */
+        .knob {
+            position: relative;
+            flex: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(145deg, #f2f4f8, #dde1e8);
+            box-shadow: 6px 6px 12px var(--lo), -6px -6px 12px var(--hi), inset 1px 1px 0 rgba(255, 255, 255, 0.9);
+            transition: box-shadow 0.25s, background 0.25s, transform 0.25s var(--spring);
+            cursor: pointer;
+        }
+
+        .knob:hover { transform: scale(1.06); }
+        .knob:active { transform: scale(0.94); }
+        .knob:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+        .knob .num { font-weight: 700; font-size: 0.95rem; color: var(--ink-soft); transition: opacity 0.15s; }
+
+        .knob svg { position: absolute; width: 22px; height: 22px; overflow: visible; }
+        .knob svg path { fill: none; stroke: var(--ink); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 30; stroke-dashoffset: 30; }
+
+        /* Empty slots show a dimple instead of a button */
+        .dimple {
+            flex: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--ink-soft);
+            box-shadow: inset 4px 4px 8px var(--lo), inset -4px -4px 8px var(--hi);
+        }
+
+        .well.done .knob {
+            background: linear-gradient(145deg, #c9f53a, #b4e81b);
+            box-shadow: inset 5px 5px 10px rgba(120, 160, 20, 0.45), inset -4px -4px 10px rgba(240, 255, 190, 0.8);
+        }
+
+        .well.done .knob .num { opacity: 0; }
+        .well.done .knob svg path { animation: draw 0.35s ease-out 0.08s forwards; }
+
+        @keyframes draw { to { stroke-dashoffset: 0; } }
+
+        /* A lime ripple out of the button */
+        .splash {
+            position: absolute;
+            left: 37px;
+            top: 50%;
+            width: 46px;
+            height: 46px;
+            margin: -23px 0 0 -23px;
+            border-radius: 50%;
+            border: 3px solid var(--acid-lime);
+            pointer-events: none;
+            animation: splash 0.6s ease-out forwards;
+        }
+
+        @keyframes splash {
+            from { transform: scale(0.8); opacity: 0.9; }
+            to { transform: scale(2.4); opacity: 0; }
+        }
+
+        /* Ink droplets flicked off a finished task */
+        .drop {
+            position: absolute;
+            width: var(--s);
+            height: var(--s);
+            border-radius: 50%;
+            background: var(--ink);
+            pointer-events: none;
+            animation: fling 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+        }
+
+        @keyframes fling {
+            from { transform: translate(0, 0) scale(1); opacity: 1; }
+            to { transform: translate(var(--dx), var(--dy)) scale(0.3); opacity: 0; }
+        }
+
+        /* WRITING IN INK */
+        .line { position: relative; flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; }
+
+        .ink {
+            font-family: var(--write);
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+            color: var(--ink);
+            white-space: pre;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 6px 0 2px;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .ink .c { display: inline-block; }
+        .ink .c.fresh { animation: ink-in 0.32s ease-out, dry 2s ease-in forwards; }
+
+        @keyframes ink-in {
+            0% { opacity: 0; filter: blur(3px); transform: translateY(2px) scale(1.25); }
+            60% { opacity: 1; filter: blur(0.4px); }
+            100% { opacity: 1; filter: none; transform: none; }
+        }
+
+        @keyframes dry {
+            0% { color: #000; text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 0 2px rgba(0, 0, 0, 0.35); }
+            100% { color: var(--ink); text-shadow: none; }
+        }
+
+        /* The ink lifts off when the task is done */
+        .well.lifting .task .ink { animation: lift 0.5s ease-in forwards; }
+
+        @keyframes lift {
+            to { opacity: 0; filter: blur(4px); transform: translateY(-10px) scale(1.06); letter-spacing: 0.08em; }
+        }
+
+        .writing { position: relative; width: 100%; height: 100%; display: flex; align-items: center; }
+
+        .writing input {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            padding: 6px 0 2px;
+            font-family: var(--write);
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+            color: transparent;
+            caret-color: var(--ink);
+            outline: none;
+        }
+
+        .writing input::placeholder { color: rgba(20, 26, 46, 0.3); }
+        .writing input:focus::placeholder { color: transparent; }
+        .writing .ink { position: relative; pointer-events: none; }
+
+        /* The red note */
+        .note {
+            flex: 1;
+            min-width: 0;
+            transition: opacity 0.35s;
+            font-family: var(--write);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.4;
+            color: var(--ink-soft);
+        }
+
+        .note.gone { opacity: 0; }
+
+        /* The message pops in out of a blur */
+        .note.pop-in { animation: note-in 0.55s cubic-bezier(0.2, 0.8, 0.3, 1); }
+
+        @keyframes note-in {
+            from { opacity: 0; filter: blur(8px); transform: scale(0.94); }
+            to { opacity: 1; filter: none; transform: none; }
+        }
+
+        /* THE PEN: a soft clay felt-tip pen. Its tip is the element's origin. */
+        .pen {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 20;
+            width: 320px;
+            height: 44px;
+            transform-origin: 0 22px;
+            transition: transform 0.24s cubic-bezier(0.25, 0.8, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .pen.resting { transition: transform 0.9s var(--ease); }
+        .pen.no { transition: transform 0.09s ease-in-out; }
+
+        .pen-body {
+            display: block;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            filter: drop-shadow(10px 14px 10px rgba(120, 132, 160, 0.45));
+            transition: filter 0.3s;
+        }
+
+        .pen.writing .pen-body { filter: drop-shadow(26px 30px 16px rgba(120, 132, 160, 0.38)); }
+
+        /* Idle, it bobs like it's waiting to be picked up */
+        .pen.resting .pen-body { animation: bob 3.2s ease-in-out infinite; }
+
+        @keyframes bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px) rotate(-0.6deg); }
+        }
+
+        /* ---------- DOODLING ---------- */
+        .pen { pointer-events: none; }
+        .pen.resting { pointer-events: auto; cursor: pointer; }
+        .pen.resting:hover .pen-body,
+        .pen.resting:focus-visible .pen-body { filter: drop-shadow(16px 24px 16px rgba(120, 132, 160, 0.5)) brightness(1.04); }
+        .pen:focus-visible { outline: none; }
+
+        /* Every tool gets a matching barrel and tip */
+        .pen .barrel { fill: url(#barrel); }
+        .pen[data-tool="highlighter"] .barrel { fill: url(#barrel-lime); }
+        .pen[data-tool="brush"] .barrel { fill: url(#barrel-black); }
+        .pen .tip { display: none; }
+        .pen[data-tool="pen"] .tip-felt,
+        .pen[data-tool="eraser"] .tip-felt,
+        .pen[data-tool="highlighter"] .tip-chisel,
+        .pen[data-tool="brush"] .tip-brush { display: inline; }
+
+        /* Held: it tracks the pointer exactly */
+        .pen.held { transition: none; }
+        .pen.held .pen-body { filter: drop-shadow(22px 26px 14px rgba(120, 132, 160, 0.4)); }
+        .pen.held.over-tools { opacity: 0.25; }
+
+        .stage.doodling { cursor: none; }
+        .stage.doodling .tools { cursor: default; }
+
+        .doodle {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            /* Ink sits in the surface */
+            mix-blend-mode: multiply;
+            z-index: 1;
+            touch-action: none;
+        }
+
+        .doodle.live { z-index: 2; }
+
+        /* The card sits on top of the drawing */
+        .pad { z-index: 3; }
+        .stage.doodling .doodle { pointer-events: auto; }
+
+        /* The tray */
+        .tools {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            z-index: 25;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: linear-gradient(145deg, #eef1f6, #e2e5ec);
+            box-shadow: 12px 12px 28px var(--lo), -12px -12px 28px var(--hi), inset 1px 1px 0 rgba(255, 255, 255, 0.9);
+            transform: translateX(-50%);
+            animation: tray-in 0.45s var(--spring);
+        }
+
+        .tools[hidden] { display: none; }
+
+        @keyframes tray-in {
+            from { opacity: 0; transform: translate(-50%, -14px) scale(0.92); }
+            to { opacity: 1; transform: translateX(-50%); }
+        }
+
+        .tool-row { display: flex; gap: 10px; }
+
+        .tool {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 52px;
+            height: 52px;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.25s var(--spring);
+        }
+
+        .tool:hover { transform: translateY(-2px); }
+        .tool:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+        .tool.active { box-shadow: inset 4px 4px 9px var(--lo), inset -4px -4px 9px var(--hi); transform: none; }
+
+        .swatch {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--sw);
+            box-shadow: 3px 3px 6px var(--lo), -3px -3px 6px var(--hi), inset 1px 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .eraser-sw { background: linear-gradient(145deg, #ffd3dc, #e08ea0); border-radius: 8px; }
+
+
+        @media (prefers-reduced-motion: reduce) {
+            .tools { animation: none; }
+            .ink .c.fresh, .note.pop-in, .count b.pop, .pad.wobble, .well.squish, .plus.nope, .plus.on-again, .splash, .drop, .pen.resting .pen-body { animation: none; }
+            .pen, .pen.resting, .pen.no, .well, .knob { transition: none; }
+            .well.done .knob svg path { animation: none; stroke-dashoffset: 0; }
+            .well.lifting .task .ink { animation: none; opacity: 0; }
+        }
+
+        @media (max-width: 560px) {
+            .pad { padding: 52px 18px 22px; border-radius: 28px; }
+            .title { font-size: 2.1rem; }
+            .count { padding: 8px 12px; font-size: 0.85rem; }
+            .well { height: 66px; gap: 12px; }
+            .well::after { left: 64px; }
+            .knob, .dimple { width: 40px; height: 40px; }
+            .ink, .writing input { font-size: 15px; }
+            .note { font-size: 13px; }
+            .binding { gap: 16px; }
+            .tools { top: 14px; }
+            .tool { width: 46px; height: 46px; }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">&larr; Back</a>
+
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <linearGradient id="barrel" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#e6dcfb"/>
+                <stop offset="0.35" stop-color="#c3b0ec"/>
+                <stop offset="0.75" stop-color="#a28bd6"/>
+                <stop offset="1" stop-color="#8d76c4"/>
+            </linearGradient>
+            <linearGradient id="ferrule" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffffff"/>
+                <stop offset="0.45" stop-color="#e3e6ec"/>
+                <stop offset="1" stop-color="#aab1bf"/>
+            </linearGradient>
+            <linearGradient id="tip" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#4a4f63"/>
+                <stop offset="0.3" stop-color="#151926"/>
+                <stop offset="1" stop-color="#05070c"/>
+            </linearGradient>
+            <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#e2ff7a"/>
+                <stop offset="0.5" stop-color="#c5fb29"/>
+                <stop offset="1" stop-color="#97c90e"/>
+            </linearGradient>
+            <linearGradient id="barrel-lime" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#f0ffb8"/>
+                <stop offset="0.35" stop-color="#d6ff4f"/>
+                <stop offset="0.75" stop-color="#b2e41a"/>
+                <stop offset="1" stop-color="#93c20c"/>
+            </linearGradient>
+            <linearGradient id="barrel-black" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#5a5f72"/>
+                <stop offset="0.35" stop-color="#262a38"/>
+                <stop offset="0.75" stop-color="#11141e"/>
+                <stop offset="1" stop-color="#05070c"/>
+            </linearGradient>
+            <linearGradient id="eraser" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffd3dc"/>
+                <stop offset="0.45" stop-color="#f6a9b9"/>
+                <stop offset="1" stop-color="#dc8396"/>
+            </linearGradient>
+            <filter id="soft-hi" x="-10%" y="-200%" width="120%" height="500%">
+                <feGaussianBlur stdDeviation="1.4"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="stage" id="stage">
+        <!-- Doodles live on the background, under the card -->
+        <canvas class="doodle" id="doodle" aria-hidden="true"></canvas>
+        <canvas class="doodle live" id="doodle-live" aria-hidden="true"></canvas>
+
+        <main class="pad" id="pad">
+            <div class="binding" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+            <div class="head">
+                <h1 class="title"><span class="two">Two</span> Do</h1>
+                <p class="count" id="count" aria-live="polite"></p>
+            </div>
+
+            <ol class="wells" id="wells" aria-label="Your two things"></ol>
+
+            <div class="add-row">
+                <button class="plus" id="plus" aria-label="Add a task"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12"/></svg></button>
+                <p class="note" id="note" role="status" aria-live="polite"></p>
+            </div>
+        </main>
+
+        <div class="pen resting" id="pen" data-tool="pen" role="button" tabindex="0" aria-label="Pick up the pen to doodle" title="Pick up the pen">
+            <svg class="pen-body" viewBox="0 0 320 44" aria-hidden="true">
+                <!-- felt tip (pen) -->
+                <g class="tip tip-felt">
+                    <path d="M0 22 C3 21 8 19.6 14 18.6 L22 17 L22 27 L14 25.4 C8 24.4 3 23 0 22 Z" fill="url(#tip)"/>
+                    <path d="M5 21.2 C10 20 15 19 20 18.6" stroke="rgba(255,255,255,0.5)" stroke-width="1" stroke-linecap="round" fill="none"/>
+                </g>
+                <!-- chisel tip (highlighter) -->
+                <g class="tip tip-chisel">
+                    <path d="M0 14 L22 15 L22 29 L6 30 C2 30 0 28 0 26 Z" fill="url(#barrel-lime)"/>
+                    <path d="M2 16 L20 16.6" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-linecap="round"/>
+                </g>
+                <!-- bristles (brush pen) -->
+                <g class="tip tip-brush">
+                    <path d="M0 22 C6 21 14 17.5 24 15.5 L24 28.5 C14 26.5 6 23 0 22 Z" fill="url(#tip)"/>
+                    <path d="M5 21 C11 19.4 17 17.8 22 17" stroke="rgba(255,255,255,0.45)" stroke-width="1" stroke-linecap="round" fill="none"/>
+                </g>
+                <!-- cone into the grip -->
+                <path d="M24 13 C34 12 42 11 50 11 L50 33 C42 33 34 32 24 31 C21 30 20 27 20 22 C20 17 21 14 24 13 Z" fill="url(#ferrule)"/>
+                <rect x="46" y="8" width="44" height="28" rx="10" fill="url(#ferrule)"/>
+                <!-- clay barrel, skinned per tool -->
+                <rect class="barrel" x="82" y="3" width="216" height="38" rx="19"/>
+                <rect x="98" y="9" width="180" height="6" rx="3" fill="rgba(255,255,255,0.6)" filter="url(#soft-hi)"/>
+                <rect x="252" y="3" width="12" height="38" fill="url(#band)"/>
+                <!-- eraser end -->
+                <rect x="290" y="7" width="28" height="30" rx="14" fill="url(#eraser)"/>
+            </svg>
+        </div>
+
+        <!-- Tool tray, shown while the pen is picked up -->
+        <div class="tools" id="tools" role="toolbar" aria-label="Drawing tools" hidden>
+            <div class="tool-row">
+                <button class="tool" data-tool="highlighter" aria-label="Highlighter"><span class="swatch" style="--sw:#c5fb29"></span></button>
+                <button class="tool" data-tool="pen" aria-label="Pen"><span class="swatch" style="--sw:#9b82db"></span></button>
+                <button class="tool" data-tool="brush" aria-label="Brush pen"><span class="swatch" style="--sw:#141a2e"></span></button>
+                <button class="tool" data-tool="eraser" aria-label="Eraser"><span class="swatch eraser-sw"></span></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (window.self !== window.top) document.documentElement.classList.add('framed');
+
+        const LIMIT = 2;
+        const NOPE = 'Accomplish what you already set out two do first.';
+        const KEY = 'two-do';
+        const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const wait = ms => new Promise(r => setTimeout(r, ms));
+
+        const stage = document.getElementById('stage');
+        const pad = document.getElementById('pad');
+        const wellsEl = document.getElementById('wells');
+        const note = document.getElementById('note');
+        const countEl = document.getElementById('count');
+        const plus = document.getElementById('plus');
+        const pen = document.getElementById('pen');
+
+        // Saved in this browser only; starts with two things already written down
+        let state = { tasks: ['Answer that email from Tuesday', 'Water the plants'], done: 0 };
+        try {
+            const saved = JSON.parse(localStorage.getItem(KEY));
+            if (saved && Array.isArray(saved.tasks)) state = { tasks: saved.tasks.slice(0, LIMIT), done: saved.done | 0 };
+        } catch (e) { /* storage unavailable */ }
+        const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ } };
+
+        let draft = '';
+        let input = null, mirror = null, refusing = false;
+
+        /* ---------- SOUND: soft pen strokes and a rubbery button ---------- */
+        let audio = null, noise = null;
+        function sound(kind) {
+            try {
+                if (!audio) {
+                    audio = new (window.AudioContext || window.webkitAudioContext)();
+                    noise = audio.createBuffer(1, audio.sampleRate * 0.4, audio.sampleRate);
+                    const data = noise.getChannelData(0);
+                    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+                }
+                if (audio.state === 'suspended') audio.resume();
+                const t = audio.currentTime;
+                const gain = audio.createGain();
+                gain.connect(audio.destination);
+                if (kind === 'pop' || kind === 'boop') {
+                    const osc = audio.createOscillator();
+                    osc.type = 'sine';
+                    const [f0, f1] = kind === 'pop' ? [520, 880] : [220, 120];
+                    osc.frequency.setValueAtTime(f0, t);
+                    osc.frequency.exponentialRampToValueAtTime(f1, t + 0.09);
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.09, t + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+                    osc.connect(gain);
+                    osc.start(t);
+                    osc.stop(t + 0.18);
+                    return;
+                }
+                const src = audio.createBufferSource();
+                src.buffer = noise;
+                const band = audio.createBiquadFilter();
+                band.type = 'bandpass';
+                band.frequency.value = 2600 + Math.random() * 900;
+                band.Q.value = 0.7;
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.022, t + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+                src.connect(band).connect(gain);
+                src.start(t, Math.random() * 0.2, 0.09);
+            } catch (e) { /* no audio, no problem */ }
+        }
+
+        function letters(el, text, fresh) {
+            el.textContent = '';
+            [...text].forEach(ch => {
+                const s = document.createElement('span');
+                s.className = 'c' + (fresh ? ' fresh' : '');
+                s.textContent = ch;
+                el.appendChild(s);
+            });
+        }
+
+        /* ---------- WELLS ---------- */
+        const tick = '<svg viewBox="0 0 22 22" aria-hidden="true"><path d="M4 11.5 9 16.5 18 6"/></svg>';
+
+        function render() {
+            wellsEl.innerHTML = '';
+            input = mirror = null;
+            for (let i = 0; i < LIMIT; i++) {
+                const li = document.createElement('li');
+                li.className = 'well';
+                const task = state.tasks[i];
+                if (task !== undefined) {
+                    li.innerHTML = `<button class="knob"><span class="num">${i + 1}</span>${tick}</button><div class="line"><button class="task" tabindex="-1"><span class="ink"></span></button></div>`;
+                    li.querySelector('.knob').setAttribute('aria-label', 'Mark done: ' + task);
+                    letters(li.querySelector('.ink'), task, false);
+                    const done = () => complete(i, li);
+                    li.querySelector('.knob').addEventListener('click', done);
+                    li.querySelector('.task').addEventListener('click', done);
+                } else if (i === state.tasks.length) {
+                    li.innerHTML = `<span class="dimple" aria-hidden="true">${i + 1}</span><div class="line"><div class="writing"><span class="ink"></span><input type="text" maxlength="40" autocomplete="off" spellcheck="false"></div></div>`;
+                    input = li.querySelector('input');
+                    mirror = li.querySelector('.ink');
+                    input.setAttribute('aria-label', 'Write a task');
+                    input.placeholder = 'write a task…';
+                    input.value = draft;
+                    letters(mirror, draft, false);
+                    bindInput();
+                } else {
+                    li.innerHTML = `<span class="dimple" aria-hidden="true">${i + 1}</span><div class="line"></div>`;
+                }
+                wellsEl.appendChild(li);
+            }
+            countEl.innerHTML = `<b id="done-n">${state.done}</b> done`;
+            setPlus(state.tasks.length >= LIMIT);
+        }
+
+        /* ---------- THE + ---------- */
+        let plusOff = false;
+        function setPlus(full) {
+            if (full === plusOff) return;
+            plusOff = full;
+            plus.classList.toggle('off', full);
+            plus.setAttribute('aria-disabled', String(full));
+            plus.setAttribute('aria-label', full ? 'Add a task (finish one first)' : 'Add a task');
+            if (!full) {
+                // Back on: it springs up and the message fades away
+                if (!reduceMotion) plus.classList.add('on-again');
+                note.classList.add('gone');
+                setTimeout(() => { if (!plusOff) { note.textContent = ''; note.classList.remove('gone'); } }, 350);
+            }
+        }
+
+        /* ---------- THE PEN ---------- */
+        const small = () => innerWidth <= 560;
+        const scale = () => small() ? 0.7 : 1;
+        let restTimer;
+
+        function stagePoint(rect, atRight) {
+            const s = stage.getBoundingClientRect();
+            return { x: (atRight ? rect.right : rect.left) - s.left, y: rect.bottom - s.top };
+        }
+
+        function pose(x, y, angle) {
+            pen.style.transform = `translate(${x}px, ${y - 22}px) rotate(${angle}deg) scale(${scale()})`;
+        }
+
+        // Writing pose: tip on the point, barrel up to the right
+        function penTo(x, y) {
+            if (held) return;
+            clearTimeout(restTimer);
+            pen.classList.add('writing');
+            pen.classList.remove('resting');
+            const jx = (Math.random() * 2 - 1) * 1.5, jr = (Math.random() * 2 - 1) * 2;
+            pose(x + jx, y, -42 + jr);
+        }
+
+        // Floating beside the pad (below it on phones)
+        function penRest() {
+            if (held) return;
+            pen.classList.remove('writing');
+            pen.classList.add('resting');
+            const r = pad.getBoundingClientRect(), s = stage.getBoundingClientRect();
+            // Beside the pad when there's room for it, otherwise lying below
+            const roomBeside = s.right - r.right > 120;
+            if (!roomBeside) pose(r.left - s.left + 30, r.bottom - s.top + 72, -6);
+            else pose(r.right - s.left + 44, r.bottom - s.top - 40, -70);
+        }
+
+        function penToCaret() {
+            if (!input || refusing) return;
+            const pos = input.selectionStart ?? draft.length;
+            const spans = mirror.querySelectorAll('.c');
+            const pt = pos > 0 && spans[pos - 1]
+                ? stagePoint(spans[pos - 1].getBoundingClientRect(), true)
+                : stagePoint(mirror.getBoundingClientRect(), false);
+            penTo(pt.x + 2, pt.y - 6);
+        }
+
+        function restSoon() {
+            clearTimeout(restTimer);
+            restTimer = setTimeout(penRest, 900);
+        }
+
+        /* ---------- WRITING ---------- */
+        function bindInput() {
+            input.addEventListener('input', () => {
+                const next = input.value;
+                if (next.startsWith(draft) && next.length > draft.length) {
+                    [...next.slice(draft.length)].forEach(ch => {
+                        const s = document.createElement('span');
+                        s.className = 'c fresh';
+                        s.textContent = ch;
+                        mirror.appendChild(s);
+                    });
+                    if (next.slice(draft.length).trim()) sound('stroke');
+                } else {
+                    letters(mirror, next, false);
+                }
+                draft = next;
+                penToCaret();
+            });
+            ['keyup', 'click', 'focus', 'select'].forEach(ev => input.addEventListener(ev, penToCaret));
+            input.addEventListener('blur', restSoon);
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+        }
+
+        // Clicking an open well picks up the pen
+        wellsEl.addEventListener('click', e => {
+            if (!e.target.closest('.knob, .task') && input) input.focus();
+        });
+
+        // Clicking the switched-off +: it bounces, the pad wobbles, the pen shakes its head
+        async function nudge() {
+            if (refusing) return;
+            refusing = true;
+            if (!reduceMotion) {
+                sound('boop');
+                [pad, plus].forEach(el => { el.classList.remove('wobble', 'nope'); void el.offsetWidth; });
+                pad.classList.add('wobble');
+                plus.classList.add('nope');
+                const at = stagePoint(plus.getBoundingClientRect(), true);
+                pen.classList.add('no');
+                for (const dx of [-16, 16, -13, 13, -6, 0]) {
+                    pose(at.x + 12 + dx, at.y - 36, -36 + dx * 0.6);
+                    await wait(95);
+                }
+                pen.classList.remove('no');
+            }
+            refusing = false;
+            // The message is normally there already; write it if it isn't
+            if (note.textContent !== NOPE) showNote();
+            restSoon();
+        }
+
+        // The message beside the + pops in and unblurs
+        function showNote() {
+            note.classList.remove('gone', 'pop-in');
+            note.textContent = NOPE;
+            void note.offsetWidth;
+            note.classList.add('pop-in');
+        }
+
+        function submit() {
+            const text = draft.trim();
+            if (!text) return;
+            state.tasks.push(text);
+            draft = '';
+            save();
+            render();
+            if (input) input.focus();
+            else { showNote(); restSoon(); }
+        }
+
+        // + with a free slot: go write in it. Switched off, it only bounces.
+        plus.addEventListener('click', () => {
+            if (state.tasks.length >= LIMIT) return nudge();
+            if (input) {
+                input.focus();
+                const well = input.closest('.well');
+                well.classList.remove('squish');
+                void well.offsetWidth;
+                well.classList.add('squish');
+            }
+        });
+        plus.addEventListener('animationend', () => plus.classList.remove('nope', 'on-again'));
+
+        pad.addEventListener('animationend', e => { if (e.target === pad) pad.classList.remove('wobble'); });
+        wellsEl.addEventListener('animationend', e => e.target.classList.remove('squish'));
+
+        /* ---------- DONE ---------- */
+        function burst(well) {
+            const splash = document.createElement('span');
+            splash.className = 'splash';
+            well.appendChild(splash);
+            setTimeout(() => splash.remove(), 700);
+            // Droplets flicked off the ink
+            const ink = well.querySelector('.ink').getBoundingClientRect();
+            const w = well.getBoundingClientRect();
+            for (let k = 0; k < 9; k++) {
+                const d = document.createElement('span');
+                d.className = 'drop';
+                d.style.setProperty('--s', (3 + Math.random() * 5).toFixed(1) + 'px');
+                d.style.left = (ink.left - w.left + Math.random() * ink.width) + 'px';
+                d.style.top = (ink.top - w.top + ink.height * 0.5) + 'px';
+                d.style.setProperty('--dx', ((Math.random() * 2 - 1) * 60).toFixed(0) + 'px');
+                d.style.setProperty('--dy', (-20 - Math.random() * 50).toFixed(0) + 'px');
+                well.appendChild(d);
+                setTimeout(() => d.remove(), 800);
+            }
+        }
+
+        function complete(i, well) {
+            if (well.classList.contains('done') || refusing) return;
+            well.classList.add('done');
+            sound('pop');
+            const finish = () => {
+                state.tasks.splice(i, 1);
+                state.done++;
+                save();
+                render();
+                if (!reduceMotion) document.getElementById('done-n').classList.add('pop');
+                if (input) input.focus(); else restSoon();
+            };
+            if (reduceMotion) return finish();
+            burst(well);
+            setTimeout(() => well.classList.add('lifting'), 260);
+            setTimeout(finish, 820);
+        }
+
+        render();
+        (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+            penRest();
+            if (plusOff) setTimeout(showNote, reduceMotion ? 0 : 400);
+        });
+        addEventListener('resize', () => { if (document.activeElement === input) penToCaret(); else penRest(); });
+
+        /* ---------- DOODLING: pick up the pen, choose a tool, drag to draw ---------- */
+        const tools = document.getElementById('tools');
+        const doodle = document.getElementById('doodle');
+        const liveCanvas = document.getElementById('doodle-live');
+        const ctx = doodle.getContext('2d');
+        const live = liveCanvas.getContext('2d');
+        const DOODLE_KEY = 'two-do-doodle';
+        const INK = {
+            pen: { color: '#8f73d6', width: 3 },
+            brush: { color: '#141a2e', min: 1.6, max: 9 },
+            highlighter: { color: '#c5fb29', width: 22 },
+            eraser: { width: 28 },
+        };
+        let held = false, tool = 'pen', dpr = 1;
+        let down = null, stroke = null;
+
+        function sizeCanvases() {
+            const keep = document.createElement('canvas');
+            keep.width = doodle.width;
+            keep.height = doodle.height;
+            if (keep.width && keep.height) keep.getContext('2d').drawImage(doodle, 0, 0);
+            dpr = Math.min(devicePixelRatio || 1, 2);
+            const w = doodle.clientWidth, h = doodle.clientHeight;
+            [doodle, liveCanvas].forEach(c => { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); });
+            // The card is centred, so keep the drawing centred too
+            if (keep.width && keep.height) ctx.drawImage(keep, (doodle.width - keep.width) / 2, (doodle.height - keep.height) / 2);
+        }
+
+        function saveDoodle() {
+            try { localStorage.setItem(DOODLE_KEY, doodle.toDataURL()); } catch (e) { /* storage full or unavailable */ }
+        }
+
+        function loadDoodle() {
+            let url = null;
+            try { url = localStorage.getItem(DOODLE_KEY); } catch (e) { /* unavailable */ }
+            if (!url) return;
+            const img = new Image();
+            img.onload = () => ctx.drawImage(img, (doodle.width - img.width) / 2, (doodle.height - img.height) / 2);
+            img.src = url;
+        }
+
+        // Pointer position on the pad's canvas, in canvas pixels
+        function canvasPoint(e) {
+            const r = doodle.getBoundingClientRect();
+            return { x: (e.clientX - r.left) * dpr, y: (e.clientY - r.top) * dpr, t: performance.now() };
+        }
+
+        // Tip on the pointer; the eraser turns the pen around so its end does the rubbing
+        function follow(e) {
+            const s = stage.getBoundingClientRect();
+            const x = e.clientX - s.left, y = e.clientY - s.top;
+            pen.classList.toggle('over-tools', !!e.target.closest('.tools'));
+            if (tool === 'eraser') {
+                pen.style.transform = `translate(${x}px, ${y - 22}px) rotate(138deg) translate(${-312 * scale()}px, 0) scale(${scale()})`;
+            } else {
+                pose(x, y, -42);
+            }
+        }
+
+        function setTool(name) {
+            tool = name;
+            pen.dataset.tool = name;
+            tools.querySelectorAll('.tool').forEach(b => b.classList.toggle('active', b.dataset.tool === name));
+        }
+
+        function pickUp(e) {
+            if (held || refusing) return;
+            held = true;
+            clearTimeout(restTimer);
+            if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+            pen.classList.remove('resting', 'writing');
+            pen.classList.add('held');
+            pen.setAttribute('aria-label', 'Put the pen down');
+            stage.classList.add('doodling');
+            tools.hidden = false;
+            setTool(tool);
+            sound('pop');
+            if (e && 'clientX' in e && e.clientX) follow(e);
+        }
+
+        function drop() {
+            if (!held) return;
+            held = false;
+            down = stroke = null;
+            pen.classList.remove('held', 'over-tools');
+            pen.dataset.tool = 'pen';
+            pen.setAttribute('aria-label', 'Pick up the pen to doodle');
+            stage.classList.remove('doodling');
+            tools.hidden = true;
+            sound('boop');
+            penRest();
+        }
+
+        pen.addEventListener('click', e => { if (!held) { e.stopPropagation(); pickUp(e); } });
+        pen.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); held ? drop() : pickUp(); } });
+
+        // While the pen is in hand, and for the click that puts it down, the card's buttons stay put
+        let swallowUntil = 0;
+        pad.addEventListener('click', e => {
+            if (held || performance.now() < swallowUntil) { e.stopPropagation(); e.preventDefault(); }
+        }, true);
+
+        tools.addEventListener('click', e => {
+            const b = e.target.closest('.tool');
+            if (b) setTool(b.dataset.tool);
+        });
+
+        // Esc puts the pen down (and stays here, rather than closing the homepage modal)
+        addEventListener('keydown', e => {
+            if (held && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); drop(); }
+        }, true);
+
+        /* Strokes, after p5.brush: each mark is many small stamps along a smoothed path,
+           pressure tapers both ends, and a per-stroke seed keeps the grain steady
+           while the stroke is redrawn on every move. Eraser works directly. */
+
+        // Stable pseudo-random 0..1 for (stamp, channel) within one stroke
+        function rnd(i, k) {
+            let h = (Math.imul(i, 374761393) + Math.imul(k, 668265263) + stroke.seed) | 0;
+            h = Math.imul(h ^ (h >>> 13), 1274126177);
+            h ^= h >>> 16;
+            return (h >>> 0) / 4294967296;
+        }
+
+        // Chaikin smoothing, carrying each point's width along
+        function smooth(pts) {
+            let out = pts;
+            for (let pass = 0; pass < 2 && out.length > 2; pass++) {
+                const next = [out[0]];
+                for (let i = 0; i < out.length - 1; i++) {
+                    const a = out[i], b = out[i + 1];
+                    next.push({ x: a.x * 0.75 + b.x * 0.25, y: a.y * 0.75 + b.y * 0.25, w: a.w * 0.75 + b.w * 0.25 });
+                    next.push({ x: a.x * 0.25 + b.x * 0.75, y: a.y * 0.25 + b.y * 0.75, w: a.w * 0.25 + b.w * 0.75 });
+                }
+                next.push(out[out.length - 1]);
+                out = next;
+            }
+            return out;
+        }
+
+        // Walk the path, calling stamp(x, y, w, along, total, dirX, dirY, index) every `spacing` canvas px
+        function walk(pts, spacing, stamp) {
+            let total = 0;
+            for (let i = 1; i < pts.length; i++) total += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+            let along = 0, nextAt = 0, n = 0;
+            for (let i = 1; i < pts.length; i++) {
+                const a = pts[i - 1], b = pts[i];
+                const len = Math.hypot(b.x - a.x, b.y - a.y);
+                if (!len) continue;
+                const dx = (b.x - a.x) / len, dy = (b.y - a.y) / len;
+                while (nextAt <= along + len) {
+                    const t = (nextAt - along) / len;
+                    stamp(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.w + (b.w - a.w) * t, nextAt, total, dx, dy, n++);
+                    nextAt += spacing;
+                }
+                along += len;
+            }
+        }
+
+        // Pressure: eases in over the first stretch and out over the last
+        const taper = (along, total, inLen, outLen) =>
+            Math.max(0.12, Math.pow(Math.min(1, along / inLen), 0.6) * Math.pow(Math.min(1, (total - along) / outLen), 0.7));
+
+        const BRUSHES = {
+            // Brush pen: a soft round core with bristle grain; thin, broken strokes when fast
+            brush(c, pts) {
+                c.fillStyle = INK.brush.color;
+                walk(pts, 0.6 * dpr, (x, y, w, along, total, dx, dy, i) => {
+                    const p = taper(along, total, 16 * dpr, 22 * dpr);
+                    const r = (w * dpr * p) / 2;
+                    if (w < 3 && rnd(i, 1) < 0.18) return;           // dry-brush gaps at speed
+                    c.globalAlpha = 0.85 + rnd(i, 2) * 0.15;
+                    c.beginPath();
+                    c.arc(x, y, r, 0, Math.PI * 2);
+                    c.fill();
+                    // bristles: little flecks along the edges
+                    for (let k = 0; k < 3; k++) {
+                        const off = (rnd(i, 10 + k) - 0.5) * 2.2 * r;
+                        c.globalAlpha = 0.35 + rnd(i, 20 + k) * 0.4;
+                        c.beginPath();
+                        c.arc(x - dy * off, y + dx * off, r * (0.18 + rnd(i, 30 + k) * 0.2), 0, Math.PI * 2);
+                        c.fill();
+                    }
+                });
+                c.globalAlpha = 1;
+            },
+            // Pen: a technical-pen line with a slight ink tremor and soft ends
+            pen(c, pts) {
+                c.fillStyle = INK.pen.color;
+                walk(pts, 0.5 * dpr, (x, y, w, along, total, dx, dy, i) => {
+                    const p = 0.75 + 0.25 * taper(along, total, 8 * dpr, 10 * dpr);
+                    const jitter = (rnd(i >> 3, 1) - 0.5) * 0.35 * dpr;
+                    c.globalAlpha = 0.9;
+                    c.beginPath();
+                    c.arc(x - dy * jitter, y + dx * jitter, (INK.pen.width * dpr * p) / 2, 0, Math.PI * 2);
+                    c.fill();
+                });
+                c.globalAlpha = 1;
+            },
+            // Highlighter: a chisel nib held at a fixed slant, so the ribbon's width
+            // changes with direction like a real one; drawn solid, laid down translucent
+            highlighter(c, pts) {
+                c.fillStyle = INK.highlighter.color;
+                const nib = INK.highlighter.width * dpr, thick = 5 * dpr;
+                walk(pts, 1 * dpr, (x, y) => {
+                    c.save();
+                    c.translate(x, y);
+                    c.rotate(-0.55);
+                    c.fillRect(-thick / 2, -nib / 2, thick, nib);
+                    c.restore();
+                });
+            },
+        };
+
+        function renderLive() {
+            live.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+            const pts = stroke.points.length > 1 ? smooth(stroke.points) : stroke.points;
+            BRUSHES[tool](live, pts);
+        }
+
+        function eraseSegment(a, b) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = INK.eraser.width * dpr;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function extend(p) {
+            const pts = stroke.points;
+            const prev = pts[pts.length - 1];
+            // Brush width from speed: slow and wide, fast and thin
+            const speed = Math.hypot(p.x - prev.x, p.y - prev.y) / dpr / Math.max(1, p.t - prev.t);
+            const target = Math.max(INK.brush.min, Math.min(INK.brush.max, INK.brush.max - speed * 6));
+            p.w = prev.w * 0.6 + target * 0.4;
+            pts.push(p);
+            if (tool === 'eraser') return eraseSegment(prev, p);
+            renderLive();
+        }
+
+        function startStroke(p) {
+            p.w = INK.brush.max * 0.75;
+            stroke = { points: [p], seed: (Math.random() * 2 ** 31) | 0 };
+            liveCanvas.style.opacity = tool === 'highlighter' ? '0.55' : '1';
+        }
+
+        function endStroke() {
+            if (stroke && tool !== 'eraser') {
+                ctx.save();
+                ctx.globalAlpha = tool === 'highlighter' ? 0.55 : 1;
+                ctx.drawImage(liveCanvas, 0, 0);
+                ctx.restore();
+                live.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+            }
+            if (stroke) { sound('stroke'); saveDoodle(); }
+            stroke = null;
+        }
+
+        stage.addEventListener('pointermove', e => {
+            if (!held) return;
+            follow(e);
+            if (!down || down.onCard) return;
+            const p = canvasPoint(e);
+            if (!stroke) {
+                // A drag, not a click: start drawing once the pointer has really moved
+                if (Math.hypot(e.clientX - down.x, e.clientY - down.y) < 4) return;
+                startStroke(down.p);
+            }
+            extend(p);
+        });
+
+        stage.addEventListener('pointerdown', e => {
+            if (!held || e.target.closest('.tools')) return;
+            down = { x: e.clientX, y: e.clientY, p: canvasPoint(e), onCard: !!e.target.closest('.pad') };
+            try { stage.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or finished pointer */ }
+            e.preventDefault();
+        });
+
+        stage.addEventListener('pointerup', e => {
+            if (!held || !down) return;
+            const wasStroke = !!stroke;
+            endStroke();
+            down = null;
+            if (!wasStroke && !e.target.closest('.tools')) {
+                swallowUntil = performance.now() + 400;
+                drop();
+            }
+        });
+
+        sizeCanvases();
+        loadDoodle();
+        addEventListener('resize', sizeCanvases);
+    </script>
+</body>
+</html>
