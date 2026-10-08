@@ -387,10 +387,26 @@
 
         /* FOOTER, seen through a wet lens */
         footer {
-            padding: 140px 0 120px;
+            --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='24' viewBox='0 0 320 24'%3E%3Cpath d='M0 12C53 4 107 4 160 12S267 20 320 12V24H0Z'/%3E%3C/svg%3E");
+            /* Rises into the section above so the wave's dips show the grid behind */
+            margin-top: -24px;
+            padding: 164px 0 120px;
             background: var(--night);
             color: var(--paper);
             overflow: hidden;
+            /* A wavy top edge: the wave tile along the top, solid below it */
+            -webkit-mask: var(--wave) 0 0 / 320px 24px repeat-x, linear-gradient(#000, #000) 0 23px / 100% calc(100% - 23px) no-repeat;
+            mask: var(--wave) 0 0 / 320px 24px repeat-x, linear-gradient(#000, #000) 0 23px / 100% calc(100% - 23px) no-repeat;
+        }
+
+        /* The edge drifts sideways like a water surface */
+        @media (prefers-reduced-motion: no-preference) {
+            footer { animation: footer-wave 14s linear infinite; }
+        }
+
+        @keyframes footer-wave {
+            from { -webkit-mask-position: 0 0, 0 23px; mask-position: 0 0, 0 23px; }
+            to { -webkit-mask-position: 320px 0, 0 23px; mask-position: 320px 0, 0 23px; }
         }
 
         #lens-canvas {
