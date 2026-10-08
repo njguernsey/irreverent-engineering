@@ -23,25 +23,30 @@
         p, li, blockquote { text-wrap: pretty; }
         h1, h2 { text-wrap: balance; }
 
+        /* Calendar on top, pitch underneath, both on one screen: the calendar takes
+           whatever height the pitch leaves and sizes its hours to fit */
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--ink);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            height: 100vh;
         }
 
-        /* The calendar fills the top of the page at its full height, so it never
-           scrolls inside itself; the script sets the exact height once it loads */
         .calendar-frame {
             display: block;
+            flex: 1 1 auto;
             width: 100%;
-            height: 820px;
+            min-height: 460px;
             border: 0;
             background: #fff;
         }
 
         .back-link {
             display: inline-block;
-            margin-bottom: 32px;
+            margin-bottom: 16px;
             color: var(--acid-lime);
             text-decoration: none;
             font-weight: 700;
@@ -50,26 +55,30 @@
         html.framed .back-link { display: none; }
 
         .stage {
+            flex: none;
+            width: 100%;
             max-width: 1180px;
             margin: 0 auto;
-            padding: 56px 56px 72px;
+            padding: 24px 48px 28px;
         }
 
-        /* PITCH */
+        /* PITCH: one row of name and rating, Doug's quote, and the button */
         .pitch {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-            gap: 28px 64px;
-            align-items: start;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 20px 48px;
+            align-items: center;
         }
 
-        .pitch-head { display: flex; flex-direction: column; gap: 20px; }
-        .pitch-body { display: flex; flex-direction: column; gap: 28px; }
+        .pitch-head { display: flex; flex-direction: column; gap: 10px; }
+        .pitch-body { display: flex; align-items: center; gap: 40px; }
+        .pitch-body blockquote { flex: 1; }
+        .pitch-body .download { flex: none; }
 
-        .kicker { color: var(--deep-clay); font-weight: 500; font-size: 0.95rem; margin-bottom: 8px; }
+        .kicker { color: var(--deep-clay); font-weight: 500; font-size: 0.9rem; margin-bottom: 4px; }
 
         .pitch h2 {
-            font-size: 2.6rem;
+            font-size: 2.1rem;
             font-weight: 800;
             letter-spacing: -1.5px;
             line-height: 1;
@@ -80,14 +89,14 @@
         .rating-text { font-weight: 700; }
 
         blockquote {
-            font-size: 1.35rem;
+            font-size: 1.15rem;
             font-weight: 800;
             line-height: 1.2;
             letter-spacing: -0.5px;
         }
 
         blockquote footer {
-            margin-top: 12px;
+            margin-top: 8px;
             font-size: 0.95rem;
             font-weight: 500;
             letter-spacing: 0;
@@ -116,10 +125,16 @@
             .download { transition: none; }
         }
 
+        @media (max-width: 1000px) {
+            .pitch-body { flex-direction: column; align-items: flex-start; gap: 20px; }
+        }
+
         @media (max-width: 760px) {
-            .stage { padding: 40px 24px 48px; }
+            body { height: auto; }
+            .calendar-frame { flex: none; height: 78vh; }
+            .stage { padding: 28px 24px 40px; }
             .pitch { grid-template-columns: 1fr; }
-            .pitch h2 { font-size: 2.2rem; }
+            .pitch h2 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -171,24 +186,9 @@
         // Esc inside the calendar reaches this page, so the homepage modal can close.
         // The calendar stops Esc itself while one of its event cards is open.
         const frame = document.getElementById('calendar');
-
-        // Exactly as tall as the calendar's header plus its whole day
-        function fitCalendar() {
-            const cal = frame.contentDocument;
-            const bar = cal && cal.querySelector('.topbar');
-            const week = cal && cal.querySelector('.week');
-            if (bar && week) frame.style.height = (bar.offsetHeight + week.offsetHeight) + 'px';
-        }
-        addEventListener('resize', fitCalendar);
-
         frame.addEventListener('load', () => {
             const cal = frame.contentDocument;
             if (!cal) return;
-            fitCalendar();
-            if (cal.fonts) cal.fonts.ready.then(fitCalendar);
-            // Refit whenever the calendar's layout settles at a new height (fonts, resizes)
-            const week = cal.querySelector('.week');
-            if (week && frame.contentWindow.ResizeObserver) new frame.contentWindow.ResizeObserver(fitCalendar).observe(week);
             cal.addEventListener('keydown', e => {
                 if (e.key === 'Escape') document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
             });

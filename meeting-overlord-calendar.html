@@ -32,7 +32,7 @@
             color: var(--ink);
             background: #fff;
             display: grid;
-            grid-template-rows: 64px 1fr;
+            grid-template-rows: 52px 1fr;
             overflow: hidden;
         }
 
@@ -45,13 +45,14 @@
         .topbar {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
+            gap: 10px;
+            padding: 6px 16px;
             border-bottom: 1px solid var(--line);
             min-width: 0;
         }
 
-        /* Inside the homepage modal, leave room for its close button */
+        /* Inside the homepage modal, leave room for its close button (44px, 16px in) */
+        html.framed body { grid-template-rows: 60px 1fr; }
         html.framed .topbar { padding-right: 76px; }
         html.framed .back-link { display: none; }
 
@@ -65,7 +66,7 @@
 
         .brand { display: flex; align-items: center; gap: 10px; min-width: 196px; }
         .brand svg { flex: none; }
-        .brand-name { font-size: 20px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+        .brand-name { font-size: 18px; font-weight: 500; color: var(--ink); white-space: nowrap; }
 
         .today-btn {
             border: 1px solid var(--line);
@@ -86,7 +87,7 @@
             flex: none;
         }
 
-        .range-title { font-size: 22px; font-weight: 400; white-space: nowrap; }
+        .range-title { font-size: 19px; font-weight: 400; white-space: nowrap; }
 
         .spacer { flex: 1; }
 
@@ -131,7 +132,8 @@
         .main { display: grid; grid-template-columns: 256px 1fr; min-height: 0; }
 
         /* SIDEBAR */
-        .sidebar { padding: 16px 12px 16px 8px; overflow-y: auto; }
+        .sidebar { padding: 12px 12px 12px 8px; overflow-y: auto; scrollbar-width: none; }
+        .sidebar::-webkit-scrollbar { display: none; }
 
         .create-btn {
             display: flex;
@@ -142,7 +144,7 @@
             background: #fff;
             box-shadow: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
             font-weight: 500;
-            margin: 0 0 20px 8px;
+            margin: 0 0 16px 8px;
             transition: box-shadow 0.2s;
         }
 
@@ -220,16 +222,23 @@
             border-bottom: 1px solid var(--line);
         }
 
-        .day-head { text-align: center; padding: 10px 0 8px; border-left: 1px solid var(--line); }
-        .day-head .dow { font-size: 11px; font-weight: 500; color: var(--ink-soft); }
+        .day-head {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 4px 0;
+            border-left: 1px solid var(--line);
+        }
+        .day-head .dow { font-size: 12px; font-weight: 500; color: var(--ink-soft); }
         .day-head .num {
-            width: 46px;
-            height: 46px;
-            margin: 4px auto 0;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             display: grid;
             place-items: center;
-            font-size: 24px;
+            font-size: 15px;
+            font-weight: 500;
         }
 
         .day-head.is-today .dow { color: var(--accent); }
@@ -415,7 +424,7 @@
     <header class="topbar">
         <a href="index.html" class="back-link">&larr; Back</a>
         <div class="brand">
-            <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true">
                 <rect x="4" y="7" width="32" height="29" rx="4" fill="#fff" stroke="#8e24aa" stroke-width="2.5"/>
                 <rect x="4" y="7" width="32" height="8" rx="4" fill="#8e24aa"/>
                 <path d="M11 30 L13 20 L17 25 L20 18 L23 25 L27 20 L29 30 Z" fill="#f6bf26" stroke="#b07d00" stroke-width="1" stroke-linejoin="round"/>
@@ -489,7 +498,7 @@
         if (window.self !== window.top) document.documentElement.classList.add('framed');
 
         // The week of Sun Oct 4 – Sat Oct 10, 2026. Day 0 is Sunday; Tuesday is "today".
-        const START_HOUR = 7, END_HOUR = 20, TODAY = 2;
+        const START_HOUR = 7, END_HOUR = 18, TODAY = 2;
         const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const DATES = [4, 5, 6, 7, 8, 9, 10];
@@ -797,11 +806,11 @@
         // Every answer leads to more meetings
         const WORSE_SLOTS = [
             [1, 7, '7am Monday so everyone can make it'],
-            [5, 18.5, '6:30pm Friday, when calendars are clearest'],
+            [5, 17, '5pm Friday, when calendars are clearest'],
             [6, 9, 'Saturday morning, a fresh start'],
-            [0, 19, 'Sunday evening, to get ahead of the week'],
+            [0, 16, 'Sunday afternoon, to get ahead of the week'],
             [3, 7.5, '7:30am Wednesday, before the day gets busy'],
-            [2, 19.5, '7:30pm Tuesday, the quiet hours']
+            [2, 17, '5pm Tuesday, the quiet hours']
         ];
         let worseIdx = 0;
 
@@ -901,8 +910,23 @@
         document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) { e.stopPropagation(); closePopover(); } }, true);
         window.addEventListener('resize', () => { if (!pop.hidden && popAnchor) positionPopover(popAnchor); });
 
+        // Hours fill whatever height the page has, within readable limits
+        function fitHours() {
+            const avail = $('cal-scroll').clientHeight - $('day-heads').offsetHeight - 1;
+            const h = Math.max(36, Math.min(60, Math.floor(avail / (END_HOUR - START_HOUR))));
+            document.documentElement.style.setProperty('--hour', h + 'px');
+        }
+
+        let fitTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(fitTimer);
+            fitTimer = setTimeout(() => { closePopover(); fitHours(); render(); }, 120);
+        });
+
         buildChrome();
+        fitHours();
         render();
+        if (document.fonts) document.fonts.ready.then(() => { closePopover(); fitHours(); render(); });
         // Open on the working day
         $('cal-scroll').scrollTop = (8.5 - START_HOUR) * hourPx();
     </script>
