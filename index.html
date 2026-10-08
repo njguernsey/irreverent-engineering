@@ -182,12 +182,12 @@
         /* Each letter sits a little off true and springs when poked */
         .hero-title .ch {
             display: inline-block;
-            transform: translateY(var(--y, 0)) rotate(var(--r, 0deg));
+            transform: translate(var(--ex, 0px), var(--ey, 0px)) translateY(var(--y, 0)) rotate(calc(var(--r, 0deg) + var(--er, 0deg)));
             transition: transform 0.6s var(--spring), color 0.2s;
         }
 
         .hero-title .ch:hover {
-            transform: translateY(calc(var(--y, 0px) - 0.12em)) rotate(calc(var(--r, 0deg) * -3)) scale(1.12);
+            transform: translate(var(--ex, 0px), var(--ey, 0px)) translateY(calc(var(--y, 0px) - 0.12em)) rotate(calc(var(--r, 0deg) * -3 + var(--er, 0deg))) scale(1.12);
             color: var(--acid-lime);
             transition-duration: 0.25s;
         }
@@ -195,10 +195,10 @@
         .hero-title .ch.hop { animation: hop 0.9s var(--spring); }
 
         @keyframes hop {
-            0% { transform: translateY(var(--y, 0)) rotate(var(--r, 0deg)); }
-            35% { transform: translateY(-0.28em) rotate(-14deg); }
-            70% { transform: translateY(0.04em) rotate(6deg); }
-            100% { transform: translateY(var(--y, 0)) rotate(var(--r, 0deg)); }
+            0% { transform: translate(var(--ex, 0px), var(--ey, 0px)) translateY(var(--y, 0)) rotate(calc(var(--r, 0deg) + var(--er, 0deg))); }
+            35% { transform: translate(var(--ex, 0px), var(--ey, 0px)) translateY(-0.28em) rotate(-14deg); }
+            70% { transform: translate(var(--ex, 0px), var(--ey, 0px)) translateY(0.04em) rotate(6deg); }
+            100% { transform: translate(var(--ex, 0px), var(--ey, 0px)) translateY(var(--y, 0)) rotate(calc(var(--r, 0deg) + var(--er, 0deg))); }
         }
 
         /* Dimension line measuring the title */
@@ -261,6 +261,7 @@
         .work-section { padding: 120px 0; }
 
         .work-grid {
+            position: relative;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             border-top: 1px solid var(--line);
@@ -277,7 +278,7 @@
             background: rgba(11, 26, 74, 0.38);
             border-right: 1px solid var(--line);
             border-bottom: 1px solid var(--line);
-            transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
+            transform: translate(var(--ex, 0px), var(--ey, 0px)) rotate(var(--er, 0deg)) perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
             transition: background-color 0.35s, color 0.35s, transform 0.5s var(--spring), box-shadow 0.35s;
         }
 
@@ -434,7 +435,12 @@
         .quote-text { font-size: clamp(2rem, 4vw, 2.9rem); font-weight: 800; line-height: 1.05; margin-bottom: 16px; letter-spacing: -0.03em; }
         .quote-attribution { color: var(--deep-clay); font-weight: 600; font-size: 0.95rem; margin-bottom: 56px; }
 
-        .quote-text:nth-of-type(3) { transform: rotate(-1deg); transform-origin: left center; }
+        .quote-text, .quote-attribution {
+            transform: translate(var(--ex, 0px), var(--ey, 0px)) rotate(calc(var(--tilt, 0deg) + var(--er, 0deg)));
+            transition: transform 0.6s var(--spring);
+        }
+
+        .quote-text:nth-of-type(3) { --tilt: -1deg; transform-origin: left center; }
 
         /* PRANK TOGGLE */
         #prank-toggle {
@@ -570,40 +576,63 @@
 
         html.modal-open { overflow: hidden; }
 
-        /* PRANK MODE */
-        body.prank-mode { animation: rainbow-bg 5s infinite; }
-
-        body.prank-mode .hero-title,
-        body.prank-mode .hero-tagline,
-        body.prank-mode .project-card,
-        body.prank-mode .quote-text,
-        body.prank-mode .quote-attribution,
-        body.prank-mode .social-link {
-            animation: rainbow-text 2s linear infinite;
-        }
-
-        body.prank-mode .project-card { animation: shake 0.5s infinite, rainbow-text 2s linear infinite; border: 3px dashed #00ff00; }
+        /* PRANK MODE: the grid goes rainbow and the page becomes an exploded-view
+           diagram. Parts spring out of their slots, dashed outlines mark where they
+           belong, and leader lines tie each part back to its slot. */
+        body.prank-mode .hero-title { animation: rainbow-text 2s linear infinite; }
 
         @keyframes rainbow-text {
             0% { color: #ff8a8a; } 20% { color: #ffc98a; } 40% { color: #fff38a; }
             60% { color: #9cff8a; } 80% { color: #8ab6ff; } 100% { color: #e08aff; }
         }
 
-        @keyframes rainbow-bg {
-            0% { background-color: #e68a8a; } 20% { background-color: #e6b88a; } 40% { background-color: #e6e68a; }
-            60% { background-color: #8ae68a; } 80% { background-color: #8a8ae6; } 100% { background-color: #b88ae6; }
+        body.prank-mode .project-card,
+        body.prank-mode .quote-text,
+        body.prank-mode .quote-attribution {
+            transition: background-color 0.35s, color 0.35s, transform 0.9s var(--spring), box-shadow 0.35s;
         }
 
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            50% { transform: translate(-1px, 2px) rotate(1deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        body.prank-mode .project-card { z-index: 1; }
+        body.prank-mode .project-card:hover { z-index: 3; }
+
+        body.prank-mode .notes { transform: rotate(-1deg); }
+        .notes { transition: transform 0.9s var(--spring); }
+
+        /* Loose parts drift a little while the diagram is apart */
+        @media (prefers-reduced-motion: no-preference) {
+            body.prank-mode .project-card,
+            body.prank-mode .quote-text,
+            body.prank-mode .quote-attribution {
+                animation: drift var(--drift, 4s) ease-in-out var(--drift-delay, 0s) infinite alternate;
+            }
         }
+
+        @keyframes drift {
+            from { translate: 0 0; }
+            to { translate: 0 -6px; }
+        }
+
+        .explode-svg {
+            position: absolute;
+            left: 0;
+            top: 0;
+            overflow: visible;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        body.prank-mode .explode-svg { opacity: 1; transition: opacity 0.5s 0.35s; }
+
+        .explode-svg .slot { fill: none; stroke: rgba(255, 255, 255, 0.55); stroke-width: 1; stroke-dasharray: 6 5; }
+        .explode-svg .leader { stroke: rgba(255, 255, 255, 0.7); stroke-width: 1; stroke-dasharray: 3 4; }
+        .explode-svg .pin { fill: var(--acid-lime); }
 
         @media (prefers-reduced-motion: reduce) {
-            .hero-title .ch, .hero-tagline, .project-card, .title-dim, .title-dim span { transition: none; }
+            .hero-title .ch, .hero-tagline, .project-card, .title-dim, .title-dim span, .notes,
+            .quote-text, .quote-attribution, body.prank-mode .project-card,
+            body.prank-mode .quote-text, body.prank-mode .quote-attribution { transition: none; }
             .hero-title .ch.hop { animation: none; }
             .project-card:hover .project-title .ch { transform: none; transition: none; }
         }
@@ -744,6 +773,8 @@
         const canvas = document.getElementById('webgl-canvas');
         const gl = canvas.getContext('webgl');
         const MAX_RIPPLES = 4;
+        // The grid scrolls a little slower than the page, so the cards slide over it
+        const GRID_SCROLL = 0.8;
         const ripples = Array.from({ length: MAX_RIPPLES }, () => [-9999, -9999, -99]);
         let rippleIdx = 0;
         const mouse = { x: -9999, y: -9999 };
@@ -870,7 +901,7 @@
                 gl.uniform2f(uRes, canvas.width, canvas.height);
                 gl.uniform2f(uMouse, mouse.x, mouse.y);
                 gl.uniform1f(uTime, now());
-                gl.uniform1f(uScroll, scrollY);
+                gl.uniform1f(uScroll, scrollY * GRID_SCROLL);
                 gl.uniform1f(uPrank, isPrank ? 1 : 0);
                 gl.uniform3fv(uRip, ripples.flat());
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -913,15 +944,25 @@
                 s.textContent = x;
                 top.appendChild(s);
             }
-            for (let y = 100; y < innerHeight; y += 100) {
-                const s = document.createElement('span');
-                s.style.top = (y - 18 + 22) + 'px';
-                s.textContent = y;
-                left.appendChild(s);
-            }
+            for (let k = 0; k <= Math.ceil(innerHeight / 100); k++) left.appendChild(document.createElement('span'));
+            updateLeftRuler();
+        }
+
+        // The left ruler reads page position, so its ticks and numbers move with the scroll
+        function updateLeftRuler() {
+            const left = document.getElementById('ruler-left');
+            const y0 = scrollY;
+            left.style.backgroundPosition = `0 ${-18 - (y0 % 100)}px, 100% ${-18 - (y0 % 10)}px`;
+            const base = Math.floor(y0 / 100) * 100;
+            [...left.children].forEach((s, k) => {
+                const v = base + (k + 1) * 100;
+                s.textContent = v;
+                s.style.top = (v - y0 - 18 + 22) + 'px';
+            });
         }
         buildRulers();
         addEventListener('resize', buildRulers);
+        addEventListener('scroll', updateLeftRuler, { passive: true });
 
         /* ---------- HERO: wobbly letters and a live dimension line ---------- */
         const title = document.getElementById('hero-title');
@@ -1030,11 +1071,97 @@
         document.querySelectorAll('.project-card[href="#"]').forEach(card =>
             card.addEventListener('click', e => e.preventDefault()));
 
-        /* ---------- PRANK MODE ---------- */
+        /* ---------- PRANK MODE: exploded view ---------- */
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const EXPLODE = [
+            // root: the part positions are measured against it. spread pushes parts away from its centre.
+            { root: '.work-grid', parts: '.project-card', spread: 0.2, jitter: 12, turn: 3.5, slots: true },
+            { root: '.notes', parts: '.quote-text, .quote-attribution', spread: 0.6, jitter: 30, turn: 5, slots: false },
+            { root: '.hero-measure', parts: '.ch', spread: 0.16, jitter: 8, turn: 18, svg: false },
+        ];
+        const rand = (a, b) => a + Math.random() * (b - a);
+
+        function explode() {
+            EXPLODE.forEach(g => {
+                const root = document.querySelector(g.root);
+                if (!root) return;
+                root.querySelector(':scope > .explode-svg')?.remove();
+                const W = root.offsetWidth, H = root.offsetHeight;
+                const svg = g.svg === false ? null : document.createElementNS(SVG_NS, 'svg');
+                if (svg) {
+                    svg.setAttribute('class', 'explode-svg');
+                    svg.setAttribute('width', W);
+                    svg.setAttribute('height', H);
+                    svg.setAttribute('aria-hidden', 'true');
+                }
+                root.querySelectorAll(g.parts).forEach(part => {
+                    // Untransformed position inside the root
+                    let x = 0, y = 0;
+                    for (let el = part; el && el !== root; el = el.offsetParent) { x += el.offsetLeft; y += el.offsetTop; }
+                    const w = part.offsetWidth, h = part.offsetHeight;
+                    const cx = x + w / 2, cy = y + h / 2;
+                    const ex = (cx - W / 2) * g.spread + rand(-g.jitter, g.jitter);
+                    const ey = (cy - H / 2) * g.spread + rand(-g.jitter, g.jitter);
+                    const er = rand(-g.turn, g.turn);
+                    part.style.setProperty('--ex', ex.toFixed(1) + 'px');
+                    part.style.setProperty('--ey', ey.toFixed(1) + 'px');
+                    part.style.setProperty('--er', er.toFixed(1) + 'deg');
+                    part.style.setProperty('--drift', rand(3, 5).toFixed(2) + 's');
+                    part.style.setProperty('--drift-delay', rand(-4, 0).toFixed(2) + 's');
+                    if (!svg) return;
+
+                    // Where a point of the part lands once it's moved and turned
+                    const a = er * Math.PI / 180, cos = Math.cos(a), sin = Math.sin(a);
+                    const moved = (px, py) => {
+                        const dx = px - cx, dy = py - cy;
+                        return [cx + ex + dx * cos - dy * sin, cy + ey + dx * sin + dy * cos];
+                    };
+                    const line = (x1, y1, [x2, y2]) => {
+                        const l = document.createElementNS(SVG_NS, 'line');
+                        l.setAttribute('class', 'leader');
+                        l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+                        l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+                        svg.appendChild(l);
+                        const pin = document.createElementNS(SVG_NS, 'circle');
+                        pin.setAttribute('class', 'pin');
+                        pin.setAttribute('cx', x1); pin.setAttribute('cy', y1); pin.setAttribute('r', 2.5);
+                        svg.appendChild(pin);
+                    };
+
+                    if (g.slots) {
+                        const slot = document.createElementNS(SVG_NS, 'rect');
+                        slot.setAttribute('class', 'slot');
+                        slot.setAttribute('x', x + 6); slot.setAttribute('y', y + 6);
+                        slot.setAttribute('width', w - 12); slot.setAttribute('height', h - 12);
+                        svg.appendChild(slot);
+                        // Leader lines from each slot corner to the same corner of the part
+                        [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].forEach(([px, py]) => line(px, py, moved(px, py)));
+                    } else {
+                        line(x, cy, moved(x, cy));
+                    }
+                });
+                if (svg) root.prepend(svg);
+            });
+        }
+
+        function reassemble() {
+            EXPLODE.forEach(g => document.querySelectorAll(`${g.root} ${g.parts}`).forEach(part => {
+                ['--ex', '--ey', '--er'].forEach(v => part.style.removeProperty(v));
+            }));
+        }
+
         toggle.addEventListener('click', () => {
             document.body.classList.toggle('prank-mode');
             isPrank = document.body.classList.contains('prank-mode');
             toggle.innerText = isPrank ? 'RESTORE_SANITY.sh' : 'INITIALIZE_OVERRIDE.exe';
+            if (isPrank) explode(); else reassemble();
+        });
+
+        let explodeTimer;
+        addEventListener('resize', () => {
+            if (!isPrank) return;
+            clearTimeout(explodeTimer);
+            explodeTimer = setTimeout(explode, 200);
         });
 
         document.querySelectorAll('a, button').forEach(link => {
