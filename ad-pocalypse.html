@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad-pocalypse | Irreverent Engineering</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💣</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --page: #dae0e6;
+            --card: #fff;
+            --line: #ccd2d8;
+            --ink: #1c1c1c;
+            --ink-soft: #787c7e;
+            --brand: #ff4500;
+            --up: #ff4500;
+            --acid-lime: #c5fb29;
+            --deep-clay: #b39ddb;
+            --alarm: #e5242b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        p, li { text-wrap: pretty; }
+        h1, h2, h3 { text-wrap: balance; }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: var(--ink);
+            background: var(--page);
+            overflow: hidden;
+        }
+
+        button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+        /* The page scrolls inside this, so the bars and ads can sit over it */
+        .viewport { position: fixed; inset: 0; overflow-y: auto; }
+
+        /* FORUM TOP BAR */
+        .forum-bar {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 20px;
+            background: #fff;
+            border-bottom: 1px solid var(--line);
+        }
+
+        html.framed .forum-bar { padding-right: 76px; }
+
+        .back-link { color: var(--ink-soft); text-decoration: none; font-weight: 600; white-space: nowrap; }
+        html.framed .back-link { display: none; }
+
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
+
+        .search {
+            flex: 1;
+            max-width: 560px;
+            margin: 0 auto;
+            height: 38px;
+            border-radius: 999px;
+            background: #f6f7f8;
+            border: 1px solid #edeff1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 16px;
+            color: var(--ink-soft);
+        }
+
+        .me { width: 32px; height: 32px; border-radius: 50%; background: #46d160; flex: none; }
+
+        /* LAYOUT */
+        .layout {
+            display: grid;
+            grid-template-columns: 200px minmax(0, 640px) 300px;
+            justify-content: center;
+            gap: 24px;
+            padding: 20px 20px 80px;
+        }
+
+        .nav { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 72px; align-self: start; }
+        .nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .nav a.active { background: #e4e7ea; }
+        .nav h4 { font-size: 11px; font-weight: 600; color: var(--ink-soft); padding: 16px 12px 6px; }
+        .dot { width: 22px; height: 22px; border-radius: 50%; flex: none; }
+
+        .feed { display: flex; flex-direction: column; gap: 12px; }
+
+        .post {
+            display: grid;
+            grid-template-columns: 44px 1fr;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .votes {
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 0;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .votes svg { color: #878a8c; }
+        .votes .upped { color: var(--up); }
+
+        .post-body { padding: 10px 14px 6px; min-width: 0; }
+        .post-meta { font-size: 12px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+        .post-meta strong { color: var(--ink); font-weight: 700; }
+        .post-title { font-size: 18px; font-weight: 600; line-height: 1.3; margin: 6px 0 10px; }
+        .post-text { color: #3a3c3e; line-height: 1.5; margin-bottom: 10px; }
+
+        .post-media {
+            height: 280px;
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
+            font-size: 96px;
+            margin-bottom: 8px;
+        }
+
+        .post-actions { display: flex; gap: 4px; color: var(--ink-soft); font-size: 12px; font-weight: 700; }
+        .post-actions span { padding: 8px; border-radius: 4px; }
+
+        .side { position: sticky; top: 72px; align-self: start; display: flex; flex-direction: column; gap: 12px; }
+        .side-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+        .side-card .banner { height: 34px; background: var(--brand); }
+        .side-card .inner { padding: 12px 14px 14px; line-height: 1.5; }
+        .side-card h3 { font-size: 15px; margin-bottom: 6px; }
+        .side-card ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+        .side-card li { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+
+        /* AD-POCALYPSE BAR */
+        .doom-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 12px 20px;
+            background: #111;
+            color: #fff;
+            box-shadow: 0 6px 0 var(--deep-clay);
+            transform: translateY(-120%);
+            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1), background-color 0.3s;
+        }
+
+        html.framed .doom-bar { padding-right: 76px; }
+
+        .doom-bar.show { transform: none; }
+        .doom-bar.urgent { background: var(--alarm); animation: throb 1s infinite; }
+
+        @keyframes throb {
+            0%, 100% { box-shadow: 0 6px 0 var(--deep-clay); }
+            50% { box-shadow: 0 6px 0 #ffd400; }
+        }
+
+        .doom-brand { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--acid-lime); white-space: nowrap; }
+        .doom-bar.urgent .doom-brand { color: #fff; }
+        .doom-label { color: rgba(255,255,255,0.75); font-weight: 500; }
+        .doom-time { font-size: 30px; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -1px; min-width: 3.2ch; }
+
+        /* ADS */
+        .ad-layer { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+
+        .ad {
+            position: absolute;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+            padding: 18px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            overflow: hidden;
+            animation: pop 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        @keyframes pop {
+            from { transform: scale(0.4) rotate(var(--tilt, 0deg)); opacity: 0; }
+            to { transform: scale(1) rotate(var(--tilt, 0deg)); opacity: 1; }
+        }
+
+        .ad { transform: rotate(var(--tilt, 0deg)); }
+
+        .ad .tag {
+            position: absolute;
+            top: 6px;
+            left: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            background: rgba(0,0,0,0.15);
+        }
+
+        .ad .x {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            font-size: 14px;
+            line-height: 22px;
+            text-align: center;
+        }
+
+        .ad h3 { font-size: 22px; font-weight: 900; line-height: 1.1; letter-spacing: -0.5px; }
+        .ad p { font-size: 14px; line-height: 1.3; opacity: 0.9; }
+        .ad .cta { align-self: flex-start; padding: 8px 16px; font-weight: 800; border-radius: 4px; }
+
+        .ad.small h3 { font-size: 17px; }
+        .ad.small p { display: none; }
+
+        .skin-0 { background: #ffd400; color: #111; border: 4px dashed #e5242b; }
+        .skin-0 .cta { background: #e5242b; color: #fff; }
+        .skin-1 { background: #1e5bff; color: #fff; }
+        .skin-1 .cta { background: #fff; color: #1e5bff; }
+        .skin-2 { background: #111; color: var(--acid-lime); border: 3px solid var(--acid-lime); }
+        .skin-2 .cta { background: var(--acid-lime); color: #111; }
+        .skin-3 { background: #ff4fa3; color: #fff; }
+        .skin-3 .cta { background: #fff200; color: #111; }
+        .skin-4 { background: #fff; color: #111; border: 5px solid #00c853; }
+        .skin-4 .cta { background: #00c853; color: #fff; }
+        .skin-5 { background: #7b2ff7; color: #fff; }
+        .skin-5 .cta { background: #ffd400; color: #111; }
+
+        /* THE END */
+        .finale {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: rgba(0,0,0,0.55);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s, visibility 0s 0.4s;
+        }
+
+        .finale.show { opacity: 1; visibility: visible; transition: opacity 0.4s; }
+
+        .give-up {
+            max-width: 560px;
+            padding: 24px 32px;
+            background: var(--acid-lime);
+            color: #000;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.25;
+            letter-spacing: -0.3px;
+            text-align: center;
+            text-wrap: balance;
+            box-shadow: 8px 8px 0 var(--deep-clay);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .give-up:hover { transform: translate(-1px, -1px); box-shadow: 9px 9px 0 var(--deep-clay); }
+        .give-up:active { transform: translate(3px, 3px); box-shadow: 4px 4px 0 var(--deep-clay); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .doom-bar, .finale, .give-up { transition: none; }
+            .doom-bar.urgent { animation: none; }
+            .ad { animation: none; }
+        }
+
+        @media (max-width: 1100px) {
+            .layout { grid-template-columns: minmax(0, 640px) 280px; }
+            .nav { display: none; }
+        }
+
+        @media (max-width: 760px) {
+            .layout { grid-template-columns: minmax(0, 1fr); padding: 12px 8px 80px; }
+            .side, .search { display: none; }
+            .post-media { height: 200px; font-size: 72px; }
+            .doom-label { display: none; }
+            .doom-time { font-size: 24px; }
+            .ad h3 { font-size: 18px; }
+            .give-up { font-size: 19px; padding: 20px 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="viewport" id="viewport">
+        <header class="forum-bar">
+            <a href="index.html" class="back-link">&larr; Back</a>
+            <div class="logo">
+                <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+                    <circle cx="16" cy="16" r="16" fill="#ff4500"/>
+                    <path d="M9 12h14M9 16h14M9 20h9" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+                </svg>
+                scrollit
+            </div>
+            <div class="search">
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+                Search scrollit
+            </div>
+            <div class="me" aria-hidden="true"></div>
+        </header>
+
+        <div class="layout">
+            <nav class="nav" aria-label="Feeds">
+                <a href="#" class="active"><span class="dot" style="background:#ff4500"></span>Home</a>
+                <a href="#"><span class="dot" style="background:#0079d3"></span>Popular</a>
+                <a href="#"><span class="dot" style="background:#46d160"></span>All</a>
+                <h4>Communities</h4>
+                <a href="#"><span class="dot" style="background:#ffb000"></span>s/todayilearned</a>
+                <a href="#"><span class="dot" style="background:#7193ff"></span>s/aww</a>
+                <a href="#"><span class="dot" style="background:#ff585b"></span>s/breadit</a>
+                <a href="#"><span class="dot" style="background:#0dd3bb"></span>s/houseplants</a>
+                <a href="#"><span class="dot" style="background:#94e044"></span>s/showerthoughts</a>
+            </nav>
+
+            <main class="feed" id="feed"></main>
+
+            <aside class="side">
+                <div class="side-card">
+                    <div class="banner"></div>
+                    <div class="inner">
+                        <h3>Home</h3>
+                        <p>Your personal front page. Come here to check in with your favorite communities.</p>
+                    </div>
+                </div>
+                <div class="side-card">
+                    <div class="inner">
+                        <h3>Trending communities</h3>
+                        <ul>
+                            <li><span class="dot" style="background:#ff585b"></span>s/breadit</li>
+                            <li><span class="dot" style="background:#0dd3bb"></span>s/houseplants</li>
+                            <li><span class="dot" style="background:#ffb000"></span>s/todayilearned</li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div class="doom-bar" id="doom-bar" role="timer" aria-live="off">
+        <span class="doom-brand">
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 3h2v3h-2zM17.7 5l1.4 1.4-2.1 2.1-1.4-1.4zM12 8a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm-3 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>
+            Ad-pocalypse
+        </span>
+        <span class="doom-label">Screen time left today</span>
+        <span class="doom-time" id="doom-time">0:20</span>
+    </div>
+
+    <div class="ad-layer" id="ad-layer" aria-hidden="true"></div>
+
+    <div class="finale" id="finale">
+        <button class="give-up" id="give-up">I'm not addicted to the internet. And I'm going to close this tab to prove it.</button>
+    </div>
+
+    <script>
+        if (window.self !== window.top) document.documentElement.classList.add('framed');
+
+        const BROWSE_MS = 3500;       // scrolling before the countdown shows up
+        const COUNTDOWN = 20;         // seconds on the clock
+        const ADS_FROM = 10;          // ads start with this many seconds left
+        const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        /* THE FEED */
+        const POSTS = [
+            { sub: 'todayilearned', user: 'quietfacts', age: '4h', votes: '24.1k', comments: '1.2k', title: 'TIL octopuses have three hearts, and two of them stop beating when they swim', media: ['🐙', '#d7ecff'] },
+            { sub: 'aww', user: 'loafmode', age: '2h', votes: '18.7k', comments: '403', title: 'She has decided the keyboard is her bed now. I work here now, apparently', media: ['🐈', '#ffe9d6'] },
+            { sub: 'showerthoughts', user: 'thinkingwet', age: '6h', votes: '9.3k', comments: '880', title: 'Saying "I’ll just check one thing" is the most expensive sentence in the English language' },
+            { sub: 'breadit', user: 'crumbshot', age: '1h', votes: '3.4k', comments: '156', title: 'Sourdough attempt #14. I think we finally have an ear', media: ['🍞', '#f6e7c8'] },
+            { sub: 'houseplants', user: 'monsteramom', age: '5h', votes: '6.2k', comments: '298', title: 'Three years ago this was a single leaf in a jar', media: ['🪴', '#dff5e1'] },
+            { sub: 'AskForum', user: 'curious_cat_42', age: '3h', votes: '12.8k', comments: '6.1k', title: 'What’s a small thing that instantly makes your day better?', text: 'Mine is when the crosswalk turns green the second I get there.' },
+            { sub: 'todayilearned', user: 'quietfacts', age: '8h', votes: '31.5k', comments: '2.4k', title: 'TIL honey never spoils. Archaeologists have found 3,000-year-old honey that was still edible', media: ['🍯', '#fff1c2'] },
+            { sub: 'aww', user: 'goodboyfiles', age: '7h', votes: '22.0k', comments: '611', title: 'First day home. He has not stopped wagging since', media: ['🐕', '#e8f0ff'] },
+            { sub: 'showerthoughts', user: 'lateralthinker', age: '9h', votes: '15.6k', comments: '1.0k', title: 'Your phone has a screen-time report because even your phone is worried about you' },
+            { sub: 'mildlyinteresting', user: 'oddlyspecific', age: '10h', votes: '8.1k', comments: '342', title: 'This banana has a perfectly straight section in the middle', media: ['🍌', '#fff7cc'] },
+            { sub: 'breadit', user: 'yeastofeden', age: '11h', votes: '4.9k', comments: '210', title: 'Made focaccia for the first time and turned it into a garden', media: ['🌻', '#fdecc8'] },
+            { sub: 'AskForum', user: 'nightowl_99', age: '12h', votes: '20.3k', comments: '9.8k', title: 'What did you used to do with your free time before your phone?', text: 'Asking for a friend. The friend is me. It’s 2am.' }
+        ];
+
+        const upArrow = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4 4 13h5v7h6v-7h5z"/></svg>';
+        const downArrow = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20l8-9h-5V4H9v7H4z"/></svg>';
+
+        const feed = document.getElementById('feed');
+        function renderPost(p, i) {
+            const el = document.createElement('article');
+            el.className = 'post';
+            el.innerHTML = `
+                <div class="votes"><span class="${i % 3 === 0 ? 'upped' : ''}">${upArrow}</span><span>${p.votes}</span><span>${downArrow}</span></div>
+                <div class="post-body">
+                    <div class="post-meta"><strong>s/${p.sub}</strong><span>· Posted by u/${p.user} ${p.age} ago</span></div>
+                    <h3 class="post-title"></h3>
+                    ${p.text ? '<p class="post-text"></p>' : ''}
+                    ${p.media ? `<div class="post-media" style="background:${p.media[1]}" aria-hidden="true">${p.media[0]}</div>` : ''}
+                    <div class="post-actions"><span>💬 ${p.comments} comments</span><span>Share</span><span>Save</span></div>
+                </div>`;
+            el.querySelector('.post-title').textContent = p.title;
+            if (p.text) el.querySelector('.post-text').textContent = p.text;
+            feed.appendChild(el);
+        }
+        // Twice through, so the scrolling never hits the bottom
+        [...POSTS, ...POSTS].forEach(renderPost);
+
+        /* AUTO-SCROLL: someone idly browsing. Wheel or touch hands control to the viewer. */
+        const viewport = document.getElementById('viewport');
+        let autoScroll = !reduceMotion;
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(evt =>
+            viewport.addEventListener(evt, () => { autoScroll = false; }, { passive: true }));
+        const scrollTimer = setInterval(() => {
+            if (!autoScroll) return;
+            viewport.scrollTop += 1.4;
+            if (viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 2) clearInterval(scrollTimer);
+        }, 16);
+
+        /* COUNTDOWN */
+        const bar = document.getElementById('doom-bar');
+        const timeEl = document.getElementById('doom-time');
+        let left = COUNTDOWN;
+
+        function showTime() {
+            timeEl.textContent = '0:' + String(left).padStart(2, '0');
+            bar.setAttribute('aria-label', `Screen time left today: ${left} seconds`);
+        }
+
+        setTimeout(() => {
+            showTime();
+            bar.classList.add('show');
+            const tick = setInterval(() => {
+                left -= 1;
+                showTime();
+                if (left === ADS_FROM) { bar.classList.add('urgent'); startAds(); }
+                if (left <= 0) { clearInterval(tick); finale(); }
+            }, 1000);
+        }, BROWSE_MS);
+
+        /* ADS */
+        const ADS = [
+            { h: 'Doctors hate this one weird trick', p: 'It’s going outside.', c: 'Learn more' },
+            { h: 'Touch grass. Now in 4K.', p: 'Real grass. Actual size. No subscription.', c: 'Touch now' },
+            { h: 'Your thumb has scrolled 3 miles today', p: 'That’s a 5K by Friday.', c: 'Keep going' },
+            { h: 'Congratulations! You are the 1,000,000th scroller', p: 'Claim your prize: one (1) sunset.', c: 'Claim' },
+            { h: 'Download more time', p: 'Limited offer. Time sold separately.', c: 'Download' },
+            { h: 'Sunlight', p: 'Free. Unlimited. Right outside.', c: 'Get it' },
+            { h: 'Your plants miss you', p: 'They’re thirsty. Not like that.', c: 'Water them' },
+            { h: 'Call your mom', p: 'Sponsored by your mom.', c: 'Call' },
+            { h: 'Hot singles in your area', p: 'They are socks. Do your laundry.', c: 'See socks' },
+            { h: 'Local person closes laptop', p: 'Scientists baffled.', c: 'Read more' },
+            { h: 'Is your screen bright enough?', p: 'Try the sky. It’s very bright.', c: 'Look up' },
+            { h: 'You won’t believe what happens next', p: 'Nothing. Go to bed.', c: 'Sleep' },
+            { h: 'Free Wi-Fi detected nearby', p: 'It’s called a park.', c: 'Connect' },
+            { h: 'Stretch your legs', p: 'Both of them. Right now.', c: 'Stand up' }
+        ];
+
+        const layer = document.getElementById('ad-layer');
+        let adCount = 0;
+
+        function makeAd(x, y, w, h) {
+            const ad = ADS[adCount % ADS.length];
+            const el = document.createElement('div');
+            el.className = `ad skin-${adCount % 6}` + (w < 240 || h < 130 ? ' small' : '');
+            el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;--tilt:${(Math.random() * 6 - 3).toFixed(1)}deg`;
+            el.innerHTML = `<span class="tag">Ad</span><button class="x" aria-label="Close ad">×</button><h3></h3><p></p><button class="cta"></button>`;
+            el.querySelector('h3').textContent = ad.h;
+            el.querySelector('p').textContent = ad.p;
+            el.querySelector('.cta').textContent = ad.c;
+            // Closing an ad is not how this works
+            el.querySelector('.x').addEventListener('click', () => { el.remove(); randomAd(); randomAd(); });
+            el.querySelector('.cta').addEventListener('click', () => randomAd());
+            layer.appendChild(el);
+            adCount++;
+        }
+
+        const SIZES = [[300, 250], [320, 100], [180, 380], [728, 90], [250, 250], [400, 300]];
+
+        function randomAd() {
+            const W = innerWidth, H = innerHeight;
+            let [w, h] = SIZES[Math.floor(Math.random() * SIZES.length)];
+            w = Math.min(w, W - 16);
+            h = Math.min(h, H - 16);
+            makeAd(Math.random() * (W - w), Math.random() * (H - h), w, h);
+        }
+
+        let adTimer;
+        function startAds() {
+            let delay = 900;
+            const next = () => {
+                randomAd();
+                // Speeds up from roughly one a second to a flood
+                delay = Math.max(90, delay * 0.82);
+                if (left > 1) adTimer = setTimeout(next, delay);
+            };
+            next();
+        }
+
+        // Last second: tile the screen so nothing shows through
+        function coverScreen() {
+            const W = innerWidth, H = innerHeight;
+            const cols = Math.ceil(W / 280), rows = Math.ceil(H / 220);
+            const cw = W / cols, ch = H / rows;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    makeAd(c * cw - 12, r * ch - 12, cw + 24, ch + 24);
+                }
+            }
+        }
+
+        function finale() {
+            clearTimeout(adTimer);
+            coverScreen();
+            timeEl.textContent = '0:00';
+            setTimeout(() => {
+                document.getElementById('finale').classList.add('show');
+                document.getElementById('give-up').focus();
+            }, 600);
+        }
+
+        // In the homepage modal this closes the modal; opened directly, it heads home
+        document.getElementById('give-up').addEventListener('click', () => {
+            if (document.documentElement.classList.contains('framed')) {
+                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+            } else {
+                location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
