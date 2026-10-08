@@ -248,6 +248,8 @@
             display: grid;
             grid-template-columns: 56px repeat(7, 1fr);
             position: relative;
+            /* Room for the last hour's label, which sits on the bottom line */
+            padding-bottom: 12px;
         }
 
         .gutter { position: relative; }
@@ -262,6 +264,7 @@
         .day-col {
             position: relative;
             border-left: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
             background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px);
             background-size: 100% var(--hour);
         }
@@ -272,7 +275,8 @@
             right: 0;
             height: 2px;
             background: var(--now);
-            z-index: 2;
+            /* Under the meetings, so it never reads as a line through their text */
+            z-index: 0;
             pointer-events: none;
         }
 
@@ -312,7 +316,6 @@
 
         .event .title {
             font-weight: 600;
-            overflow-wrap: anywhere;
             display: -webkit-box;
             -webkit-box-orient: vertical;
             overflow: hidden;
@@ -325,6 +328,10 @@
         .event.one-line { display: block; padding-top: 3px; padding-bottom: 0; white-space: nowrap; text-overflow: ellipsis; }
         .event.one-line .title, .event.one-line .time { display: inline; }
         .event.one-line .time { opacity: 0.9; }
+
+        /* Too narrow to wrap words: one title line ending in an ellipsis */
+        .event.narrow { padding-left: 4px; padding-right: 4px; }
+        .event.narrow .title { display: block; white-space: nowrap; text-overflow: ellipsis; }
 
         .event.mine { background: #fff; color: #0b6fa4; border: 1px solid var(--mine); border-left-width: 4px; padding-left: 5px; }
 
@@ -604,7 +611,7 @@
 
             const hours = END_HOUR - START_HOUR;
             let gutter = '<div class="gutter" style="height:calc(var(--hour) * ' + hours + ')">';
-            for (let h = START_HOUR + 1; h < END_HOUR; h++) {
+            for (let h = START_HOUR + 1; h <= END_HOUR; h++) {
                 gutter += `<span style="top:calc(var(--hour) * ${h - START_HOUR})">${fmtTime(h)}</span>`;
             }
             gutter += '</div>';
@@ -671,8 +678,10 @@
                     // Whole lines that fit in this event's height
                     const lines = Math.floor((hourPx() * (e.end - e.start) - 1 - PAD_Y) / LINE);
                     const oneLine = lines < 2;
+                    // Side-by-side meetings in a narrow day can't wrap whole words
+                    const narrow = col.clientWidth * e._width / 100 < 80;
                     const el = document.createElement('button');
-                    el.className = 'event' + (e.mine ? ' mine' : '') + (oneLine ? ' one-line' : '') + (e.id === newId ? ' new' : '');
+                    el.className = 'event' + (e.mine ? ' mine' : '') + (oneLine ? ' one-line' : '') + (narrow && !oneLine ? ' narrow' : '') + (e.id === newId ? ' new' : '');
                     el.dataset.id = e.id;
                     el.style.top = `calc(var(--hour) * ${e.start - START_HOUR})`;
                     el.style.height = `calc(var(--hour) * ${e.end - e.start} - 1px)`;
@@ -686,7 +695,7 @@
                     const titleEl = el.querySelector('.title');
                     titleEl.textContent = e.title;
                     // The title gets every line but the last, which holds the time
-                    if (!oneLine) titleEl.style.webkitLineClamp = lines - 1;
+                    if (!oneLine && !narrow) titleEl.style.webkitLineClamp = lines - 1;
                     el.setAttribute('aria-label', `${e.title}, ${DAY_NAMES[d]} ${fmtRange(e)}`);
                     el.addEventListener('click', ev => { ev.stopPropagation(); openPopover(e, el); });
                     col.appendChild(el);
@@ -912,9 +921,10 @@
 
         // Hours fill whatever height the page has, within readable limits
         function fitHours() {
-            const avail = $('cal-scroll').clientHeight - $('day-heads').offsetHeight - 1;
-            const h = Math.max(36, Math.min(60, Math.floor(avail / (END_HOUR - START_HOUR))));
-            document.documentElement.style.setProperty('--hour', h + 'px');
+            // Everything below the day headers, less the room for the last label
+            const avail = $('cal-scroll').clientHeight - $('day-heads').offsetHeight - 12;
+            const h = Math.max(36, Math.min(60, avail / (END_HOUR - START_HOUR)));
+            document.documentElement.style.setProperty('--hour', h.toFixed(2) + 'px');
         }
 
         let fitTimer;
