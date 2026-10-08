@@ -505,12 +505,11 @@
             color: var(--paper);
         }
 
-        .footer-fine { margin-top: 80px; font-size: 0.75rem; font-weight: 500; color: rgba(244, 241, 232, 0.55); }
+        .footer-fine { margin-top: 40px; font-size: 0.75rem; font-weight: 500; color: rgba(244, 241, 232, 0.55); }
 
         /* The lens draws these; the real text stays for reading and selecting */
         html.lens-on .footer-big, html.lens-on .footer-fine { color: transparent; }
 
-        .social-link { color: var(--acid-lime); text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; margin-right: 30px; }
 
         /* PROJECT MODAL */
         #project-modal {
@@ -663,7 +662,7 @@
     <div id="cursor-follower" data-bp-ignore></div>
     <div id="cursor-coords" aria-hidden="true" data-bp-ignore></div>
 
-    <button id="prank-toggle" data-bp-ignore>INITIALIZE_OVERRIDE.exe</button>
+    <button id="prank-toggle" data-bp-ignore>initialize_override.exe</button>
 
     <header>
         <div class="hero-measure">
@@ -677,54 +676,54 @@
         <section class="work-section">
             <div class="work-grid">
                 <a href="broccoli.html" class="project-card">
-                    <span class="project-meta">PROJECT_01</span>
+                    <span class="project-meta">project_01</span>
                     <h3 class="project-title">Broccoli Facts</h3>
                     <p class="project-desc">A deeply unnecessary subscription service for broccoli facts. Now featuring an AI that will absolutely talk to you about broccoli longer than you’d like.</p>
-                    <span class="project-link">GET_FACTS</span>
+                    <span class="project-link">get_facts</span>
                 </a>
                 <a href="meeting-overlord.html" class="project-card">
-                    <span class="project-meta">PROJECT_02</span>
+                    <span class="project-meta">project_02</span>
                     <h3 class="project-title">Meeting Overlord</h3>
                     <p class="project-desc">An add-on that schedules meetings you didn’t ask for, at times you won’t enjoy. You know you needed even more meetings.</p>
-                    <span class="project-link">SCHEDULE_CHAOS</span>
+                    <span class="project-link">schedule_chaos</span>
                 </a>
                 <!-- <a href="bilbo-faramir.html" class="project-card">
-                    <span class="project-meta">PROJECT_07</span>
+                    <span class="project-meta">project_07</span>
                     <h3 class="project-title">Bilbo-Faramir Scale</h3>
                     <p class="project-desc">The definitive, highly scientific, and completely arbitrary scale for measuring the "hobbit-ness" of a situation versus its "steward-of-gondor-ness".</p>
-                    <span class="project-link">MEASURE_SCALE</span>
+                    <span class="project-link">measure_scale</span>
                 </a> -->
                 <a href="ad-pocalypse.html" class="project-card">
-                    <span class="project-meta">PROJECT_03</span>
+                    <span class="project-meta">project_03</span>
                     <h3 class="project-title">Ad-pocalypse</h3>
                     <p class="project-desc">A browser add-on that weaponizes ads and interruptions to force you off the screen after a set time.</p>
-                    <span class="project-link">FORCE_QUIT</span>
+                    <span class="project-link">force_quit</span>
                 </a>
                 <a href="#" class="project-card unbuilt">
-                    <span class="project-meta">PROJECT_04</span>
+                    <span class="project-meta">project_04</span>
                     <h3 class="project-title">Reality Alarm</h3>
                     <p class="project-desc">An alarm clock that uses psychological discomfort—like playing your own voice or reading your bank balance—to get you out of bed.</p>
-                    <span class="project-link">WAKE_UP</span>
+                    <span class="project-link">wake_up</span>
                 </a>
                 <!--
                 <a href="#" class="project-card">
-                    <span class="project-meta">PROJECT_05</span>
+                    <span class="project-meta">project_05</span>
                     <h3 class="project-title">Joy-Based Flavor Mapper</h3>
                     <p class="project-desc">A nutrition app that ignores calories and focuses entirely on your sensory experience to help you discover food you actually love.</p>
-                    <span class="project-link">MAP_FLAVOR</span>
+                    <span class="project-link">map_flavor</span>
                 </a>
                 -->
                 <a href="bilbo-faramir.html" class="project-card">
-                    <span class="project-meta">PROJECT_05</span>
+                    <span class="project-meta">project_05</span>
                     <h3 class="project-title">The Bilbo-Faramir Scale</h3>
                     <p class="project-desc">The definitive, highly scientific, and completely arbitrary scale for measuring the "hobbit-ness" of a situation versus its "steward-of-gondor-ness".</p>
-                    <span class="project-link">MEASURE_SCALE</span>
+                    <span class="project-link">measure_scale</span>
                 </a>
                 <a href="#" class="project-card unbuilt">
-                    <span class="project-meta">PROJECT_06</span>
+                    <span class="project-meta">project_06</span>
                     <h3 class="project-title">Plant-Whisperer AI</h3>
                     <p class="project-desc">An app that gives your houseplants a voice and a personality based on their species, health, and physical characteristics.</p>
-                    <span class="project-link">TALK_TO_PLANTS</span>
+                    <span class="project-link">talk_to_plants</span>
                 </a>
             </div>
         </section>
@@ -735,9 +734,9 @@
             <div class="notes">
                 <span class="notes-tab" aria-hidden="true">Field notes</span>
                 <p class="quote-text">"It really was annoying. 10/10"</p>
-                <p class="quote-attribution">— DOUG, FIRST ADOPTER</p>
+                <p class="quote-attribution">— Doug, first adopter</p>
                 <p class="quote-text">"It started funny. Now it’s personal."</p>
-                <p class="quote-attribution">— ALSO DOUG</p>
+                <p class="quote-attribution">— Also Doug</p>
             </div>
         </div>
     </section>
@@ -746,12 +745,7 @@
         <canvas id="lens-canvas" aria-hidden="true"></canvas>
         <div class="container">
             <h2 class="footer-big" id="footer-big">Smart ideas, slightly sideways.</h2>
-            <div class="footer-links">
-                <a href="#" class="social-link">GITHUB</a>
-                <a href="#" class="social-link">LINKEDIN</a>
-                <a href="#" class="social-link">EMAIL</a>
-            </div>
-            <p class="footer-fine" id="footer-fine">&copy; 2026 IRREVERENT ENGINEERING. THOUGHTFUL WORK. DUBIOUS APPLICATIONS.</p>
+            <p class="footer-fine" id="footer-fine">&copy; 2026 Irreverent Engineering. Thoughtful work. Dubious applications.</p>
         </div>
     </footer>
 
@@ -1240,7 +1234,7 @@
         toggle.addEventListener('click', () => {
             document.body.classList.toggle('prank-mode');
             isPrank = document.body.classList.contains('prank-mode');
-            toggle.innerText = isPrank ? 'RESTORE_SANITY.sh' : 'INITIALIZE_OVERRIDE.exe';
+            toggle.innerText = isPrank ? 'restore_sanity.sh' : 'initialize_override.exe';
             if (isPrank) explode(); else reassemble();
         });
 
