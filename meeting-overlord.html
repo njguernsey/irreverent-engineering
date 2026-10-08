@@ -29,12 +29,12 @@
             color: var(--ink);
         }
 
-        /* The calendar fills the top of the page, leaving the pitch peeking in below */
+        /* The calendar fills the top of the page at its full height, so it never
+           scrolls inside itself; the script sets the exact height once it loads */
         .calendar-frame {
             display: block;
             width: 100%;
-            height: min(816px, calc(100vh - 120px));
-            min-height: 520px;
+            height: 820px;
             border: 0;
             background: #fff;
         }
@@ -171,9 +171,24 @@
         // Esc inside the calendar reaches this page, so the homepage modal can close.
         // The calendar stops Esc itself while one of its event cards is open.
         const frame = document.getElementById('calendar');
+
+        // Exactly as tall as the calendar's header plus its whole day
+        function fitCalendar() {
+            const cal = frame.contentDocument;
+            const bar = cal && cal.querySelector('.topbar');
+            const week = cal && cal.querySelector('.week');
+            if (bar && week) frame.style.height = (bar.offsetHeight + week.offsetHeight) + 'px';
+        }
+        addEventListener('resize', fitCalendar);
+
         frame.addEventListener('load', () => {
             const cal = frame.contentDocument;
             if (!cal) return;
+            fitCalendar();
+            if (cal.fonts) cal.fonts.ready.then(fitCalendar);
+            // Refit whenever the calendar's layout settles at a new height (fonts, resizes)
+            const week = cal.querySelector('.week');
+            if (week && frame.contentWindow.ResizeObserver) new frame.contentWindow.ResizeObserver(fitCalendar).observe(week);
             cal.addEventListener('keydown', e => {
                 if (e.key === 'Escape') document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
             });
