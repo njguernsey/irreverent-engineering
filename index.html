@@ -1067,6 +1067,54 @@
             });
         });
 
+        /* ---------- PROJECT CARDS: each one scrolls at a slightly different speed ----------
+           While the page scrolls, every card lags behind or pulls ahead by a set amount,
+           scaled by how fast you're scrolling. When scrolling stops, a spring brings each
+           card back to exactly its slot. Uses the translate property, which the hover
+           tilt (transform) doesn't touch. */
+        const floatCards = [...document.querySelectorAll('.project-card')].map((el, i) => ({
+            el,
+            // Positive lags behind the scroll, negative pulls ahead
+            rate: [0.45, -0.3, 0.2, 0.55, -0.4, 0.3][i % 6],
+            y: 0,
+            vy: 0,
+        }));
+        let lastScroll = scrollY, lastKnownScroll = scrollY, scrollSpeed = 0, cardsMoving = false;
+
+        function cardFrame() {
+            const delta = scrollY - lastScroll;
+            lastScroll = scrollY;
+            scrollSpeed = scrollSpeed * 0.8 + delta * 0.2;
+            let settled = Math.abs(scrollSpeed) < 0.05;
+            floatCards.forEach(c => {
+                const target = isPrank ? 0 : Math.max(-28, Math.min(28, scrollSpeed * c.rate));
+                c.vy = (c.vy + (target - c.y) * 0.09) * 0.78;
+                c.y += c.vy;
+                if (Math.abs(c.y) > 0.05 || Math.abs(c.vy) > 0.05) settled = false;
+                c.el.style.translate = `0 ${c.y.toFixed(2)}px`;
+            });
+            if (settled) {
+                // Back in their slots: clear the offset completely
+                floatCards.forEach(c => { c.y = c.vy = 0; c.el.style.translate = ''; });
+                scrollSpeed = 0;
+                cardsMoving = false;
+                return;
+            }
+            requestAnimationFrame(cardFrame);
+        }
+
+        if (!reduceMotion) {
+            addEventListener('scroll', () => {
+                if (!cardsMoving && !isPrank) {
+                    // Measure from where this scroll began
+                    cardsMoving = true;
+                    lastScroll = lastKnownScroll;
+                    requestAnimationFrame(cardFrame);
+                }
+                lastKnownScroll = scrollY;
+            }, { passive: true });
+        }
+
         // Cards without a page yet stay put
         document.querySelectorAll('.project-card[href="#"]').forEach(card =>
             card.addEventListener('click', e => e.preventDefault()));
