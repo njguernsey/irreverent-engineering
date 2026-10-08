@@ -14,9 +14,9 @@
         html, body, #webgl-canvas, #cursor-follower, * { cursor: none !important; }
 
         :root {
-            --sheet: #2149d9;
-            --sheet-deep: #0b1a4a;
-            --night: #081236;
+            --sheet: #1c2540;
+            --sheet-deep: #0e1428;
+            --night: #080c1a;
             --ink: #fff;
             --ink-soft: rgba(255, 255, 255, 0.72);
             --line: rgba(255, 255, 255, 0.6);
@@ -28,7 +28,7 @@
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
             --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
             /* Blueprint load-in */
-            --bp-blue: #2e5ff6;
+            --bp-blue: #33467a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -71,7 +71,7 @@
             pointer-events: none;
             padding: 3px 7px;
             border-radius: 4px;
-            background: rgba(8, 18, 54, 0.92);
+            background: rgba(8, 12, 26, 0.92);
             color: var(--ink);
             font-size: 11px;
             font-weight: 500;
@@ -89,7 +89,7 @@
             position: fixed;
             z-index: 9000;
             pointer-events: none;
-            background-color: rgba(11, 26, 74, 0.55);
+            background-color: rgba(14, 20, 40, 0.6);
             color: var(--ink-soft);
             font-size: 9px;
             font-weight: 500;
@@ -275,7 +275,7 @@
             padding: 72px 52px 60px;
             color: var(--ink);
             text-decoration: none;
-            background: rgba(11, 26, 74, 0.38);
+            background: rgba(14, 20, 40, 0.45);
             border-right: 1px solid var(--line);
             border-bottom: 1px solid var(--line);
             transform: translate(var(--ex, 0px), var(--ey, 0px)) rotate(var(--er, 0deg)) perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
@@ -393,7 +393,7 @@
 
         .project-card:hover .title-dim span { opacity: 1; transition: opacity 0.25s 0.45s; }
         .project-desc { font-size: 1rem; line-height: 1.5; color: var(--ink-soft); margin-bottom: 36px; max-width: 360px; transition: color 0.35s; }
-        .project-card:hover .project-desc { color: rgba(11, 26, 74, 0.78); }
+        .project-card:hover .project-desc { color: rgba(14, 20, 40, 0.78); }
         .project-card.unbuilt:hover .project-desc { color: var(--ink-soft); }
 
         .project-link {
@@ -649,7 +649,7 @@
         }
     </style>
 
-    <script src="blueprint-load.js" data-once data-blue="#2e5ff6"></script>
+    <script src="blueprint-load.js" data-once data-blue="#33467a"></script>
 </head>
 <body>
     <canvas id="webgl-canvas" aria-hidden="true" data-bp-ignore></canvas>
@@ -833,13 +833,23 @@
                     float minor = max(gridLine(g.x, 24.0, 1.0), gridLine(g.y, 24.0, 1.0));
                     float major = max(gridLine(g.x, 120.0, 1.4), gridLine(g.y, 120.0, 1.4));
 
-                    vec3 sheet = vec3(0.129, 0.286, 0.851);
-                    // Cyanotype mottling and paper grain
+                    // Midnight navy: somewhere between a blueprint and a star chart
+                    vec3 sheet = vec3(0.110, 0.145, 0.251);
+                    // Mottling with a faint violet nebula, and paper grain
                     float mott = sin(g.x * 0.004 + 1.3) * sin(g.y * 0.003 + 0.7) + sin((g.x + g.y) * 0.0021);
-                    vec3 col = sheet * (1.0 + mott * 0.035);
-                    col += (hash(floor(q) + floor(u_time * 8.0)) - 0.5) * 0.025;
+                    vec3 col = sheet * (1.0 + mott * 0.05);
+                    col += vec3(0.05, 0.02, 0.09) * smoothstep(0.3, 1.6, mott);
+                    col += (hash(floor(q) + floor(u_time * 8.0)) - 0.5) * 0.02;
 
-                    col = mix(col, vec3(1.0), minor * 0.10 + major * 0.22);
+                    // Stars on a deeper layer: they scroll at half the page's speed
+                    vec2 sp = p + vec2(0.0, u_scroll * 0.625);
+                    vec2 cell = floor(sp / 3.0);
+                    float sh = hash(cell);
+                    float star = step(0.9982, sh) * step(length(fract(sp / 3.0) - 0.5), 0.3);
+                    float twinkle = 0.55 + 0.45 * sin(u_time * (0.8 + fract(sh * 97.0) * 2.5) + sh * 60.0) * u_motion;
+                    col += vec3(0.85, 0.9, 1.0) * star * twinkle * 0.8;
+
+                    col = mix(col, vec3(1.0), minor * 0.06 + major * 0.14);
 
                     // A soft glow where the cursor presses in
                     col += vec3(0.77, 0.98, 0.16) * smoothstep(180.0, 0.0, r) * 0.05;
@@ -1503,7 +1513,7 @@ precision highp float; in vec2 vUv, vL, vR, vT, vB; out vec4 o;`;
                 const origin = footer.getBoundingClientRect();
                 const scale = w / origin.width;
                 const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
-                x.fillStyle = '#081236'; x.fillRect(0,0,w,h);
+                x.fillStyle = '#080c1a'; x.fillRect(0,0,w,h);
                 // Faint drawing grid, so the lens has lines to bend
                 x.strokeStyle = 'rgba(255,255,255,0.06)'; x.lineWidth = 1;
                 const step = 24 * scale;
