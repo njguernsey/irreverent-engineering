@@ -279,10 +279,6 @@
             border-bottom: 1px solid var(--line);
             transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
             transition: background-color 0.35s, color 0.35s, transform 0.5s var(--spring), box-shadow 0.35s;
-            /* matrix-text colours while the title scrambles on the lime card */
-            --mx-color: var(--sheet);
-            --mx-hot: var(--sheet-deep);
-            --mx-fringe: var(--deep-clay);
         }
 
         /* Crop marks in two corners */
@@ -321,7 +317,80 @@
         .project-card:hover .project-meta { color: var(--sheet); }
         .project-card.unbuilt:hover .project-meta { color: var(--deep-clay); }
 
-        .project-title { font-size: 2.4rem; font-weight: 800; margin-bottom: 18px; letter-spacing: -0.03em; line-height: 1.05; }
+        .project-title {
+            position: relative;
+            align-self: flex-start;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 26px;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+        }
+
+        /* At rest the title is set straight. On hover a spring wave rolls through
+           the letters and leaves each one a little askew; on leave they snap back together. */
+        .project-title .word { white-space: nowrap; }
+        .project-title .ch {
+            display: inline-block;
+            transition: transform 0.25s ease-out;
+        }
+
+        .project-card:hover .project-title .ch {
+            transform: translateY(var(--hy, 0)) rotate(var(--hr, 0deg));
+            transition: transform 0.55s var(--spring) calc(var(--i, 0) * 28ms);
+        }
+
+        /* Dimension line that draws in under the title on hover */
+        .title-dim {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -14px;
+            height: 1px;
+            background: currentColor;
+            opacity: 0.7;
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 0.2s ease-out;
+            pointer-events: none;
+        }
+
+        .title-dim::before, .title-dim::after {
+            content: "";
+            position: absolute;
+            top: -5px;
+            width: 1px;
+            height: 11px;
+            background: currentColor;
+        }
+
+        .title-dim::before { left: 0; }
+        .title-dim::after { right: 0; }
+
+        .title-dim span {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translate(-50%, -50%);
+            padding: 0 6px;
+            background: var(--acid-lime);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .project-card.unbuilt .title-dim span { background: var(--sheet-deep); }
+
+        .project-card:hover .title-dim {
+            transform: scaleX(1);
+            transition: transform 0.5s var(--ease-out) 0.12s;
+        }
+
+        .project-card:hover .title-dim span { opacity: 1; transition: opacity 0.25s 0.45s; }
         .project-desc { font-size: 1rem; line-height: 1.5; color: var(--ink-soft); margin-bottom: 36px; max-width: 360px; transition: color 0.35s; }
         .project-card:hover .project-desc { color: rgba(11, 26, 74, 0.78); }
         .project-card.unbuilt:hover .project-desc { color: var(--ink-soft); }
@@ -533,8 +602,9 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .hero-title .ch, .hero-tagline, .project-card { transition: none; }
+            .hero-title .ch, .hero-tagline, .project-card, .title-dim, .title-dim span { transition: none; }
             .hero-title .ch.hop { animation: none; }
+            .project-card:hover .project-title .ch { transform: none; transition: none; }
         }
 
         @media (max-width: 768px) {
@@ -576,13 +646,13 @@
             <div class="work-grid">
                 <a href="broccoli.html" class="project-card">
                     <span class="project-meta">PROJECT_01</span>
-                    <h3 class="project-title" data-matrix="hover">Broccoli Facts</h3>
+                    <h3 class="project-title">Broccoli Facts</h3>
                     <p class="project-desc">A deeply unnecessary subscription service for broccoli facts. Now featuring an AI that will absolutely talk to you about broccoli longer than you’d like.</p>
                     <span class="project-link">GET_FACTS</span>
                 </a>
                 <a href="meeting-overlord.html" class="project-card">
                     <span class="project-meta">PROJECT_02</span>
-                    <h3 class="project-title" data-matrix="hover">Meeting Overlord</h3>
+                    <h3 class="project-title">Meeting Overlord</h3>
                     <p class="project-desc">An add-on that schedules meetings you didn’t ask for, at times you won’t enjoy. You know you needed even more meetings.</p>
                     <span class="project-link">SCHEDULE_CHAOS</span>
                 </a>
@@ -594,13 +664,13 @@
                 </a> -->
                 <a href="ad-pocalypse.html" class="project-card">
                     <span class="project-meta">PROJECT_03</span>
-                    <h3 class="project-title" data-matrix="hover">Ad-pocalypse</h3>
+                    <h3 class="project-title">Ad-pocalypse</h3>
                     <p class="project-desc">A browser add-on that weaponizes ads and interruptions to force you off the screen after a set time.</p>
                     <span class="project-link">FORCE_QUIT</span>
                 </a>
                 <a href="#" class="project-card unbuilt">
                     <span class="project-meta">PROJECT_04</span>
-                    <h3 class="project-title" data-matrix="hover">Reality Alarm</h3>
+                    <h3 class="project-title">Reality Alarm</h3>
                     <p class="project-desc">An alarm clock that uses psychological discomfort—like playing your own voice or reading your bank balance—to get you out of bed.</p>
                     <span class="project-link">WAKE_UP</span>
                 </a>
@@ -614,13 +684,13 @@
                 -->
                 <a href="bilbo-faramir.html" class="project-card">
                     <span class="project-meta">PROJECT_05</span>
-                    <h3 class="project-title" data-matrix="hover">The Bilbo-Faramir Scale</h3>
+                    <h3 class="project-title">The Bilbo-Faramir Scale</h3>
                     <p class="project-desc">The definitive, highly scientific, and completely arbitrary scale for measuring the "hobbit-ness" of a situation versus its "steward-of-gondor-ness".</p>
                     <span class="project-link">MEASURE_SCALE</span>
                 </a>
                 <a href="#" class="project-card unbuilt">
                     <span class="project-meta">PROJECT_06</span>
-                    <h3 class="project-title" data-matrix="hover">Plant-Whisperer AI</h3>
+                    <h3 class="project-title">Plant-Whisperer AI</h3>
                     <p class="project-desc">An app that gives your houseplants a voice and a personality based on their species, health, and physical characteristics.</p>
                     <span class="project-link">TALK_TO_PLANTS</span>
                 </a>
@@ -659,7 +729,6 @@
         </div>
     </div>
 
-    <script src="matrix-text.js"></script>
     <script>
         const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
         const cursor = document.getElementById('cursor-follower');
@@ -908,10 +977,40 @@
         addEventListener('resize', measureTitle);
         if (document.fonts) document.fonts.ready.then(measureTitle);
 
-        /* ---------- PROJECT CARDS: tilt toward the pointer, scramble the title ---------- */
+        /* ---------- PROJECT CARDS: tilt toward the pointer, loosen the title ---------- */
         document.querySelectorAll('.project-card').forEach(card => {
             const cardTitle = card.querySelector('.project-title');
-            card.addEventListener('mouseenter', () => { if (window.MatrixText) MatrixText.play(cardTitle); });
+            const text = cardTitle.textContent;
+            cardTitle.setAttribute('aria-label', text);
+            cardTitle.textContent = '';
+            // Words stay together so the title wraps as before; each letter gets a separate askew pose
+            let i = 0;
+            text.split(' ').forEach((word, w) => {
+                if (w) cardTitle.append(' ');
+                const wordEl = document.createElement('span');
+                wordEl.className = 'word';
+                wordEl.setAttribute('aria-hidden', 'true');
+                [...word].forEach(chr => {
+                    const ch = document.createElement('span');
+                    ch.className = 'ch';
+                    ch.textContent = chr;
+                    ch.style.setProperty('--i', i++);
+                    ch.style.setProperty('--hr', (Math.random() * 14 - 7).toFixed(1) + 'deg');
+                    ch.style.setProperty('--hy', (Math.random() * -0.14 + 0.02).toFixed(3) + 'em');
+                    wordEl.appendChild(ch);
+                });
+                cardTitle.appendChild(wordEl);
+            });
+
+            const dim = document.createElement('span');
+            dim.className = 'title-dim';
+            dim.setAttribute('aria-hidden', 'true');
+            dim.innerHTML = '<span></span>';
+            cardTitle.appendChild(dim);
+            card.addEventListener('mouseenter', () => {
+                dim.firstChild.textContent = Math.round(cardTitle.getBoundingClientRect().width) + ' px';
+            });
+
             if (reduceMotion) return;
             card.addEventListener('pointermove', e => {
                 const r = card.getBoundingClientRect();
