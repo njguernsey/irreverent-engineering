@@ -16,9 +16,6 @@
             --ink-soft: rgba(255, 255, 255, 0.6);
             --acid-lime: #c5fb29;
             --deep-clay: #b39ddb;
-            --bezel: #0b0b0d;
-            --aluminium: #c4c7cc;
-            --aluminium-dark: #9a9ea5;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -30,15 +27,21 @@
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--ink);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+        }
+
+        /* The calendar fills the top of the page, leaving the pitch peeking in below */
+        .calendar-frame {
+            display: block;
+            width: 100%;
+            height: min(816px, calc(100vh - 120px));
+            min-height: 520px;
+            border: 0;
+            background: #fff;
         }
 
         .back-link {
-            position: absolute;
-            top: 20px;
-            left: 24px;
+            display: inline-block;
+            margin-bottom: 32px;
             color: var(--acid-lime);
             text-decoration: none;
             font-weight: 700;
@@ -47,142 +50,9 @@
         html.framed .back-link { display: none; }
 
         .stage {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 64px;
-            max-width: 1280px;
-            width: 100%;
+            max-width: 1180px;
             margin: 0 auto;
-            padding: 64px 7% 72px;
-        }
-
-        /* LAPTOP */
-        .laptop { width: 100%; }
-
-        .lid {
-            background: var(--bezel);
-            border-radius: 18px 18px 0 0;
-            padding: 2.4% 2.4% 3.2%;
-            box-shadow: 0 0 0 1.5px #2a2b30;
-            position: relative;
-        }
-
-        /* Camera */
-        .lid::before {
-            content: "";
-            position: absolute;
-            top: 1.1%;
-            left: 50%;
-            width: 6px;
-            height: 6px;
-            margin-left: -3px;
-            border-radius: 50%;
-            background: #26272c;
-        }
-
-        .screen {
-            aspect-ratio: 16 / 10;
-            overflow: hidden;
-            background: #fff;
-            position: relative;
-        }
-
-        /* The browser window is laid out at 1280×800 and scaled to fit the screen */
-        .window {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 1280px;
-            height: 800px;
-            transform-origin: 0 0;
-            display: flex;
-            flex-direction: column;
-            background: #fff;
-        }
-
-        .toolbar {
-            height: 52px;
-            flex: none;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 0 18px;
-            background: #e9eaee;
-            border-bottom: 1px solid #d3d5da;
-            font-size: 15px;
-            color: #3c4043;
-        }
-
-        .lights { display: flex; gap: 9px; }
-        .lights span { width: 13px; height: 13px; border-radius: 50%; }
-        .lights span:nth-child(1) { background: #ff5f57; }
-        .lights span:nth-child(2) { background: #febc2e; }
-        .lights span:nth-child(3) { background: #28c840; }
-
-        .address {
-            flex: 1;
-            max-width: 720px;
-            margin: 0 auto;
-            height: 34px;
-            border-radius: 999px;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 0 16px;
-            color: #5f6368;
-        }
-
-        .ext {
-            position: relative;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            background: #f3e8fd;
-        }
-
-        .ext .badge {
-            position: absolute;
-            top: -3px;
-            right: -5px;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 4px;
-            border-radius: 999px;
-            background: #d50000;
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
-            line-height: 18px;
-            text-align: center;
-        }
-
-        .calendar-frame { flex: 1; width: 100%; border: 0; display: block; }
-
-        .base {
-            position: relative;
-            height: 0;
-            padding-bottom: 3.2%;
-            margin: 0 -7%;
-            background: var(--aluminium);
-            border-radius: 0 0 14px 14px / 0 0 60% 60%;
-            box-shadow: inset 0 2px 0 #e3e5e8, inset 0 -3px 0 var(--aluminium-dark);
-        }
-
-        /* Thumb notch for opening the lid */
-        .base::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 16%;
-            height: 38%;
-            transform: translateX(-50%);
-            background: var(--aluminium-dark);
-            border-radius: 0 0 10px 10px;
+            padding: 56px 56px 72px;
         }
 
         /* PITCH */
@@ -247,38 +117,17 @@
         }
 
         @media (max-width: 760px) {
-            .stage { gap: 40px; padding: 64px 24px 40px; }
-            .laptop { padding: 0 6%; }
+            .stage { padding: 40px 24px 48px; }
             .pitch { grid-template-columns: 1fr; }
             .pitch h2 { font-size: 2.2rem; }
         }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-link">&larr; Back</a>
+    <iframe class="calendar-frame" id="calendar" src="meeting-overlord-calendar.html" title="Meeting Overlord calendar"></iframe>
 
     <main class="stage">
-        <div class="laptop">
-            <div class="lid">
-                <div class="screen" id="screen">
-                    <div class="window" id="window">
-                        <div class="toolbar">
-                            <div class="lights" aria-hidden="true"><span></span><span></span><span></span></div>
-                            <div class="address">
-                                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zM9 6a3 3 0 0 1 6 0v2H9V6z"/></svg>
-                                calendar/week
-                            </div>
-                            <div class="ext" title="Meeting Overlord">
-                                <svg width="20" height="20" viewBox="0 0 40 40" aria-hidden="true"><path d="M7 32 L10 14 L16 23 L20 10 L24 23 L30 14 L33 32 Z" fill="#f6bf26" stroke="#8e24aa" stroke-width="2.5" stroke-linejoin="round"/></svg>
-                                <span class="badge" id="badge">25</span>
-                            </div>
-                        </div>
-                        <iframe class="calendar-frame" id="calendar" src="meeting-overlord-calendar.html" data-device="laptop" title="Meeting Overlord calendar"></iframe>
-                    </div>
-                </div>
-            </div>
-            <div class="base" aria-hidden="true"></div>
-        </div>
+        <a href="index.html" class="back-link">&larr; Back</a>
 
         <section class="pitch">
             <div class="pitch-head">
@@ -316,38 +165,18 @@
     <script>
         if (window.self !== window.top) document.documentElement.classList.add('framed');
 
-        // Scale the 1280-wide browser window to the laptop screen
-        const screenEl = document.getElementById('screen');
-        const win = document.getElementById('window');
-        function fit() {
-            const s = screenEl.clientWidth / 1280;
-            win.style.transform = `scale(${s})`;
-        }
-        fit();
-        window.addEventListener('resize', fit);
-        if ('ResizeObserver' in window) new ResizeObserver(fit).observe(screenEl);
-
         // The download link is for show
         document.getElementById('download').addEventListener('click', e => e.preventDefault());
 
+        // Esc inside the calendar reaches this page, so the homepage modal can close.
+        // The calendar stops Esc itself while one of its event cards is open.
         const frame = document.getElementById('calendar');
         frame.addEventListener('load', () => {
-            const cal = frame.contentWindow;
-            if (!cal || !cal.document) return;
-
-            // Esc inside the calendar reaches this page, so the homepage modal can close.
-            // The calendar stops Esc itself while one of its event cards is open.
-            cal.document.addEventListener('keydown', e => {
+            const cal = frame.contentDocument;
+            if (!cal) return;
+            cal.addEventListener('keydown', e => {
                 if (e.key === 'Escape') document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
             });
-
-            // Keep the add-on badge in step with the Overlord's meeting count
-            const badge = document.getElementById('badge');
-            const count = () => {
-                badge.textContent = cal.document.querySelectorAll('.event:not(.mine)').length;
-            };
-            count();
-            new cal.MutationObserver(count).observe(cal.document.getElementById('grid'), { childList: true, subtree: true });
         });
     </script>
 </body>

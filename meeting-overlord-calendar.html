@@ -53,10 +53,7 @@
 
         /* Inside the homepage modal, leave room for its close button */
         html.framed .topbar { padding-right: 76px; }
-        html.framed .back-link, html.in-device .back-link { display: none; }
-
-        /* Shorter hours on the promo laptop so the whole day fits its screen */
-        html.in-device { --hour: 42px; }
+        html.framed .back-link { display: none; }
 
         .back-link {
             color: var(--ink-soft);
@@ -472,10 +469,8 @@
     <div class="snackbar" id="snackbar" role="status" aria-live="polite"></div>
 
     <script>
-        // On the laptop screen of the promo page, or straight inside the homepage modal
-        const host = window.frameElement;
-        if (host && host.dataset.device) document.documentElement.classList.add('in-device');
-        else if (host) document.documentElement.classList.add('framed');
+        // Embedded in the Meeting Overlord page, at the top of the homepage modal
+        if (window.self !== window.top) document.documentElement.classList.add('framed');
 
         // The week of Sun Oct 4 – Sat Oct 10, 2026. Day 0 is Sunday; Tuesday is "today".
         const START_HOUR = 7, END_HOUR = 21, TODAY = 2;
