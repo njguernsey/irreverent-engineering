@@ -119,11 +119,11 @@
     <div class="stage" id="stage">
         <div class="bezel">
             <div class="screen">
-                <canvas id="game" width="480" height="320" tabindex="0" aria-label="Picklémon. Walk with the arrow keys, press Enter to talk, X for your pickles, or click."></canvas>
+                <canvas id="game" width="480" height="320" tabindex="0" aria-label="Picklémon. Walk with the arrow keys, press Enter to talk, X for the menu, or click."></canvas>
             </div>
         </div>
         <div class="below">
-            <p class="hint">Arrow keys to walk, Enter to talk, X for your pickles. Or click.</p>
+            <p class="hint">Arrow keys to walk, Enter to talk, X for the menu. Or click.</p>
             <button class="sound" id="sound" type="button" aria-pressed="true">&#9834; Music on</button>
         </div>
     </div>
@@ -722,7 +722,7 @@
                 }
                 if (p.ridges) s += 0.07 * Math.cos(across[i] * p.ridges * Math.PI);
                 let k = Math.max(0, Math.min(4, Math.floor(s * 5 + (BAYER[(y % 4) * 4 + (x % 4)] / 16 - 0.5) * 0.8)));
-                // Pale stripes running the length of the pickle, like the real thing
+                // Pale stripes along the length of the pickle, like the real thing
                 if (p.lines && Math.cos(across[i] * p.lines * Math.PI) > 0.75) k = Math.min(4, k + 1);
                 if (p.tex === 'knurl' && x % 3 === 0) k = Math.max(0, k - 1);
                 if (p.tex === 'bands' && y % 4 === 0) k = Math.max(0, k - 1);
@@ -1093,6 +1093,25 @@
         }).flatMap(([kind, n]) => Array(n).fill(kind));
         const movesOf = p => SPECIES[p.kind].moves;
 
+        // The Picklédex, in the order the originals come in
+        const DEX = ['dillbasaur', 'gherkinzard', 'brinetle', 'picklechu', 'pickleypuff', 'dillglett', 'cornichonite', 'brinegar', 'voltjar', 'mrbrine', 'gherkarp', 'dillto', 'snorelish'];
+        const DEX_INFO = {
+            dillbasaur: { cat: 'Seed Pickle', ht: "2' 4\"", wt: '6 jars', entry: 'The dill on its back grows taller in the sun. You can smell it from three delis away.' },
+            gherkinzard: { cat: 'Flame Pickle', ht: "5' 7\"", wt: '12 jars', entry: 'Breathes fire hot enough to grill a pickle. It is a pickle. It tries not to think about that.' },
+            brinetle: { cat: 'Lid Pickle', ht: "1' 8\"", wt: '4 jars', entry: 'Hides inside its lid when it gets scared. The lid is stuck, so it has been scared for years.' },
+            picklechu: { cat: 'Zap Pickle', ht: "1' 4\"", wt: '3 jars', entry: 'Brine carries a charge, so its cheeks spark whenever it is happy. It is always happy.' },
+            pickleypuff: { cat: 'Slice Pickle', ht: "1' 8\"", wt: '2 jars', entry: 'Sings to put its foes to sleep. It sings so badly that they leave instead.' },
+            dillglett: { cat: 'Mole Pickle', ht: "0' 8\"", wt: '1 jar', entry: 'Nobody has ever seen the rest of it. Experts agree that it is probably more pickle.' },
+            cornichonite: { cat: 'Rock Pickle', ht: "1' 4\"", wt: '9 jars', entry: 'Small, warty and very crunchy. People mistake it for a rock, and it takes that as a compliment.' },
+            brinegar: { cat: 'Shadow Pickle', ht: "4' 11\"", wt: '5 jars', entry: 'Lives at the back of the fridge. If a jar of pickles has gone missing, it was Brinegar.' },
+            voltjar: { cat: 'Jar Pickle', ht: "1' 8\"", wt: '1 jar', entry: 'Looks exactly like a pickle jar. Whoever opens it gets a shock and a face full of brine.' },
+            mrbrine: { cat: 'Mime Pickle', ht: "4' 3\"", wt: '7 jars', entry: 'Mimes so well that its invisible walls turn real. It has never said a word, and never needed to.' },
+            gherkarp: { cat: 'Spicy Pickle', ht: "2' 11\"", wt: '2 jars', entry: 'The spiciest pickle there is, and the least useful. Some say it turns into something amazing one day.' },
+            dillto: { cat: 'Melt Pickle', ht: "1' 0\"", wt: '1 jar', entry: 'It can turn into any pickle it likes. It always chooses a pickle.' },
+            snorelish: { cat: 'Sleep Pickle', ht: "6' 11\"", wt: '460 jars', entry: 'Sleeps 23 hours a day and spends the last hour eating relish. Do not wake it. You cannot wake it.' },
+        };
+        const pad3 = n => String(n).padStart(3, '0');
+
         function makePickle(kind, lvl) {
             const max = Math.round((20 + lvl * 2) * (SPECIES[kind].hp || 1));
             return { kind, name: SPECIES[kind].name, lvl, max, hp: max, shownHp: max };
@@ -1102,6 +1121,7 @@
         const team = [makePickle('dillbasaur', 12), makePickle('picklechu', 9), makePickle('brinetle', 10)];
         const brineBox = [];
         let player = team[0];
+        const dex = { seen: new Set(team.map(p => p.kind)), caught: new Set(team.map(p => p.kind)) };
 
         const bag = [
             { id: 'jar', name: 'Pickle Jar', count: 5, rate: 1 },
@@ -1115,8 +1135,9 @@
         const bagList = () => bag.filter(it => it.rate || it.count > 0);
 
         let scene = 'world';                // world | battle
-        let mode = 'busy';                  // walk | text | main | fight | bag | team | busy
+        let mode = 'busy';                  // walk | text | menu | dex | dexEntry | main | fight | bag | team | busy
         let teamMode = 'world';             // world | battle | forced
+        let dexAt = 0;                      // the entry open in the Picklédex
         let enemy = null;
         let cursor = 0;
         let queue = [], line = null, shown = 0, onDone = null, looseText = false;
@@ -1322,7 +1343,7 @@
         }
 
         function worldClick(p) {
-            if (hud && p.x >= hud.x && p.x <= hud.x + hud.w && p.y >= hud.y && p.y <= hud.y + hud.h) return openTeam('world');
+            if (hud && p.x >= hud.x && p.x <= hud.x + hud.w && p.y >= hud.y && p.y <= hud.y + hud.h) return openMenu();
             const cam = camera();
             const tx = Math.floor((p.x + cam.x) / TS), ty = Math.floor((p.y + cam.y) / TS);
             held = [];
@@ -1355,6 +1376,7 @@
 
         async function encounter() {
             newEnemy();
+            dex.seen.add(enemy.kind);
             fx.enemyX = 200;
             mode = 'busy';
             await play(500, t => { fx.enemyX = 200 * (1 - t); });
@@ -1469,6 +1491,7 @@
                 sfx.catch();
                 await play(500, t => { fx.stars = t; });
                 const caught = makePickle(enemy.kind, enemy.lvl);
+                dex.caught.add(enemy.kind);
                 caught.hp = caught.shownHp = Math.max(1, enemy.hp);
                 const lines = [`Gotcha! ${enemy.name} was jarred!`];
                 if (team.length < 6) { team.push(caught); lines.push(`${enemy.name} joined your team of pickles.`); }
@@ -1503,6 +1526,38 @@
         }
 
         function openBag() { mode = 'bag'; cursor = 0; draw(); }
+
+        const START = ['Picklédex', 'Pickles', 'Close'];
+
+        function openMenu(at = 0) {
+            mode = 'menu';
+            cursor = at;
+            held = []; path = [];
+            sfx.select();
+            draw();
+        }
+
+        function openDex(at = dexAt) {
+            mode = 'dex';
+            cursor = at;
+            sfx.select();
+            draw();
+        }
+
+        function openEntry(i) {
+            if (!dex.seen.has(DEX[i])) { sfx.nope(); return; }
+            dexAt = i;
+            mode = 'dexEntry';
+            sfx.select();
+            draw();
+        }
+
+        // Flip to the next pickle you have seen
+        function flipEntry(step) {
+            for (let i = dexAt + step; i >= 0 && i < DEX.length; i += step) {
+                if (dex.seen.has(DEX[i])) { dexAt = i; sfx.move(); return draw(); }
+            }
+        }
 
         function openTeam(kind) {
             teamMode = kind;
@@ -1545,11 +1600,17 @@
             if (mode === 'fight') { const moves = movesOf(player); return i === moves.length ? toMenu() : useMove(moves[i]); }
             if (mode === 'bag') { const list = bagList(); return i === list.length ? toMenu() : useItem(list[i]); }
             if (mode === 'team') return teamChoose(i);
+            if (mode === 'menu') return i === 0 ? openDex() : i === 1 ? openTeam('world') : toWalk();
+            if (mode === 'dex') { if (i === DEX.length) return back(); dexAt = i; return openEntry(i); }
+            if (mode === 'dexEntry') return back();
         }
 
         function back() {
             if (mode === 'fight' || mode === 'bag') { sfx.move(); return toMenu(); }
             if (mode === 'team' && teamMode !== 'forced') { sfx.move(); return teamMode === 'world' ? toWalk() : toMenu(); }
+            if (mode === 'menu') { sfx.move(); return toWalk(); }
+            if (mode === 'dex') { sfx.move(); dexAt = Math.min(cursor, DEX.length - 1); return openMenu(0); }
+            if (mode === 'dexEntry') { sfx.move(); return openDex(dexAt); }
         }
 
         function optionCount() {
@@ -1557,6 +1618,8 @@
             if (mode === 'fight') return movesOf(player).length + 1;
             if (mode === 'bag') return bagList().length + 1;
             if (mode === 'team') return team.length + (teamMode === 'forced' ? 0 : 1);
+            if (mode === 'menu') return START.length;
+            if (mode === 'dex') return DEX.length + 1;
             return 0;
         }
 
@@ -1579,7 +1642,15 @@
             if (mode === 'walk') {
                 if (dir) { e.preventDefault(); path = []; if (!e.repeat) press(dir); return; }
                 if (OK.includes(k)) { e.preventDefault(); return interact(); }
-                if (['x', 'X', 'p', 'P'].includes(k)) { e.preventDefault(); return openTeam('world'); }
+                if (['x', 'X'].includes(k)) { e.preventDefault(); return openMenu(); }
+                if (['p', 'P'].includes(k)) { e.preventDefault(); return openTeam('world'); }
+                return;
+            }
+            if (mode === 'dexEntry') {
+                e.preventDefault();
+                if (dir === 'left' || dir === 'up') return flipEntry(-1);
+                if (dir === 'right' || dir === 'down') return flipEntry(1);
+                if (OK.includes(k) || CANCEL.includes(k)) return back();
                 return;
             }
             const n = optionCount();
@@ -1613,9 +1684,18 @@
             if (mode === 'text') return advance();
             const p = pointFromEvent(e);
             if (mode === 'walk') return worldClick(p);
+            if (mode === 'dexEntry') return back();
             const hit = regions.find(r => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h);
             if (hit) { cursor = hit.i; choose(hit.i); }
         });
+
+        // Scroll the Picklédex list with the wheel
+        canvas.addEventListener('wheel', e => {
+            if (mode !== 'dex') return;
+            e.preventDefault();
+            const next = Math.max(0, Math.min(DEX.length - 1, cursor + Math.sign(e.deltaY)));
+            if (next !== cursor) { cursor = next; sfx.move(); draw(); }
+        }, { passive: false });
 
         canvas.addEventListener('mousemove', e => {
             if (mode === 'text' || mode === 'busy' || mode === 'walk') return;
@@ -1674,6 +1754,8 @@
             regions = [];
             g.imageSmoothingEnabled = false;
             if (mode === 'team') drawTeam();
+            else if (mode === 'dex') drawDex();
+            else if (mode === 'dexEntry') drawDexEntry();
             else if (scene === 'world') drawWorld();
             else drawBattle();
             drawCover();
@@ -1775,16 +1857,89 @@
 
             hud = null;
             if (mode === 'walk') drawHud();
+            if (mode === 'menu') drawStartMenu();
             if (mode === 'text' && line) drawDialog();
         }
 
         function drawHud() {
-            const w = 104, h = 30, x = W - w - 8, y = 8;
+            const w = 92, h = 30, x = W - w - 8, y = 8;
             g.fillStyle = '#26402a'; g.beginPath(); g.roundRect(x, y, w, h, 15); g.fill();
             g.fillStyle = '#f8fbef'; g.beginPath(); g.roundRect(x + 2, y + 2, w - 4, h - 4, 13); g.fill();
             g.drawImage(ICON[team[0].kind], x + 9, y + 7, 16, 16);
-            text('Pickles', x + 32, y + 20, 16, '#22301f', 600);
+            text('Menu', x + 34, y + 20, 16, '#22301f', 600);
             hud = { x, y, w, h };
+        }
+
+        function drawStartMenu() {
+            box(W - 168, 8, 160, 116, '#ffffff');
+            START.forEach((label, i) => option(label, W - 136, 44 + i * 30, i, 120, 30));
+        }
+
+        // A little jar: the mark for a pickle you have caught
+        function jarMark(x, y) {
+            g.fillStyle = '#26402a'; g.fillRect(x, y, 10, 12);
+            g.fillStyle = LIDS.jar; g.fillRect(x + 1, y + 1, 8, 3);
+            g.fillStyle = '#6aa83a'; g.fillRect(x + 1, y + 5, 8, 6);
+        }
+
+        function drawDex() {
+            g.fillStyle = '#eef5df'; g.fillRect(0, 0, W, H);
+            const at = Math.min(cursor, DEX.length - 1), kind = DEX[at], seen = dex.seen.has(kind);
+
+            // The picture
+            box(8, 8, 196, 220, '#ffffff');
+            g.fillStyle = '#dcebc4';
+            g.beginPath(); g.ellipse(106, 130, 62, 10, 0, 0, Math.PI * 2); g.fill();
+            if (seen) {
+                const img = FRONT[kind];
+                g.drawImage(img, 106 - img.width, 134 - img.height * 2, img.width * 2, img.height * 2);
+            } else {
+                text('?', 94, 112, 44, '#b7c99a', 600);
+            }
+            text(`No.${pad3(at + 1)}`, 24, 168, 15, '#5f6b4c');
+            text(seen ? SPECIES[kind].name : '-----', 24, 194, 20, '#22301f', 600);
+            if (dex.caught.has(kind)) jarMark(176, 180);
+
+            // The list
+            box(210, 8, 262, 220, '#ffffff');
+            const rows = 7, top = Math.max(0, Math.min(DEX.length - rows, at - 3));
+            for (let r = 0; r < rows; r++) {
+                const i = top + r, k = DEX[i], y = 42 + r * 28;
+                regions.push({ x: 214, y: y - 20, w: 254, h: 28, i });
+                text(pad3(i + 1), 238, y, 15, '#5f6b4c');
+                text(dex.seen.has(k) ? SPECIES[k].name : '-----', 278, y, 18, '#22301f', cursor === i ? 600 : 400);
+                if (dex.caught.has(k)) jarMark(446, y - 12);
+                if (cursor === i) {
+                    g.fillStyle = '#22301f';
+                    g.beginPath(); g.moveTo(222, y - 13); g.lineTo(230, y - 7); g.lineTo(222, y - 1); g.fill();
+                }
+            }
+            g.fillStyle = '#b7c99a';
+            if (top > 0) { g.beginPath(); g.moveTo(452, 22); g.lineTo(458, 16); g.lineTo(464, 22); g.fill(); }
+            if (top + rows < DEX.length) { g.beginPath(); g.moveTo(452, 212); g.lineTo(458, 218); g.lineTo(464, 212); g.fill(); }
+
+            box(6, 232, W - 12, 82);
+            wrap(`Seen ${dex.seen.size}   Caught ${dex.caught.size}   of ${DEX.length}`, 26, 266, 340);
+            option('Back', 410, 266, DEX.length, 56);
+        }
+
+        function drawDexEntry() {
+            const kind = DEX[dexAt], info = DEX_INFO[kind], caught = dex.caught.has(kind);
+            g.fillStyle = '#eef5df'; g.fillRect(0, 0, W, H);
+            box(8, 8, W - 16, 220, '#ffffff');
+            g.fillStyle = '#dcebc4';
+            g.beginPath(); g.ellipse(88, 156, 64, 11, 0, 0, Math.PI * 2); g.fill();
+            const img = FRONT[kind];
+            g.drawImage(img, 88 - img.width, 160 - img.height * 2, img.width * 2, img.height * 2);
+            text(`No.${pad3(dexAt + 1)}`, 176, 48, 15, '#5f6b4c');
+            text(SPECIES[kind].name, 176, 80, 26, '#22301f', 600);
+            const nameW = Math.ceil(g.measureText(SPECIES[kind].name).width);
+            text(caught ? info.cat : '???', 176, 108, 16, '#5f6b4c');
+            text(`Ht   ${caught ? info.ht : '???'}`, 176, 152, 16);
+            text(`Wt   ${caught ? info.wt : '???'}`, 176, 180, 16);
+            if (caught) jarMark(176 + nameW + 12, 62);
+            box(6, 232, W - 12, 82);
+            wrap(caught ? info.entry : 'Catch one to fill in this page.', 24, 262, 432, 16, 21);
         }
 
         function drawTeam() {
@@ -1915,16 +2070,16 @@
             }
         }
 
-        function wrap(str, x, y, maxW) {
-            g.font = `400 18px ${FONT}`;
+        function wrap(str, x, y, maxW, size = 18, lineH = 26) {
+            g.font = `400 ${size}px ${FONT}`;
             const words = str.split(' ');
             let row = '', yy = y;
             words.forEach(word => {
                 const test = row ? row + ' ' + word : word;
-                if (g.measureText(test).width > maxW && row) { text(row, x, yy); row = word; yy += 26; }
+                if (g.measureText(test).width > maxW && row) { text(row, x, yy, size); row = word; yy += lineH; }
                 else row = test;
             });
-            if (row) text(row, x, yy);
+            if (row) text(row, x, yy, size);
         }
 
         // The world keeps moving: walking, swaying dill, rippling brine
