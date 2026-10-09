@@ -408,6 +408,13 @@
             red: { ramp: ['#5a1212', '#8e1f1f', '#c43430', '#e8604e', '#ffa08c'], out: '#330808', spec: '#ffe0d8' },
             dirt: { ramp: ['#2e2016', '#4a3524', '#6b4f35', '#8f6e4c', '#b8946c'], out: '#1a120c' },
             wing: { ramp: ['#1f3d2a', '#2f5c3c', '#457f52', '#64a06c', '#8ec290'], out: '#11241a' },
+            gherkin: { ramp: ['#16300f', '#24481a', '#386a26', '#548f36', '#7fb552'], out: '#0b1a07', spec: '#cfeaa0' },
+            lime: { ramp: ['#36460f', '#58741a', '#83a02a', '#b0c93e', '#e2ef88'], out: '#1f2808', spec: '#f8ffd8' },
+            chili: { ramp: ['#4a0c0c', '#7e1616', '#b82420', '#e04a36', '#ff8a70'], out: '#2a0606', spec: '#ffd8cc' },
+            stem: { ramp: ['#3a3418', '#5a5226', '#7a7038', '#9a904e', '#bab06a'], out: '#221e0c' },
+            // The inside of a pickle, for anything sliced open
+            flesh: { ramp: ['#6d7a3a', '#9aab58', '#c4d384', '#dfe9a8', '#f4f9d4'], out: '#3e4620' },
+            seed: { ramp: ['#8a7a4a', '#b8a670', '#dccb94', '#efe4b8', '#fffaf0'], out: '#5a4e2a' },
         };
 
         // Faces and markings, stamped on last
@@ -443,6 +450,7 @@
             shine: ['w', 'w', 'w', 'w', 'w', 'w', 'w'],
             shineDot: ['w', 'w'],
             spark: ['..y', '.yy', 'yy.', 'y..'],
+            heat: ['.o', 'o.', '.o', 'o.'],
             z: ['wwww', '..w.', '.w..', 'wwww'],
             zSmall: ['www', '.w.', 'www'],
         };
@@ -456,7 +464,7 @@
             dillbasaur: {
                 parts: [
                     E('pickle', 25, 47, 4.5, 6), E('pickle', 43, 47, 4.5, 6),
-                    E('pickle', 31, 39, 19, 11, { rot: -0.06, bumps: 0.5, ridges: 5 }),
+                    E('pickle', 31, 39, 19, 11, { rot: -0.06, bumps: 0.5, ridges: 5, lines: 4 }),
                     E('pickle', 19, 50, 5, 5.5), E('pickle', 37, 50, 5, 5.5),
                     E('bulb', 36, 25, 10, 8.5, { ridges: 4 }),
                     L('dill', [[36, 18], [32, 7], [28, 1]], 1.2, 0.6, { outline: false }),
@@ -475,12 +483,13 @@
             },
             picklechu: {
                 parts: [
-                    P('yellow', [[34, 42], [44, 34], [40, 31], [50, 20], [47, 18], [54, 8], [41, 20], [44, 23], [33, 36]]),
-                    P('yellow', [[17, 21], [8, 2], [24, 15]]), P('ink', [[10.7, 7.4], [8, 2], [12.5, 5.9]], { outline: false }),
-                    P('yellow', [[31, 15], [44, 1], [37, 20]]), P('ink', [[40.1, 4.9], [44, 1], [41.9, 6.4]], { outline: false }),
-                    E('yellow', 28, 35, 13.5, 18, { rot: 0.06, bumps: 0.45, ridges: 4 }),
-                    E('yellow', 17, 39, 3, 4.5, { rot: 0.5 }), E('yellow', 39, 38, 3, 4.5, { rot: -0.5 }),
-                    E('yellow', 22, 53, 5, 2.6), E('yellow', 35, 53, 5, 2.6),
+                    P('lime', [[34, 42], [44, 34], [40, 31], [50, 20], [47, 18], [54, 8], [41, 20], [44, 23], [33, 36]]),
+                    P('lime', [[17, 21], [8, 2], [24, 15]]), P('ink', [[10.7, 7.4], [8, 2], [12.5, 5.9]], { outline: false }),
+                    P('lime', [[31, 15], [44, 1], [37, 20]]), P('ink', [[40.1, 4.9], [44, 1], [41.9, 6.4]], { outline: false }),
+                    E('lime', 28, 35, 13.5, 18, { rot: 0.06, bumps: 0.7, lines: 4 }),
+                    E('stem', 27, 17.5, 2.6, 1.8),
+                    E('lime', 17, 39, 3, 4.5, { rot: 0.5 }), E('lime', 39, 38, 3, 4.5, { rot: -0.5 }),
+                    E('lime', 22, 53, 5, 2.6), E('lime', 35, 53, 5, 2.6),
                 ],
                 decals: [
                     D('eye', 19, 23), D('eye', 31, 22), D('cheek', 13, 30), D('cheek', 36, 29), D('nose', 26, 28), D('open', 23, 30),
@@ -495,7 +504,7 @@
                     P('flame', [[51, 19], [54, 24], [57, 28], [56, 33], [53, 37], [49, 37], [46, 33], [46, 28], [48, 25]], { glow: true }),
                     P('flameIn', [[51, 26], [53, 30], [53.5, 34], [51, 36], [48.5, 34], [49, 30]], { glow: true, line: false }),
                     E('pickle', 21, 51, 5.5, 4.5), E('pickle', 34, 51, 5.5, 4.5),
-                    E('pickle', 28, 39, 11, 14, { bumps: 0.4, ridges: 3 }),
+                    E('pickle', 28, 39, 11, 14, { bumps: 0.4, ridges: 3, lines: 3 }),
                     E('cream', 26, 42, 6.5, 10, { tex: 'bands' }),
                     E('pickle', 17, 36, 3, 5.5, { rot: 0.6 }), E('pickle', 39, 36, 3, 5.5, { rot: -0.5 }),
                     P('dark', [[28, 14], [33, 3], [32, 15]]), P('dark', [[23, 14], [25, 4], [27, 14]]),
@@ -513,63 +522,69 @@
                     E('lid', 28, 37, 16, 16, { side: 'back', tex: 'knurl', pow: 2.4 }),
                     E('lid', 28, 37, 9, 9, { side: 'back', pow: 2.4 }),
                     E('pickle', 15, 37, 3, 5.5, { rot: 0.5 }), E('pickle', 42, 37, 3, 5.5, { rot: -0.5 }),
-                    E('pickle', 26, 19, 10.5, 9.5, { bumps: 0.3 }),
+                    E('pickle', 26, 19, 10.5, 9.5, { bumps: 0.4, lines: 3 }),
                 ],
                 decals: [D('eye', 19, 15), D('eye', 27, 14), D('smile', 20, 23)],
             },
-            jigglypickle: {
+            pickleypuff: {
                 parts: [
-                    P('pink', [[13, 20], [8, 6], [20, 14]]), P('pinkDeep', [[13.5, 16], [10, 9], [16.5, 13]], { outline: false }),
-                    P('pink', [[36, 14], [47, 5], [43, 20]]), P('pinkDeep', [[39, 13], [45, 8], [42.5, 16]], { outline: false }),
-                    E('pink', 20, 51, 5.5, 3), E('pink', 36, 51, 5.5, 3),
-                    E('pink', 9, 34, 3.5, 4.5), E('pink', 47, 34, 3.5, 4.5),
-                    E('pink', 28, 31, 19, 18.5, { bumps: 0.25, ridges: 3 }),
+                    P('pickle', [[14, 19], [9, 7], [21, 13]]), P('pickle', [[35, 13], [47, 6], [43, 19]]),
+                    E('pickle', 20, 51, 5.5, 3), E('pickle', 36, 51, 5.5, 3),
+                    E('pickle', 9, 34, 3.5, 4.5), E('pickle', 47, 34, 3.5, 4.5),
+                    E('pickle', 28, 31, 19, 18.5, { tex: 'chip', crinkle: 18, seeds: 9 }),
                     L('pink', [[26, 14], [22, 8], [27, 4], [32, 7], [29, 11], [26, 9]], 2.6, 1.6),
                 ],
                 decals: [D('eyeBig', 15, 23), D('eyeBig', 31, 23), D('tiny', 27, 36), D('blush', 12, 32), D('blush', 40, 32)],
             },
             cornichonite: {
                 parts: [
-                    L('stone', [[18, 36], [9, 33], [6, 24]], 3.6, 3), E('stone', 6, 20, 4.8, 4.5, { bumps: 0.6 }),
-                    L('stone', [[38, 36], [47, 33], [50, 24]], 3.6, 3), E('stone', 50, 20, 4.8, 4.5, { bumps: 0.6 }),
-                    E('stone', 28, 39, 14, 12, { rot: 0.08, bumps: 0.9, ridges: 3 }),
+                    L('gherkin', [[18, 36], [9, 33], [6, 24]], 3.6, 3), E('gherkin', 6, 20, 4.8, 4.5, { bumps: 0.7 }),
+                    L('gherkin', [[38, 36], [47, 33], [50, 24]], 3.6, 3), E('gherkin', 50, 20, 4.8, 4.5, { bumps: 0.7 }),
+                    E('stem', 44, 41.5, 2.4, 2),
+                    E('gherkin', 28, 39, 15.5, 10.5, { rot: 0.12, bumps: 1, lines: 3 }),
                 ],
-                decals: [D('eyeAngry', 19, 33), D('eyeAngry', 31, 33, { flip: true }), D('grimace', 25, 41), D('crack', 35, 43), D('crack', 16, 40)],
+                decals: [D('eyeAngry', 19, 33), D('eyeAngry', 31, 33, { flip: true }), D('grimace', 25, 41)],
             },
             snorelish: {
                 parts: [
-                    P('deep', [[14, 11], [13, 3], [19, 8]]), P('deep', [[38, 8], [43, 3], [42, 11]]),
-                    E('deep', 6, 34, 5.5, 9, { rot: 0.2 }), E('deep', 50, 34, 5.5, 9, { rot: -0.2 }),
-                    E('deep', 28, 34, 23, 20, { group: 'body', bumps: 0.2 }),
-                    E('deep', 28, 15, 14, 10, { group: 'body' }),
-                    E('cream', 28, 18, 10, 6),
-                    E('cream', 28, 38, 16, 13, { flecks: ['#5f9a3a', '#c84a3a', '#e8c040'] }),
-                    E('cream', 13, 50, 7, 5.5), E('cream', 43, 50, 7, 5.5),
+                    P('gherkin', [[15, 12], [14, 4], [20, 9]]), P('gherkin', [[37, 9], [42, 4], [41, 12]]),
+                    E('stem', 28, 7.5, 2.6, 1.8),
+                    E('gherkin', 6, 34, 5.5, 9, { rot: 0.2 }), E('gherkin', 50, 34, 5.5, 9, { rot: -0.2 }),
+                    E('gherkin', 28, 31, 22, 23.5, { bumps: 0.6, lines: 5 }),
+                    E('flesh', 28, 17, 10, 6, { side: 'front' }),
+                    E('gherkin', 28, 38, 15.5, 13.5, { tex: 'chip', seeds: 9, side: 'front' }),
+                    E('flesh', 13, 50, 7, 5.5), E('flesh', 43, 50, 7, 5.5),
                 ],
-                decals: [D('eyeShut', 19, 16), D('eyeShut', 31, 16), D('snore', 25, 20), D('claws', 11, 47), D('claws', 41, 47), D('z', 47, 2), D('zSmall', 52, 9)],
+                decals: [D('eyeShut', 19, 15), D('eyeShut', 31, 15), D('snore', 25, 19), D('claws', 11, 47), D('claws', 41, 47), D('z', 47, 2), D('zSmall', 52, 9)],
             },
             brinegar: {
                 parts: [
-                    P('purple', [[10, 24], [12, 10], [17, 19], [21, 5], [26, 17], [31, 4], [35, 17], [41, 6], [43, 19], [47, 12], [46, 26]]),
-                    P('purple', [[10, 24], [3, 9], [15, 19]]), P('purple', [[43, 20], [53, 8], [47, 27]]),
+                    ...[[-165, 3.6, 9], [-138, 3.2, 8.5], [-112, 3.2, 8.5], [-90, 3.4, 9.5], [-68, 3.2, 8.5], [-42, 3.2, 8.5], [-15, 3.6, 9]].map(([deg, rx, ry]) => {
+                        // Gherkins for spikes, each one pointing out from the middle
+                        const a = deg * Math.PI / 180, edge = 1 / Math.hypot(Math.cos(a) / 20, Math.sin(a) / 17) + 3.5;
+                        return E('pickle', 28 + Math.cos(a) * edge, 34 + Math.sin(a) * edge, rx, ry, { rot: a - Math.PI / 2, lines: 2, bumps: 0.6 });
+                    }),
                     E('purple', 17, 51, 6, 4), E('purple', 38, 51, 6, 4),
                     E('purple', 8, 38, 3.5, 6, { rot: 0.7 }), E('purple', 49, 37, 3.5, 6, { rot: -0.7 }),
-                    E('purple', 28, 34, 20, 17, { ridges: 5, bumps: 0.15 }),
+                    E('purple', 28, 34, 20, 17, { ridges: 5, bumps: 0.5 }),
                 ],
                 decals: [D('eyeRed', 13, 24), D('eyeRed', 32, 24, { flip: true }), D('grin', 15, 35), D('claws', 15, 54), D('claws', 36, 54)],
             },
             gherkarp: {
                 parts: [
-                    P('fin', [[40, 30], [54, 16], [50, 30], [55, 44], [40, 36]]),
-                    P('fin', [[14, 23], [17, 9], [21, 18], [25, 7], [29, 18], [33, 9], [36, 22]]),
-                    E('orange', 26, 32, 18, 12.5, { rot: -0.12, tex: 'scales' }),
-                    E('cream', 24, 39, 12, 4.5, { rot: -0.12 }),
-                    P('fin', [[24, 37], [33, 46], [22, 44]]),
-                    L('cream', [[9, 35], [4, 42], [6, 50]], 1.1, 0.8),
-                    L('cream', [[11, 36], [10, 45], [13, 52]], 1.1, 0.8),
-                    E('cream', 8, 32, 3, 3.5),
+                    P('chili', [[40, 30], [54, 16], [50, 30], [55, 44], [40, 36]]),
+                    E('chili', 17, 16, 2.2, 6, { rot: -0.35 }), E('chili', 23, 14, 2.2, 6.5, { rot: -0.1 }),
+                    E('chili', 29, 14, 2.2, 6.5, { rot: 0.15 }), E('chili', 34, 17, 2.2, 6, { rot: 0.4 }),
+                    E('dill', 18.5, 9.5, 1.2, 1.6, { outline: false }), E('dill', 23.5, 7.5, 1.2, 1.6, { outline: false }),
+                    E('dill', 28, 7.5, 1.2, 1.6, { outline: false }), E('dill', 32, 11, 1.2, 1.6, { outline: false }),
+                    E('pickle', 26, 32, 18, 12.5, { rot: -0.12, bumps: 0.55, lines: 4, flecks: ['#c8281e', '#e8582a'], fleckDensity: 0.45 }),
+                    E('flesh', 24, 39, 12, 4.5, { rot: -0.12 }),
+                    P('chili', [[24, 37], [33, 46], [22, 44]]),
+                    L('dill', [[9, 35], [4, 42], [6, 50]], 1.1, 0.8),
+                    L('dill', [[11, 36], [10, 45], [13, 52]], 1.1, 0.8),
+                    E('flesh', 8, 32, 3, 3.5),
                 ],
-                decals: [D('eyeFish', 12, 23), D('pucker', 7, 31)],
+                decals: [D('eyeFish', 12, 23), D('pucker', 7, 31), D('heat', 12, 4, { side: 'both' }), D('heat', 38, 6, { side: 'both' }), D('heat', 44, 10, { side: 'both' })],
             },
             dillto: {
                 parts: [
@@ -587,7 +602,7 @@
                     E('white', 10, 21, 5.5, 5.5), E('white', 46, 19, 5.5, 5.5),
                     L('pickle', [[23, 46], [21, 52]], 2.6), L('pickle', [[33, 46], [35, 52]], 2.6),
                     E('ink', 19, 53, 5.5, 2.6), E('ink', 37, 53, 5.5, 2.6),
-                    E('pickle', 28, 35, 11, 15, { bumps: 0.3 }),
+                    E('pickle', 28, 35, 11, 15, { bumps: 0.4, lines: 3 }),
                     E('white', 28, 41, 10.6, 8, { tex: 'stripes', stripe: 'ink' }),
                     E('white', 28, 22, 7.5, 6.5),
                     E('ink', 30, 15, 8.5, 3.2, { rot: -0.15 }), L('ink', [[30, 12], [31, 10]], 1),
@@ -609,7 +624,7 @@
             },
             dillglett: {
                 parts: [
-                    E('pickle', 28, 34, 10.5, 19, { bumps: 0.45, ridges: 3 }),
+                    E('pickle', 28, 34, 10.5, 19, { bumps: 0.5, ridges: 3, lines: 3 }),
                     L('dill', [[29, 16], [33, 8]], 1.1, 0.6, { outline: false }),
                     E('red', 28, 33, 4.5, 3.2, { side: 'front' }),
                     E('dirt', 28, 53, 25, 8.5, { flecks: ['#c9a57a', '#4a3524', '#8a8a7a'] }),
@@ -638,10 +653,14 @@
             if (p.t === 'e') {
                 const c = Math.cos(p.rot || 0), s = Math.sin(p.rot || 0), dx = px - p.cx, dy = py - p.cy;
                 const u = (dx * c + dy * s) / p.rx, v = (-dx * s + dy * c) / p.ry, pw = p.pow || 2;
-                const q = Math.pow(Math.abs(u), pw) + Math.pow(Math.abs(v), pw);
+                let q = Math.pow(Math.abs(u), pw) + Math.pow(Math.abs(v), pw);
+                if (p.crinkle) {
+                    const lim = 1 - 0.08 * (0.5 + 0.5 * Math.sin(Math.atan2(v, u) * p.crinkle));
+                    q = (u * u + v * v) / (lim * lim);
+                }
                 if (q > 1) return null;
                 const z = Math.sqrt(1 - q), gx = u * c - v * s, gy = u * s + v * c, m = Math.hypot(gx, gy, z) || 1;
-                return [gx / m, gy / m, z / m, p.rx < p.ry ? u : v];
+                return [gx / m, gy / m, z / m, p.rx < p.ry ? u : v, u, v];
             }
             if (p.t === 'p') {
                 if (!inPoly(p.pts, px, py)) return null;
@@ -676,13 +695,14 @@
             const N = 56;
             const parts = design.parts.filter(p => !p.side || p.side === (back ? 'back' : 'front'));
             const own = new Int16Array(N * N).fill(-1), idx = new Int8Array(N * N);
-            const nrm = new Float32Array(N * N * 3), across = new Float32Array(N * N);
+            const nrm = new Float32Array(N * N * 3), across = new Float32Array(N * N), U = new Float32Array(N * N), V = new Float32Array(N * N);
             parts.forEach((p, k) => {
                 for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
                     const hit = sample(p, x + 0.5, y + 0.5);
                     if (!hit) continue;
                     const i = y * N + x;
                     own[i] = k; nrm[i * 3] = hit[0]; nrm[i * 3 + 1] = hit[1]; nrm[i * 3 + 2] = hit[2]; across[i] = hit[3];
+                    U[i] = hit[4] || 0; V[i] = hit[5] || 0;
                 }
             });
             const at = (x, y) => x < 0 || y < 0 || x >= N || y >= N ? -1 : own[y * N + x];
@@ -702,6 +722,8 @@
                 }
                 if (p.ridges) s += 0.07 * Math.cos(across[i] * p.ridges * Math.PI);
                 let k = Math.max(0, Math.min(4, Math.floor(s * 5 + (BAYER[(y % 4) * 4 + (x % 4)] / 16 - 0.5) * 0.8)));
+                // Pale stripes running the length of the pickle, like the real thing
+                if (p.lines && Math.cos(across[i] * p.lines * Math.PI) > 0.75) k = Math.min(4, k + 1);
                 if (p.tex === 'knurl' && x % 3 === 0) k = Math.max(0, k - 1);
                 if (p.tex === 'bands' && y % 4 === 0) k = Math.max(0, k - 1);
                 if (p.tex === 'scales') {
@@ -710,24 +732,35 @@
                 }
                 idx[i] = k;
                 const ramp = p.tex === 'stripes' && Math.floor(y / 3) % 2 ? MAT[p.stripe].ramp : m.ramp;
+                if (p.tex === 'chip' && Math.hypot(U[i], V[i]) < 0.76) {
+                    // A slice: pale flesh, a darker ring inside the peel, a ring of seeds
+                    const uu = U[i], vv = V[i], r = Math.hypot(uu, vv);
+                    let kk = r > 0.68 ? 2 : r < 0.2 ? 4 : Math.max(3, Math.min(4, k + 1));
+                    const n = p.seeds || 8, step = Math.PI * 2 / n, sa = Math.round(Math.atan2(vv, uu) / step) * step;
+                    const du = uu - Math.cos(sa) * 0.47, dv = vv - Math.sin(sa) * 0.47;
+                    const dr = du * Math.cos(sa) + dv * Math.sin(sa), dt = -du * Math.sin(sa) + dv * Math.cos(sa);
+                    const e = (dr / 0.15) ** 2 + (dt / 0.09) ** 2;
+                    put(i, e <= 1 ? (e > 0.5 ? MAT.seed.out : MAT.seed.ramp[3]) : MAT.flesh.ramp[kk]);
+                    continue;
+                }
                 put(i, m.spec && lam > 0.95 ? m.spec : ramp[k]);
             }
 
             // Warts: a lit pixel over a shadowed one, one per little cell
-            parts.forEach((p, k) => {
-                if (!p.bumps && !p.flecks) return;
-                const cell = p.flecks ? 4 : 5;
+            parts.forEach((p, k) => ['bumps', 'flecks'].forEach(pass => {
+                if (!p[pass]) return;
+                const flecks = pass === 'flecks', cell = flecks ? 4 : 5, density = flecks ? (p.fleckDensity || 0.4) : p.bumps;
                 for (let cy = 0; cy < N / cell; cy++) for (let cx = 0; cx < N / cell; cx++) {
-                    const h = mix(cx * 31 + k * 977, cy * 17 + (back ? 7 : 0));
-                    if ((h & 255) / 255 > (p.bumps || 0.4)) continue;
+                    const h = mix(cx * 31 + k * 977 + (flecks ? 5003 : 0), cy * 17 + (back ? 7 : 0));
+                    if ((h & 255) / 255 > density) continue;
                     const x = cx * cell + 1 + (h >>> 8) % (cell - 2), y = cy * cell + 1 + (h >>> 12) % (cell - 2), i = y * N + x;
                     if ([at(x, y), at(x - 1, y), at(x + 1, y), at(x, y - 1), at(x, y + 1), at(x, y + 2)].some(j => j !== k)) continue;
+                    if (flecks) { put(i, p.flecks[(h >>> 16) % p.flecks.length]); continue; }
                     const ramp = MAT[p.mat].ramp;
-                    if (p.flecks) { put(i, p.flecks[(h >>> 16) % p.flecks.length]); continue; }
                     put(i, ramp[Math.min(4, idx[i] + 1)]);
                     put(i + N, ramp[Math.max(0, idx[i] - 1)]);
                 }
-            });
+            }));
 
             // Outlines: darkest on the shadow side, and a line wherever one part sits on another
             for (let i = 0; i < N * N; i++) {
@@ -1043,7 +1076,7 @@
             picklechu: { name: 'Picklechu', moves: ['Brine Shock', 'Quick Crunch', 'Crunch', 'Vinegar Glare'] },
             gherkinzard: { name: 'Gherkinzard', moves: ['Dill Flame', 'Sour Slash', 'Crunch', 'Vinegar Glare'] },
             brinetle: { name: 'Brinetle', moves: ['Brine Gun', 'Lid Bash', 'Brine Splash', 'Vinegar Glare'] },
-            jigglypickle: { name: 'Jigglypickle', moves: ['Sing (badly)', 'Pickle Pound', 'Quick Crunch', 'Vinegar Glare'] },
+            pickleypuff: { name: 'Pickleypuff', moves: ['Sing (badly)', 'Pickle Pound', 'Quick Crunch', 'Vinegar Glare'] },
             cornichonite: { name: 'Cornichonite', moves: ['Rock Crunch', 'Tiny Tantrum', 'Crunch', 'Vinegar Glare'], hp: 1.2 },
             snorelish: { name: 'Snorelish', moves: ['Belly Flop', 'Snore', 'Crunch', 'Vinegar Glare'], hp: 1.5, catch: 0.6 },
             brinegar: { name: 'Brinegar', moves: ['Shadow Brine', 'Lick', 'Pickle Hex', 'Vinegar Glare'], catch: 0.8 },
@@ -1055,7 +1088,7 @@
         };
         // How often each one turns up in the tall dill
         const WILD = Object.entries({
-            gherkarp: 4, picklechu: 3, cornichonite: 3, dillglett: 3, jigglypickle: 3, brinetle: 2, gherkinzard: 2,
+            gherkarp: 4, picklechu: 3, cornichonite: 3, dillglett: 3, pickleypuff: 3, brinetle: 2, gherkinzard: 2,
             brinegar: 2, mrbrine: 2, voltjar: 2, dillto: 2, dillbasaur: 1, snorelish: 1,
         }).flatMap(([kind, n]) => Array(n).fill(kind));
         const movesOf = p => SPECIES[p.kind].moves;
