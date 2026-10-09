@@ -94,6 +94,21 @@
             transition: background 0.2s, color 0.2s;
         }
 
+        /* ?sheet: every pickle, front and back */
+        .sheet {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 14px;
+            width: min(1100px, 100%);
+            max-height: calc(100vh - 40px);
+            overflow: auto;
+            padding: 8px;
+        }
+
+        .sheet figure { margin: 0; background: #eef5df; border-radius: 12px; padding: 10px; text-align: center; }
+        .sheet canvas { width: 112px; height: 112px; image-rendering: pixelated; }
+        .sheet figcaption { font-size: 13px; font-weight: 500; color: #22301f; margin-top: 4px; }
+
         .sound:hover { background: rgba(233, 242, 216, 0.12); color: #e9f2d8; }
         .sound[aria-pressed="false"] { color: rgba(233, 242, 216, 0.45); }
     </style>
@@ -363,113 +378,376 @@
         }
         const pix = (rows, pal) => sprite(rows[0].length, x => stamp(x, rows, pal), rows.length);
 
-        function ellipse(x, cx, cy, rx, ry, rot, fill, stroke) {
-            x.beginPath();
-            x.ellipse(cx, cy, rx, ry, rot, 0, Math.PI * 2);
-            if (fill) { x.fillStyle = fill; x.fill(); }
-            if (stroke) { x.strokeStyle = stroke; x.lineWidth = 1; x.stroke(); }
-        }
-
-        // The house style: an oblong pickle with bumps and a shine
-        function pickle(x, cx, cy, rx, ry, rot, tint = COL.body) {
-            ellipse(x, cx, cy, rx, ry, rot, tint, COL.outline);
-            ellipse(x, cx + 2, cy + 3, rx - 3, ry - 4, rot, COL.dark);
-            ellipse(x, cx, cy, rx - 2, ry - 2, rot, tint);
-            ellipse(x, cx - rx * 0.35, cy - ry * 0.35, rx * 0.22, ry * 0.45, rot, COL.light);
-            const bumps = [[-0.3, 0.2], [0.25, -0.3], [0.35, 0.35], [-0.1, 0.55], [0.05, -0.6], [-0.45, -0.1]];
-            x.fillStyle = COL.bump;
-            bumps.forEach(([bx, by]) => x.fillRect(Math.round(cx + bx * rx), Math.round(cy + by * ry), 2, 2));
-        }
-
-        function eyes(x, lx, ly, rx, ry, big = false) {
-            const s = big ? 4 : 3;
-            [[lx, ly], [rx, ry]].forEach(([ex, ey]) => {
-                x.fillStyle = COL.eye; x.fillRect(ex, ey, s, s + 1);
-                x.fillStyle = COL.white; x.fillRect(ex + 1, ey, 1, 1);
-            });
-        }
-
-        /* ---------- THE PICKLES, front and back ---------- */
-        const ART = {
-            dillbasaur: [56, (x, back) => {
-                // A sturdy pickle with a dill frond sprouting from its back
-                const frond = () => {
-                    x.strokeStyle = '#2f7a2a'; x.lineWidth = 1;
-                    for (let i = 0; i < 7; i++) {
-                        x.beginPath(); x.moveTo(30, 16); x.lineTo(30 + Math.cos(-2.6 + i * 0.4) * 14, 16 + Math.sin(-2.6 + i * 0.4) * 12); x.stroke();
-                    }
-                    ellipse(x, 30, 16, 3, 2, 0, '#2f7a2a');
-                };
-                if (back) { pickle(x, 28, 34, 16, 20, 0.15); frond(); return; }
-                frond();
-                pickle(x, 28, 34, 16, 20, 0.15);
-                eyes(x, 20, 28, 31, 27, true);
-                x.fillStyle = COL.eye; x.fillRect(24, 38, 6, 1);
-            }],
-            picklechu: [48, (x, back) => {
-                // Ears with dark tips
-                x.fillStyle = COL.outline;
-                x.beginPath(); x.moveTo(14, 16); x.lineTo(8, 1); x.lineTo(20, 13); x.fill();
-                x.beginPath(); x.moveTo(30, 13); x.lineTo(40, 1); x.lineTo(35, 17); x.fill();
-                x.fillStyle = COL.yellow;
-                x.beginPath(); x.moveTo(15, 15); x.lineTo(10, 5); x.lineTo(19, 13); x.fill();
-                x.beginPath(); x.moveTo(31, 13); x.lineTo(38, 5); x.lineTo(34, 16); x.fill();
-                // Zigzag tail
-                x.fillStyle = COL.yellow; x.strokeStyle = COL.outline;
-                x.beginPath(); x.moveTo(36, 30); x.lineTo(46, 24); x.lineTo(42, 32); x.lineTo(47, 34); x.lineTo(38, 38); x.closePath(); x.fill(); x.stroke();
-                pickle(x, 24, 28, 13, 16, 0.1, COL.yellow);
-                if (back) return;
-                eyes(x, 17, 22, 27, 21);
-                x.fillStyle = COL.cheek; x.fillRect(13, 28, 4, 3); x.fillRect(31, 27, 4, 3);
-                x.fillStyle = COL.eye; x.fillRect(22, 29, 4, 1); x.fillRect(21, 28, 1, 1); x.fillRect(26, 28, 1, 1);
-            }],
-            gherkinzard: [48, (x, back) => {
-                // Tail with a flame on the end
-                x.strokeStyle = COL.outline; x.lineWidth = 3;
-                x.beginPath(); x.moveTo(30, 36); x.quadraticCurveTo(44, 36, 42, 22); x.stroke();
-                x.strokeStyle = COL.body; x.lineWidth = 1.5; x.stroke();
-                ellipse(x, 42, 17, 4, 6, 0, COL.flame);
-                ellipse(x, 42, 19, 2, 3, 0, COL.flameHi);
-                pickle(x, 22, 26, 11, 18, -0.15);
-                // Little wings
-                x.fillStyle = COL.dark; x.strokeStyle = COL.outline; x.lineWidth = 1;
-                x.beginPath(); x.moveTo(12, 20); x.lineTo(3, 12); x.lineTo(8, 26); x.closePath(); x.fill(); x.stroke();
-                if (back) return;
-                eyes(x, 17, 16, 24, 15);
-                x.fillStyle = COL.eye; x.fillRect(19, 23, 5, 1);
-            }],
-            brinetle: [48, (x, back) => {
-                // A jar lid worn as a shell
-                pickle(x, 24, 30, 15, 12, 0);
-                ellipse(x, 28, 24, 13, 9, 0, COL.lid, COL.lidDark);
-                x.fillStyle = COL.lidDark;
-                for (let i = 0; i < 6; i++) x.fillRect(18 + i * 4, 21, 1, 7);
-                ellipse(x, 11, 27, 6, 6, 0, COL.body, COL.outline);
-                if (back) return;
-                eyes(x, 8, 25, 12, 25);
-                x.fillStyle = COL.eye; x.fillRect(9, 30, 3, 1);
-            }],
-            jigglypickle: [48, (x, back) => {
-                pickle(x, 24, 27, 16, 16, 0, '#7dbb4a');
-                // A curl on top
-                x.strokeStyle = COL.outline; x.lineWidth = 1.5;
-                x.beginPath(); x.arc(22, 10, 4, Math.PI * 0.2, Math.PI * 1.9); x.stroke();
-                if (back) return;
-                eyes(x, 16, 21, 27, 21, true);
-                x.fillStyle = COL.pink; x.fillRect(13, 29, 4, 2); x.fillRect(31, 29, 4, 2);
-                x.fillStyle = COL.eye; x.fillRect(22, 31, 4, 1);
-            }],
-            cornichonite: [48, (x, back) => {
-                // Small, stony, arms up
-                x.strokeStyle = COL.outline; x.lineWidth = 2;
-                x.beginPath(); x.moveTo(15, 28); x.lineTo(7, 18); x.moveTo(33, 28); x.lineTo(41, 18); x.stroke();
-                pickle(x, 24, 31, 11, 10, 0, '#8aa070');
-                x.fillStyle = '#6d7f58';
-                [[18, 26], [29, 34], [22, 37], [31, 27]].forEach(([a, b]) => x.fillRect(a, b, 3, 2));
-                if (back) return;
-                eyes(x, 19, 28, 26, 28);
-            }],
+        /* ---------- PICKLE ART: a tiny pixel-art renderer ---------- */
+        // Each pickle is a stack of shapes on a 56px grid: ellipses (E), polygons (P) and tapered
+        // strokes (L), drawn back to front. Every pixel is then lit from the top left through a
+        // five-step ramp, dithered a little, outlined, lined where parts overlap, given warts,
+        // and finished with stamped faces (D).
+        const MAT = {
+            pickle: { ramp: ['#1c3616', '#2d5a20', '#47852d', '#6dab3f', '#a2d165'], out: '#0f220c', spec: '#e4f7b8' },
+            dark: { ramp: ['#10260f', '#1c3f19', '#2b5c25', '#3f7a33', '#5f9a48'], out: '#0a1a09' },
+            dill: { ramp: ['#173a14', '#245c1f', '#36802b', '#56a43c', '#86c85c'], out: '#0d230b' },
+            bulb: { ramp: ['#2b4620', '#466f33', '#6b9a4f', '#9cc87a', '#d0eeb0'], out: '#1a2d14', spec: '#f0fbe2' },
+            yellow: { ramp: ['#4d4a14', '#7f7a20', '#b2ac32', '#d8d455', '#f4f2a0'], out: '#2e2c0a', spec: '#fffde0' },
+            ink: { ramp: ['#0e0f12', '#1b1d22', '#2a2d35', '#3d424d', '#5a6070'], out: '#060708', spec: '#8a90a0' },
+            pink: { ramp: ['#5e2340', '#93395f', '#c95f86', '#eb90b1', '#fccbdc'], out: '#3a1427', spec: '#fff0f6' },
+            pinkDeep: { ramp: ['#4a1530', '#7a2448', '#a8395f', '#c95f86', '#e88fae'], out: '#2e0c1d' },
+            stone: { ramp: ['#2c3226', '#46503c', '#667456', '#8c9b78', '#b6c4a0'], out: '#1a1e16' },
+            deep: { ramp: ['#0f1f19', '#1b3529', '#2a4f3b', '#3f6e52', '#5f9472'], out: '#08120e', spec: '#a8d0b0' },
+            cream: { ramp: ['#5f4f33', '#8f7b55', '#c2ae82', '#e2d4ac', '#fbf3da'], out: '#3a301e' },
+            purple: { ramp: ['#22113a', '#3c2163', '#5c368f', '#8257bb', '#ae88e0'], out: '#140a24', spec: '#e6d8ff' },
+            orange: { ramp: ['#561f0e', '#8c3a18', '#c45e28', '#e88a44', '#ffbf80'], out: '#33120a', spec: '#fff0d8' },
+            fin: { ramp: ['#5f4f22', '#97803c', '#c8ae5c', '#e6d388', '#fbf0c2'], out: '#3a3014' },
+            white: { ramp: ['#5e6370', '#9399a6', '#c4c9d3', '#e6e9ef', '#ffffff'], out: '#2e323a' },
+            blue: { ramp: ['#1a2a52', '#2c4685', '#3f66b5', '#6390dc', '#9bbcf2'], out: '#0e1730', spec: '#e0ecff' },
+            glass: { ramp: ['#30504a', '#4f786c', '#7fa898', '#b5d6c6', '#e9f8f0'], out: '#1c302b', spec: '#ffffff' },
+            pickleSoft: { ramp: ['#3a5a2c', '#527a3c', '#6d9a4e', '#8fb868', '#b6d68e'], out: '#2a4220' },
+            lid: { ramp: ['#4f380e', '#80591c', '#b0832e', '#d9ac4c', '#f5d98a'], out: '#2e2006', spec: '#fff6d6' },
+            flame: { ramp: ['#9a2e0e', '#d64a18', '#f27c1c', '#ffb03a', '#fff08a'], out: '#5a1606' },
+            flameIn: { ramp: ['#d27a1a', '#f2a02a', '#ffd04a', '#ffe98a', '#fffbe0'], out: '#b85a12' },
+            red: { ramp: ['#5a1212', '#8e1f1f', '#c43430', '#e8604e', '#ffa08c'], out: '#330808', spec: '#ffe0d8' },
+            dirt: { ramp: ['#2e2016', '#4a3524', '#6b4f35', '#8f6e4c', '#b8946c'], out: '#1a120c' },
+            wing: { ramp: ['#1f3d2a', '#2f5c3c', '#457f52', '#64a06c', '#8ec290'], out: '#11241a' },
         };
+
+        // Faces and markings, stamped on last
+        const INK = { k: '#141a12', w: '#ffffff', r: '#e0484a', R: '#9a1e22', p: '#e86a92', y: '#ffe066', t: '#2f9a94', b: '#7a5a3a', g: '#8cc25a', B: '#a08b62', s: '#5f6b4c', o: '#ff9a3a' };
+        const STAMP = {
+            eye: ['.kk.', 'kwkk', 'kkkk', 'kkkk', '.kk.'],
+            eyeSmall: ['kw', 'kk', 'kk'],
+            eyeTall: ['kw', 'kk', 'kk', 'kk'],
+            eyeBig: ['.kkkk.', 'kwwkkk', 'kwwttk', 'kkttkk', 'kktttk', '.kkkk.'],
+            eyeShut: ['k....k', '.kkkk.'],
+            eyeAngry: ['kk...', '.kkk.', '.kwkk', '.kkkk', '..kk.'],
+            eyeRed: ['k.....', 'kkk...', 'krrkk.', 'krkrrk', '.kkkkk'],
+            eyeFish: ['.kkkkk.', 'kwwwwwk', 'kwkwkwk', 'kwkkkwk', 'kwkkkwk', 'kwwwwwk', '.kkkkk.'],
+            dot: ['kk', 'kk'],
+            smile: ['k...k', '.kkk.'],
+            open: ['kkkkk', 'krrrk', '.kkk.'],
+            tiny: ['k.k', '.k.'],
+            grin: ['k............k', 'kkwwwwwwwwwwkk', '.kkwwkwwkwwkk.', '...kkkkkkkk...'],
+            fang: ['kkkkk', '..wk.'],
+            grimace: ['kkkkkk', 'kwkwkk', 'kkkkkk'],
+            snore: ['kkkkkk', '.w..w.'],
+            wobbly: ['k....k', '.kkkk.'],
+            pucker: ['kk', 'kk'],
+            nose: ['k'],
+            cheek: ['.rr.', 'rrrr', '.rr.'],
+            blush: ['pp.pp'],
+            claws: ['w.w.w'],
+            stripe: ['bbbbbbbb'],
+            plate: ['BBBBBBBBBB'],
+            crack: ['s..', '.s.', '.ss', '..s'],
+            fingers: ['k.k', 'k.k'],
+            leaf: ['g.g', '.g.'],
+            shine: ['w', 'w', 'w', 'w', 'w', 'w', 'w'],
+            shineDot: ['w', 'w'],
+            spark: ['..y', '.yy', 'yy.', 'y..'],
+            z: ['wwww', '..w.', '.w..', 'wwww'],
+            zSmall: ['www', '.w.', 'www'],
+        };
+
+        const E = (mat, cx, cy, rx, ry, o = {}) => ({ t: 'e', mat, cx, cy, rx, ry, ...o });
+        const P = (mat, pts, o = {}) => ({ t: 'p', mat, pts, ...o });
+        const L = (mat, pts, r, r2 = r, o = {}) => ({ t: 'l', mat, pts, r, r2, ...o });
+        const D = (name, x, y, o = {}) => ({ name, x, y, ...o });
+
+        const DESIGNS = {
+            dillbasaur: {
+                parts: [
+                    E('pickle', 25, 47, 4.5, 6), E('pickle', 43, 47, 4.5, 6),
+                    E('pickle', 31, 39, 19, 11, { rot: -0.06, bumps: 0.5, ridges: 5 }),
+                    E('pickle', 19, 50, 5, 5.5), E('pickle', 37, 50, 5, 5.5),
+                    E('bulb', 36, 25, 10, 8.5, { ridges: 4 }),
+                    L('dill', [[36, 18], [32, 7], [28, 1]], 1.2, 0.6, { outline: false }),
+                    L('dill', [[37, 18], [41, 7], [45, 2]], 1.2, 0.6, { outline: false }),
+                    L('dill', [[35, 19], [27, 11], [22, 9]], 1.1, 0.5, { outline: false }),
+                    L('dill', [[38, 19], [47, 11], [52, 10]], 1.1, 0.5, { outline: false }),
+                    L('dill', [[36, 18], [36, 3]], 1.2, 0.6, { outline: false }),
+                    P('pickle', [[7, 24], [5, 17], [12, 22]]), P('pickle', [[16, 22], [19, 15], [21, 23]]),
+                    E('pickle', 14, 31, 11.5, 10, { bumps: 0.35 }),
+                ],
+                decals: [
+                    D('eye', 6, 27), D('eye', 14, 26), D('smile', 5, 35), D('claws', 16, 54), D('claws', 34, 54),
+                    D('leaf', 30, 6, { side: 'both' }), D('leaf', 40, 6, { side: 'both' }), D('leaf', 25, 10, { side: 'both' }),
+                    D('leaf', 46, 10, { side: 'both' }), D('leaf', 35, 8, { side: 'both' }),
+                ],
+            },
+            picklechu: {
+                parts: [
+                    P('yellow', [[34, 42], [44, 34], [40, 31], [50, 20], [47, 18], [54, 8], [41, 20], [44, 23], [33, 36]]),
+                    P('yellow', [[17, 21], [8, 2], [24, 15]]), P('ink', [[10.7, 7.4], [8, 2], [12.5, 5.9]], { outline: false }),
+                    P('yellow', [[31, 15], [44, 1], [37, 20]]), P('ink', [[40.1, 4.9], [44, 1], [41.9, 6.4]], { outline: false }),
+                    E('yellow', 28, 35, 13.5, 18, { rot: 0.06, bumps: 0.45, ridges: 4 }),
+                    E('yellow', 17, 39, 3, 4.5, { rot: 0.5 }), E('yellow', 39, 38, 3, 4.5, { rot: -0.5 }),
+                    E('yellow', 22, 53, 5, 2.6), E('yellow', 35, 53, 5, 2.6),
+                ],
+                decals: [
+                    D('eye', 19, 23), D('eye', 31, 22), D('cheek', 13, 30), D('cheek', 36, 29), D('nose', 26, 28), D('open', 23, 30),
+                    D('stripe', 21, 28, { side: 'back' }), D('stripe', 20, 33, { side: 'back' }),
+                ],
+            },
+            gherkinzard: {
+                parts: [
+                    P('wing', [[34, 24], [52, 4], [50, 16], [56, 21], [49, 25], [54, 31], [40, 32]]),
+                    P('wing', [[20, 26], [4, 6], [6, 18], [0, 24], [7, 27], [2, 33], [18, 33]]),
+                    L('pickle', [[34, 50], [44, 50], [50, 44], [51, 36]], 3.2, 2),
+                    P('flame', [[51, 19], [54, 24], [57, 28], [56, 33], [53, 37], [49, 37], [46, 33], [46, 28], [48, 25]], { glow: true }),
+                    P('flameIn', [[51, 26], [53, 30], [53.5, 34], [51, 36], [48.5, 34], [49, 30]], { glow: true, line: false }),
+                    E('pickle', 21, 51, 5.5, 4.5), E('pickle', 34, 51, 5.5, 4.5),
+                    E('pickle', 28, 39, 11, 14, { bumps: 0.4, ridges: 3 }),
+                    E('cream', 26, 42, 6.5, 10, { tex: 'bands' }),
+                    E('pickle', 17, 36, 3, 5.5, { rot: 0.6 }), E('pickle', 39, 36, 3, 5.5, { rot: -0.5 }),
+                    P('dark', [[28, 14], [33, 3], [32, 15]]), P('dark', [[23, 14], [25, 4], [27, 14]]),
+                    E('pickle', 27, 20, 9, 8.5, { bumps: 0.3 }), E('pickle', 19, 22, 6, 4.5),
+                ],
+                decals: [D('eyeAngry', 19, 15), D('eyeAngry', 27, 14), D('nose', 15, 21), D('fang', 14, 24), D('claws', 18, 54), D('claws', 31, 54)],
+            },
+            brinetle: {
+                parts: [
+                    L('pickle', [[38, 48], [47, 50], [51, 46], [49, 42], [46, 44]], 2.6, 2),
+                    E('lid', 29, 38, 14.5, 15, { side: 'front', tex: 'knurl' }),
+                    E('pickle', 21, 53, 5, 3), E('pickle', 35, 53, 5, 3),
+                    E('pickle', 28, 39, 10.5, 13, { side: 'front', bumps: 0.3 }),
+                    E('cream', 28, 41, 7, 9.5, { side: 'front', tex: 'bands' }),
+                    E('lid', 28, 37, 16, 16, { side: 'back', tex: 'knurl', pow: 2.4 }),
+                    E('lid', 28, 37, 9, 9, { side: 'back', pow: 2.4 }),
+                    E('pickle', 15, 37, 3, 5.5, { rot: 0.5 }), E('pickle', 42, 37, 3, 5.5, { rot: -0.5 }),
+                    E('pickle', 26, 19, 10.5, 9.5, { bumps: 0.3 }),
+                ],
+                decals: [D('eye', 19, 15), D('eye', 27, 14), D('smile', 20, 23)],
+            },
+            jigglypickle: {
+                parts: [
+                    P('pink', [[13, 20], [8, 6], [20, 14]]), P('pinkDeep', [[13.5, 16], [10, 9], [16.5, 13]], { outline: false }),
+                    P('pink', [[36, 14], [47, 5], [43, 20]]), P('pinkDeep', [[39, 13], [45, 8], [42.5, 16]], { outline: false }),
+                    E('pink', 20, 51, 5.5, 3), E('pink', 36, 51, 5.5, 3),
+                    E('pink', 9, 34, 3.5, 4.5), E('pink', 47, 34, 3.5, 4.5),
+                    E('pink', 28, 31, 19, 18.5, { bumps: 0.25, ridges: 3 }),
+                    L('pink', [[26, 14], [22, 8], [27, 4], [32, 7], [29, 11], [26, 9]], 2.6, 1.6),
+                ],
+                decals: [D('eyeBig', 15, 23), D('eyeBig', 31, 23), D('tiny', 27, 36), D('blush', 12, 32), D('blush', 40, 32)],
+            },
+            cornichonite: {
+                parts: [
+                    L('stone', [[18, 36], [9, 33], [6, 24]], 3.6, 3), E('stone', 6, 20, 4.8, 4.5, { bumps: 0.6 }),
+                    L('stone', [[38, 36], [47, 33], [50, 24]], 3.6, 3), E('stone', 50, 20, 4.8, 4.5, { bumps: 0.6 }),
+                    E('stone', 28, 39, 14, 12, { rot: 0.08, bumps: 0.9, ridges: 3 }),
+                ],
+                decals: [D('eyeAngry', 19, 33), D('eyeAngry', 31, 33, { flip: true }), D('grimace', 25, 41), D('crack', 35, 43), D('crack', 16, 40)],
+            },
+            snorelish: {
+                parts: [
+                    P('deep', [[14, 11], [13, 3], [19, 8]]), P('deep', [[38, 8], [43, 3], [42, 11]]),
+                    E('deep', 6, 34, 5.5, 9, { rot: 0.2 }), E('deep', 50, 34, 5.5, 9, { rot: -0.2 }),
+                    E('deep', 28, 34, 23, 20, { group: 'body', bumps: 0.2 }),
+                    E('deep', 28, 15, 14, 10, { group: 'body' }),
+                    E('cream', 28, 18, 10, 6),
+                    E('cream', 28, 38, 16, 13, { flecks: ['#5f9a3a', '#c84a3a', '#e8c040'] }),
+                    E('cream', 13, 50, 7, 5.5), E('cream', 43, 50, 7, 5.5),
+                ],
+                decals: [D('eyeShut', 19, 16), D('eyeShut', 31, 16), D('snore', 25, 20), D('claws', 11, 47), D('claws', 41, 47), D('z', 47, 2), D('zSmall', 52, 9)],
+            },
+            brinegar: {
+                parts: [
+                    P('purple', [[10, 24], [12, 10], [17, 19], [21, 5], [26, 17], [31, 4], [35, 17], [41, 6], [43, 19], [47, 12], [46, 26]]),
+                    P('purple', [[10, 24], [3, 9], [15, 19]]), P('purple', [[43, 20], [53, 8], [47, 27]]),
+                    E('purple', 17, 51, 6, 4), E('purple', 38, 51, 6, 4),
+                    E('purple', 8, 38, 3.5, 6, { rot: 0.7 }), E('purple', 49, 37, 3.5, 6, { rot: -0.7 }),
+                    E('purple', 28, 34, 20, 17, { ridges: 5, bumps: 0.15 }),
+                ],
+                decals: [D('eyeRed', 13, 24), D('eyeRed', 32, 24, { flip: true }), D('grin', 15, 35), D('claws', 15, 54), D('claws', 36, 54)],
+            },
+            gherkarp: {
+                parts: [
+                    P('fin', [[40, 30], [54, 16], [50, 30], [55, 44], [40, 36]]),
+                    P('fin', [[14, 23], [17, 9], [21, 18], [25, 7], [29, 18], [33, 9], [36, 22]]),
+                    E('orange', 26, 32, 18, 12.5, { rot: -0.12, tex: 'scales' }),
+                    E('cream', 24, 39, 12, 4.5, { rot: -0.12 }),
+                    P('fin', [[24, 37], [33, 46], [22, 44]]),
+                    L('cream', [[9, 35], [4, 42], [6, 50]], 1.1, 0.8),
+                    L('cream', [[11, 36], [10, 45], [13, 52]], 1.1, 0.8),
+                    E('cream', 8, 32, 3, 3.5),
+                ],
+                decals: [D('eyeFish', 12, 23), D('pucker', 7, 31)],
+            },
+            dillto: {
+                parts: [
+                    E('pickle', 28, 43, 21, 11, { group: 'blob', bumps: 0.25 }),
+                    E('pickle', 21, 34, 11, 9, { group: 'blob' }),
+                    E('pickle', 34, 32, 11, 9.5, { group: 'blob', bumps: 0.2 }),
+                    E('pickle', 8, 40, 5, 3.5, { group: 'blob' }), E('pickle', 48, 38, 5, 3.5, { group: 'blob' }),
+                ],
+                decals: [D('dot', 21, 33), D('dot', 31, 32), D('wobbly', 23, 38)],
+            },
+            mrbrine: {
+                parts: [
+                    L('blue', [[22, 13], [15, 7], [17, 1]], 2.2, 1.3), L('blue', [[34, 12], [41, 6], [39, 0]], 2.2, 1.3),
+                    L('pickle', [[19, 30], [12, 25]], 2.4, 2), L('pickle', [[37, 29], [44, 23]], 2.4, 2),
+                    E('white', 10, 21, 5.5, 5.5), E('white', 46, 19, 5.5, 5.5),
+                    L('pickle', [[23, 46], [21, 52]], 2.6), L('pickle', [[33, 46], [35, 52]], 2.6),
+                    E('ink', 19, 53, 5.5, 2.6), E('ink', 37, 53, 5.5, 2.6),
+                    E('pickle', 28, 35, 11, 15, { bumps: 0.3 }),
+                    E('white', 28, 41, 10.6, 8, { tex: 'stripes', stripe: 'ink' }),
+                    E('white', 28, 22, 7.5, 6.5),
+                    E('ink', 30, 15, 8.5, 3.2, { rot: -0.15 }), L('ink', [[30, 12], [31, 10]], 1),
+                ],
+                decals: [D('eyeSmall', 24, 19), D('eyeSmall', 31, 19), D('cheek', 21, 23), D('cheek', 31, 23), D('tiny', 27, 25), D('fingers', 9, 17), D('fingers', 45, 15)],
+            },
+            voltjar: {
+                parts: [
+                    E('glass', 28, 36, 16, 17, { pow: 4 }),
+                    E('pickleSoft', 22, 39, 5, 12, { rot: 0.25 }), E('pickleSoft', 34, 38, 5, 13, { rot: -0.2 }),
+                    E('pickleSoft', 28, 44, 4, 8.5, { rot: 0.05 }),
+                    E('glass', 28, 21, 14, 2.5, { pow: 4 }),
+                    E('lid', 28, 16, 17, 5, { pow: 4, tex: 'knurl' }),
+                ],
+                decals: [
+                    D('shine', 15, 26), D('shineDot', 15, 35), D('eyeAngry', 17, 27), D('eyeAngry', 33, 27, { flip: true }),
+                    D('spark', 3, 12, { side: 'both' }), D('spark', 50, 40, { side: 'both' }), D('spark', 5, 45, { side: 'both' }),
+                ],
+            },
+            dillglett: {
+                parts: [
+                    E('pickle', 28, 34, 10.5, 19, { bumps: 0.45, ridges: 3 }),
+                    L('dill', [[29, 16], [33, 8]], 1.1, 0.6, { outline: false }),
+                    E('red', 28, 33, 4.5, 3.2, { side: 'front' }),
+                    E('dirt', 28, 53, 25, 8.5, { flecks: ['#c9a57a', '#4a3524', '#8a8a7a'] }),
+                ],
+                decals: [D('eyeTall', 22, 24), D('eyeTall', 32, 24), D('leaf', 32, 7, { side: 'both' })],
+            },
+        };
+
+        const LIGHT = (() => { const l = [-0.5, -0.75, 0.9], m = Math.hypot(...l); return l.map(v => v / m); })();
+        const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+        const RGB = {};
+        const rgbOf = hex => RGB[hex] || (RGB[hex] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)));
+        const mix = (a, b) => { let h = Math.imul(a ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul(b + 0x632be59b, 0xc2b2ae35); h ^= h >>> 15; return Math.imul(h, 0x27d4eb2d) >>> 0; };
+
+        function inPoly(pts, x, y) {
+            let inside = false;
+            for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+                const [xi, yi] = pts[i], [xj, yj] = pts[j];
+                if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+            }
+            return inside;
+        }
+
+        // Where a pixel lands on a shape: its surface normal and a coordinate across the long axis
+        function sample(p, px, py) {
+            if (p.t === 'e') {
+                const c = Math.cos(p.rot || 0), s = Math.sin(p.rot || 0), dx = px - p.cx, dy = py - p.cy;
+                const u = (dx * c + dy * s) / p.rx, v = (-dx * s + dy * c) / p.ry, pw = p.pow || 2;
+                const q = Math.pow(Math.abs(u), pw) + Math.pow(Math.abs(v), pw);
+                if (q > 1) return null;
+                const z = Math.sqrt(1 - q), gx = u * c - v * s, gy = u * s + v * c, m = Math.hypot(gx, gy, z) || 1;
+                return [gx / m, gy / m, z / m, p.rx < p.ry ? u : v];
+            }
+            if (p.t === 'p') {
+                if (!inPoly(p.pts, px, py)) return null;
+                if (!p.box) {
+                    const xs = p.pts.map(q => q[0]), ys = p.pts.map(q => q[1]);
+                    p.box = { cx: (Math.min(...xs) + Math.max(...xs)) / 2, cy: (Math.min(...ys) + Math.max(...ys)) / 2, hw: (Math.max(...xs) - Math.min(...xs)) / 2 || 1, hh: (Math.max(...ys) - Math.min(...ys)) / 2 || 1 };
+                }
+                const gx = (px - p.box.cx) / p.box.hw * 0.55, gy = (py - p.box.cy) / p.box.hh * 0.55, m = Math.hypot(gx, gy, 1);
+                return [gx / m, gy / m, 1 / m, gx];
+            }
+            // A stroke: nearest point on the line, radius tapering along its length
+            let total = 0;
+            const segs = [];
+            for (let i = 1; i < p.pts.length; i++) {
+                const [ax, ay] = p.pts[i - 1], [bx, by] = p.pts[i], len = Math.hypot(bx - ax, by - ay) || 1;
+                segs.push({ ax, ay, bx, by, len, from: total });
+                total += len;
+            }
+            let best = Infinity, ox = 0, oy = 0, along = 0;
+            segs.forEach(sg => {
+                const t = Math.max(0, Math.min(1, ((px - sg.ax) * (sg.bx - sg.ax) + (py - sg.ay) * (sg.by - sg.ay)) / (sg.len * sg.len)));
+                const qx = sg.ax + t * (sg.bx - sg.ax), qy = sg.ay + t * (sg.by - sg.ay), d = Math.hypot(px - qx, py - qy);
+                if (d < best) { best = d; ox = px - qx; oy = py - qy; along = (sg.from + t * sg.len) / total; }
+            });
+            const r = p.r + (p.r2 - p.r) * along;
+            if (best > r) return null;
+            const gx = ox / r, gy = oy / r;
+            return [gx, gy, Math.sqrt(Math.max(0, 1 - gx * gx - gy * gy)), 0];
+        }
+
+        function paintMon(design, back) {
+            const N = 56;
+            const parts = design.parts.filter(p => !p.side || p.side === (back ? 'back' : 'front'));
+            const own = new Int16Array(N * N).fill(-1), idx = new Int8Array(N * N);
+            const nrm = new Float32Array(N * N * 3), across = new Float32Array(N * N);
+            parts.forEach((p, k) => {
+                for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+                    const hit = sample(p, x + 0.5, y + 0.5);
+                    if (!hit) continue;
+                    const i = y * N + x;
+                    own[i] = k; nrm[i * 3] = hit[0]; nrm[i * 3 + 1] = hit[1]; nrm[i * 3 + 2] = hit[2]; across[i] = hit[3];
+                }
+            });
+            const at = (x, y) => x < 0 || y < 0 || x >= N || y >= N ? -1 : own[y * N + x];
+            const together = (a, b) => a.group && a.group === b.group;
+            const img = new ImageData(N, N), px = img.data;
+            const put = (i, hex) => { const c = rgbOf(hex); px[i * 4] = c[0]; px[i * 4 + 1] = c[1]; px[i * 4 + 2] = c[2]; px[i * 4 + 3] = 255; };
+
+            // Light, shadow, ridges and texture
+            for (let i = 0; i < N * N; i++) {
+                if (own[i] < 0) continue;
+                const p = parts[own[i]], m = MAT[p.mat], x = i % N, y = (i / N) | 0;
+                const lam = Math.max(0, nrm[i * 3] * LIGHT[0] + nrm[i * 3 + 1] * LIGHT[1] + nrm[i * 3 + 2] * LIGHT[2]);
+                let s = p.glow ? 0.5 + 0.5 * lam : 0.1 + 0.9 * lam;
+                for (const [dx, dy] of [[-1, -1], [-2, -2], [0, -2]]) {
+                    const j = at(x + dx, y + dy);
+                    if (j > own[i] && !together(parts[j], p)) { s -= 0.2; break; }
+                }
+                if (p.ridges) s += 0.07 * Math.cos(across[i] * p.ridges * Math.PI);
+                let k = Math.max(0, Math.min(4, Math.floor(s * 5 + (BAYER[(y % 4) * 4 + (x % 4)] / 16 - 0.5) * 0.8)));
+                if (p.tex === 'knurl' && x % 3 === 0) k = Math.max(0, k - 1);
+                if (p.tex === 'bands' && y % 4 === 0) k = Math.max(0, k - 1);
+                if (p.tex === 'scales') {
+                    const row = Math.floor(y / 4), cx = (x + (row % 2) * 3) % 6, cy = y % 4;
+                    if ((cy === 3 && cx >= 1 && cx <= 4) || ((cx === 0 || cx === 5) && cy === 2)) k = Math.max(0, k - 1);
+                }
+                idx[i] = k;
+                const ramp = p.tex === 'stripes' && Math.floor(y / 3) % 2 ? MAT[p.stripe].ramp : m.ramp;
+                put(i, m.spec && lam > 0.95 ? m.spec : ramp[k]);
+            }
+
+            // Warts: a lit pixel over a shadowed one, one per little cell
+            parts.forEach((p, k) => {
+                if (!p.bumps && !p.flecks) return;
+                const cell = p.flecks ? 4 : 5;
+                for (let cy = 0; cy < N / cell; cy++) for (let cx = 0; cx < N / cell; cx++) {
+                    const h = mix(cx * 31 + k * 977, cy * 17 + (back ? 7 : 0));
+                    if ((h & 255) / 255 > (p.bumps || 0.4)) continue;
+                    const x = cx * cell + 1 + (h >>> 8) % (cell - 2), y = cy * cell + 1 + (h >>> 12) % (cell - 2), i = y * N + x;
+                    if ([at(x, y), at(x - 1, y), at(x + 1, y), at(x, y - 1), at(x, y + 1), at(x, y + 2)].some(j => j !== k)) continue;
+                    const ramp = MAT[p.mat].ramp;
+                    if (p.flecks) { put(i, p.flecks[(h >>> 16) % p.flecks.length]); continue; }
+                    put(i, ramp[Math.min(4, idx[i] + 1)]);
+                    put(i + N, ramp[Math.max(0, idx[i] - 1)]);
+                }
+            });
+
+            // Outlines: darkest on the shadow side, and a line wherever one part sits on another
+            for (let i = 0; i < N * N; i++) {
+                if (own[i] < 0) continue;
+                const p = parts[own[i]], m = MAT[p.mat], x = i % N, y = (i / N) | 0;
+                const l = at(x - 1, y), r = at(x + 1, y), u = at(x, y - 1), d = at(x, y + 1);
+                if (p.outline !== false && (r < 0 || d < 0)) put(i, m.out);
+                else if (p.outline !== false && (l < 0 || u < 0)) put(i, m.ramp[0]);
+                else if (p.line !== false && [l, r, u, d].some(j => j >= 0 && j < own[i] && !together(parts[j], p))) put(i, m.ramp[0]);
+            }
+
+            const c = sprite(N, x => x.putImageData(img, 0, 0));
+            const x = c.getContext('2d');
+            design.decals.forEach(dc => {
+                if ((dc.side || 'front') !== 'both' && (dc.side || 'front') !== (back ? 'back' : 'front')) return;
+                const rows = dc.flip ? STAMP[dc.name].map(r => [...r].reverse().join('')) : STAMP[dc.name];
+                stamp(x, rows, INK, dc.x, dc.y);
+            });
+            return c;
+        }
 
         // Party icons and the pickle that follows you: the big sprite shrunk to 16px, edges kept hard
         function shrink(img, size = 16) {
@@ -490,10 +768,9 @@
         }
 
         const FRONT = {}, BACK = {}, ICON = {}, ICON_BACK = {}, ICON_RIGHT = {};
-        for (const [kind, [size, art]] of Object.entries(ART)) {
-            FRONT[kind] = sprite(size, x => art(x, false));
-            const back = sprite(size, x => art(x, true));
-            BACK[kind] = kind === 'dillbasaur' ? back : mirror(back);
+        for (const [kind, design] of Object.entries(DESIGNS)) {
+            FRONT[kind] = paintMon(design, false);
+            BACK[kind] = mirror(paintMon(design, true));
             ICON[kind] = shrink(FRONT[kind]);
             ICON_BACK[kind] = shrink(BACK[kind]);
             ICON_RIGHT[kind] = mirror(ICON[kind]);
@@ -747,6 +1024,19 @@
             'Pickle Pound': { min: 7, max: 10, line: 'Pound for pound, a pickle.' },
             'Rock Crunch': { min: 9, max: 12, line: 'Rock hard. Pickle hard.' },
             'Tiny Tantrum': { min: 3, max: 6, line: 'Small, but loud.' },
+            'Belly Flop': { min: 10, max: 15, line: 'The ground shook. It was asleep the whole time.' },
+            'Snore': { min: 0, max: 0, line: 'Zzz. Very effective at sleeping.' },
+            'Shadow Brine': { min: 9, max: 13, line: 'Spooky and sour.' },
+            'Lick': { min: 5, max: 9, line: 'It tastes of vinegar. Both of them do.' },
+            'Pickle Hex': { min: 7, max: 11, line: 'Hexed and pickled.' },
+            'Flop': { min: 0, max: 0, line: 'But nothing happened.' },
+            'Copycat': { min: 0, max: 0, line: 'It turned into a pickle. It was already a pickle.' },
+            'Invisible Wall': { min: 0, max: 0, line: 'It mimed a wall. Very convincing.' },
+            'Brine Slap': { min: 7, max: 11, line: 'Silent, but briny.' },
+            'Mime Jab': { min: 6, max: 10, line: "You didn't hear it coming." },
+            'Pop the Lid': { min: 11, max: 16, line: 'Pop! Brine everywhere.' },
+            'Burrow': { min: 7, max: 11, line: 'It popped up somewhere else. Same pickle.' },
+            'Dirt Toss': { min: 4, max: 8, line: 'Gritty.' },
         };
         const SPECIES = {
             dillbasaur: { name: 'Dillbasaur', moves: ['Brine Splash', 'Crunch', 'Dill Beam', 'Vinegar Glare'] },
@@ -754,13 +1044,24 @@
             gherkinzard: { name: 'Gherkinzard', moves: ['Dill Flame', 'Sour Slash', 'Crunch', 'Vinegar Glare'] },
             brinetle: { name: 'Brinetle', moves: ['Brine Gun', 'Lid Bash', 'Brine Splash', 'Vinegar Glare'] },
             jigglypickle: { name: 'Jigglypickle', moves: ['Sing (badly)', 'Pickle Pound', 'Quick Crunch', 'Vinegar Glare'] },
-            cornichonite: { name: 'Cornichonite', moves: ['Rock Crunch', 'Tiny Tantrum', 'Crunch', 'Vinegar Glare'] },
+            cornichonite: { name: 'Cornichonite', moves: ['Rock Crunch', 'Tiny Tantrum', 'Crunch', 'Vinegar Glare'], hp: 1.2 },
+            snorelish: { name: 'Snorelish', moves: ['Belly Flop', 'Snore', 'Crunch', 'Vinegar Glare'], hp: 1.5, catch: 0.6 },
+            brinegar: { name: 'Brinegar', moves: ['Shadow Brine', 'Lick', 'Pickle Hex', 'Vinegar Glare'], catch: 0.8 },
+            gherkarp: { name: 'Gherkarp', moves: ['Flop'], hp: 0.7, catch: 1.6 },
+            dillto: { name: 'Dillto', moves: ['Copycat', 'Pickle Pound', 'Quick Crunch', 'Vinegar Glare'] },
+            mrbrine: { name: 'Mr. Brine', moves: ['Invisible Wall', 'Brine Slap', 'Mime Jab', 'Vinegar Glare'] },
+            voltjar: { name: 'Voltjar', moves: ['Pop the Lid', 'Brine Shock', 'Lid Bash', 'Vinegar Glare'] },
+            dillglett: { name: 'Dillglett', moves: ['Burrow', 'Dirt Toss', 'Quick Crunch', 'Vinegar Glare'], hp: 0.8 },
         };
-        const WILD = ['picklechu', 'gherkinzard', 'brinetle', 'jigglypickle', 'cornichonite'];
+        // How often each one turns up in the tall dill
+        const WILD = Object.entries({
+            gherkarp: 4, picklechu: 3, cornichonite: 3, dillglett: 3, jigglypickle: 3, brinetle: 2, gherkinzard: 2,
+            brinegar: 2, mrbrine: 2, voltjar: 2, dillto: 2, dillbasaur: 1, snorelish: 1,
+        }).flatMap(([kind, n]) => Array(n).fill(kind));
         const movesOf = p => SPECIES[p.kind].moves;
 
         function makePickle(kind, lvl) {
-            const max = 20 + lvl * 2;
+            const max = Math.round((20 + lvl * 2) * (SPECIES[kind].hp || 1));
             return { kind, name: SPECIES[kind].name, lvl, max, hp: max, shownHp: max };
         }
 
@@ -795,7 +1096,7 @@
         function newEnemy() {
             const lvl = rand(5, 14);
             enemy = makePickle(pick(WILD), lvl);
-            enemy.max = enemy.hp = enemy.shownHp = 18 + lvl * 2;
+            enemy.max = enemy.hp = enemy.shownHp = Math.round((18 + lvl * 2) * (SPECIES[enemy.kind].hp || 1));
             fx.enemyHide = false; fx.enemyScale = 1; fx.enemyFlash = 0; fx.jar = null;
         }
 
@@ -1121,7 +1422,7 @@
             fx.enemyHide = true; fx.enemyFlash = 0;
             await play(220, t => { fx.jar.y = 70 + 36 * t; fx.jar.rot = 0; });
             const hpPart = enemy.hp / enemy.max;
-            const chance = Math.min(1, (1 - hpPart * 0.7) * 0.55 * item.rate);
+            const chance = Math.min(1, (1 - hpPart * 0.7) * 0.55 * item.rate * (SPECIES[enemy.kind].catch || 1));
             let wobbles = 0;
             for (let i = 0; i < 3; i++) {
                 if (Math.random() > chance + 0.15) break;
@@ -1517,7 +1818,10 @@
             g.beginPath(); g.ellipse(128, 218, 102, 16, 0, 0, Math.PI * 2); g.fill();
 
             // Wild pickle
-            if (enemy) drawSprite(FRONT[enemy.kind], 304 + fx.enemyX, 20, 2, fx.enemyFlash, fx.enemyHide, fx.enemyScale);
+            if (enemy) {
+                const front = FRONT[enemy.kind];
+                drawSprite(front, 352 - front.width + fx.enemyX, 118 - front.height * 2, 2, fx.enemyFlash, fx.enemyHide, fx.enemyScale);
+            }
             // Your pickle, from behind
             const back = BACK[player.kind];
             drawSprite(back, 116 - back.width + fx.playerX, 216 - back.height * 2, 2, fx.playerFlash, false, fx.playerScale);
@@ -1559,7 +1863,7 @@
                 MAIN.forEach((label, i) => option(label, 286 + (i % 2) * 96, 266 + Math.floor(i / 2) * 30, i, 90));
             } else if (mode === 'fight') {
                 movesOf(player).forEach((name, i) => option(name, 40 + (i % 2) * 190, 266 + Math.floor(i / 2) * 30, i, 180));
-                option('Back', 410, 266, 4, 56);
+                option('Back', 410, 266, movesOf(player).length, 56);
             } else if (mode === 'bag') {
                 const list = bagList();
                 wrap('Every item in the bag is a pickle.', 26, 266, 210);
@@ -1599,7 +1903,29 @@
         // Keep the ▼ blinking while a line waits
         setInterval(() => { if (mode === 'text' && line && shown >= line.length) draw(); }, 400);
 
+        // ?sheet lays every pickle out, front and back, for checking the art
+        const SHEET = new URLSearchParams(location.search).has('sheet');
+        if (SHEET) {
+            const stageEl = document.getElementById('stage'), grid = document.createElement('div');
+            grid.className = 'sheet';
+            for (const kind of Object.keys(DESIGNS)) {
+                const card = document.createElement('figure');
+                [FRONT[kind], BACK[kind]].forEach(img => {
+                    const c = document.createElement('canvas');
+                    c.width = c.height = 56;
+                    c.getContext('2d').drawImage(img, 0, 0);
+                    card.appendChild(c);
+                });
+                const cap = document.createElement('figcaption');
+                cap.textContent = SPECIES[kind].name;
+                card.appendChild(cap);
+                grid.appendChild(card);
+            }
+            stageEl.replaceChildren(grid);
+        }
+
         (document.fonts ? document.fonts.load(`18px ${FONT}`) : Promise.resolve()).then(() => {
+            if (SHEET) return;
             say(['Welcome to the world of Picklémon!', 'Wild pickles live in the tall dill.'], toWalk, true);
         });
     </script>
