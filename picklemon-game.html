@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POKé Pickle | Irreverent Engineering</title>
+    <title>Picklémon | Irreverent Engineering</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥒</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -104,7 +104,7 @@
     <div class="stage" id="stage">
         <div class="bezel">
             <div class="screen">
-                <canvas id="game" width="480" height="320" tabindex="0" aria-label="POKé Pickle. Walk with the arrow keys, press Enter to talk, X for your pickles, or click."></canvas>
+                <canvas id="game" width="480" height="320" tabindex="0" aria-label="Picklémon. Walk with the arrow keys, press Enter to talk, X for your pickles, or click."></canvas>
             </div>
         </div>
         <div class="below">
@@ -241,7 +241,7 @@
         const TRACKS = { map: compile(SONGS.map), battle: compile(SONGS.battle) };
 
         let musicOn = true;
-        try { musicOn = localStorage.getItem('poke-pickle-music') !== 'off'; } catch (e) { /* private window */ }
+        try { musicOn = localStorage.getItem('picklemon-music') !== 'off'; } catch (e) { /* private window */ }
         let songName = 'map', track = null, songStep = 0, songAt = 0, noiseBuf = null;
 
         function setSong(name) {
@@ -317,7 +317,7 @@
         }
         function toggleMusic() {
             musicOn = !musicOn;
-            try { localStorage.setItem('poke-pickle-music', musicOn ? 'on' : 'off'); } catch (e) { /* fine */ }
+            try { localStorage.setItem('picklemon-music', musicOn ? 'on' : 'off'); } catch (e) { /* fine */ }
             ensureAudio();
             musicBus.gain.setTargetAtTime(musicOn ? 1 : 0, audio.currentTime, 0.03);
             track = null;
@@ -1600,7 +1600,7 @@
         setInterval(() => { if (mode === 'text' && line && shown >= line.length) draw(); }, 400);
 
         (document.fonts ? document.fonts.load(`18px ${FONT}`) : Promise.resolve()).then(() => {
-            say(['Welcome to the world of POKé Pickle!', 'Wild pickles live in the tall dill.'], toWalk, true);
+            say(['Welcome to the world of Picklémon!', 'Wild pickles live in the tall dill.'], toWalk, true);
         });
     </script>
 </body>
