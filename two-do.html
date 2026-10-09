@@ -389,13 +389,16 @@
 
         .writing input::placeholder { color: rgba(20, 26, 46, 0.3); }
         .writing input:focus::placeholder { color: transparent; }
-        .writing .ink { position: relative; pointer-events: none; }
+        /* The mirror spans the whole line rather than hugging its text. The newest letter
+           scales up and blurs as it lands, which pokes past a box the exact width of the
+           text; some browsers then clip it and draw an ellipsis in its place. */
+        .writing .ink { position: relative; pointer-events: none; flex: 1; min-width: 0; text-overflow: clip; }
 
         /* The red note */
         .note {
             flex: 1;
             min-width: 0;
-            transition: opacity 0.35s;
+            transition: opacity 0.6s;
             font-family: var(--write);
             font-size: 14px;
             font-weight: 400;
@@ -762,10 +765,11 @@
         /* ---------- WELLS ---------- */
         const tick = '<svg viewBox="0 0 22 22" aria-hidden="true"><path d="M4 11.5 9 16.5 18 6"/></svg>';
 
-        function render() {
-            wellsEl.innerHTML = '';
+        // Rebuilds the wells from one onward, so the ones before it keep their buttons mid-click
+        function render(from = 0) {
+            while (wellsEl.children.length > from) wellsEl.lastChild.remove();
             input = mirror = null;
-            for (let i = 0; i < LIMIT; i++) {
+            for (let i = from; i < LIMIT; i++) {
                 const li = document.createElement('li');
                 li.className = 'well';
                 const task = state.tasks[i];
@@ -803,10 +807,9 @@
             plus.setAttribute('aria-disabled', String(full));
             plus.setAttribute('aria-label', full ? 'Add a task (finish one first)' : 'Add a task');
             if (!full) {
-                // Back on: it springs up and the message fades away
+                // Back on: it springs up and any message fades away
                 if (!reduceMotion) plus.classList.add('on-again');
-                note.classList.add('gone');
-                setTimeout(() => { if (!plusOff) { note.textContent = ''; note.classList.remove('gone'); } }, 350);
+                hideNote();
             }
         }
 
@@ -880,7 +883,12 @@
                 penToCaret();
             });
             ['keyup', 'click', 'focus', 'select'].forEach(ev => input.addEventListener(ev, penToCaret));
-            input.addEventListener('blur', restSoon);
+            // Anything that takes focus off the field enters the task, including a click
+            // outside this page when it sits in the homepage's modal frame
+            input.addEventListener('blur', () => {
+                restSoon();
+                submit(true);
+            });
             input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
         }
 
@@ -893,6 +901,7 @@
         async function nudge() {
             if (refusing) return;
             refusing = true;
+            showNote();
             if (!reduceMotion) {
                 sound('boop');
                 [pad, plus].forEach(el => { el.classList.remove('wobble', 'nope'); void el.offsetWidth; });
@@ -907,28 +916,38 @@
                 pen.classList.remove('no');
             }
             refusing = false;
-            // The message is normally there already; write it if it isn't
-            if (note.textContent !== NOPE) showNote();
             restSoon();
         }
 
-        // The message beside the + pops in and unblurs
+        // The message beside the + pops in and unblurs, then fades out on its own
+        let noteTimer;
         function showNote() {
+            clearTimeout(noteTimer);
             note.classList.remove('gone', 'pop-in');
             note.textContent = NOPE;
             void note.offsetWidth;
             note.classList.add('pop-in');
+            noteTimer = setTimeout(hideNote, 3200);
         }
 
-        function submit() {
+        function hideNote() {
+            clearTimeout(noteTimer);
+            if (!note.textContent) return;
+            note.classList.add('gone');
+            noteTimer = setTimeout(() => { note.textContent = ''; note.classList.remove('gone', 'pop-in'); }, 600);
+        }
+
+        // Leaving the field (blurred) enters the task without pulling focus into the next one
+        function submit(blurred) {
             const text = draft.trim();
             if (!text) return;
+            const at = state.tasks.length;
             state.tasks.push(text);
             draft = '';
             save();
-            render();
-            if (input) input.focus();
-            else { showNote(); restSoon(); }
+            render(at);
+            if (blurred) return;
+            if (input) input.focus(); else restSoon();
         }
 
         // + with a free slot: go write in it. Switched off, it only bounces.
@@ -988,11 +1007,10 @@
         }
 
         render();
-        (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
-            penRest();
-            if (plusOff) setTimeout(showNote, reduceMotion ? 0 : 400);
-        });
+        (document.fonts ? document.fonts.ready : Promise.resolve()).then(penRest);
         addEventListener('resize', () => { if (document.activeElement === input) penToCaret(); else penRest(); });
+        // Closing the modal with Back, or the tab, takes the page away without ever blurring the field
+        addEventListener('pagehide', () => submit(true));
 
         /* ---------- DOODLING: pick up the pen, choose a tool, drag to draw ---------- */
         const tools = document.getElementById('tools');
