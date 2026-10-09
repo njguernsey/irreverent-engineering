@@ -416,9 +416,9 @@
             flesh: { ramp: ['#6d7a3a', '#9aab58', '#c4d384', '#dfe9a8', '#f4f9d4'], out: '#3e4620' },
             seed: { ramp: ['#8a7a4a', '#b8a670', '#dccb94', '#efe4b8', '#fffaf0'], out: '#5a4e2a' },
             // Doug
-            skin: { ramp: ['#5a3422', '#8a573c', '#c08562', '#e2ab86', '#f6d2b4'], out: '#2e1a10', spec: '#fff0e0' },
-            hair: { ramp: ['#2e2620', '#4a3e34', '#6b5a4a', '#8c7a68', '#b0a08c'], out: '#1a1612' },
-            polo: { ramp: ['#141f3a', '#22335c', '#34508a', '#4f6fb0', '#7d98d0'], out: '#0a1020' },
+            skin: { ramp: ['#6a4028', '#a06a4a', '#d29a74', '#ecbc96', '#f9dcc2'], out: '#2e1a10', spec: '#fff0e0' },
+            hair: { ramp: ['#1a0f08', '#2e1c10', '#45291a', '#5e3a24', '#7a4e32'], out: '#0e0804' },
+            flannel: { ramp: ['#4a1210', '#7a1e1a', '#a83228', '#cf5a42', '#ee8a70'], out: '#2a0806' },
             khaki: { ramp: ['#4a3e22', '#76653a', '#a48f58', '#c8b47c', '#e6d6a4'], out: '#2a2212' },
         };
 
@@ -643,22 +643,25 @@
             // The legendary one. Not a pickle. Nobody has told him.
             doug: {
                 parts: [
-                    L('khaki', [[23, 42], [22, 52]], 3.4, 3), L('khaki', [[33, 42], [34, 52]], 3.4, 3),
-                    E('ink', 21, 54, 4.5, 2), E('ink', 35, 54, 4.5, 2),
-                    L('polo', [[18, 30], [13, 38]], 3.2, 2.8), L('skin', [[13, 38], [12, 44]], 2.3, 2.1), E('skin', 12, 45.5, 2.7, 2.7),
-                    L('polo', [[38, 30], [44, 35]], 3.2, 2.8), L('skin', [[44, 35], [46, 39]], 2.3, 2.1),
-                    E('pickle', 48.5, 31.5, 2.9, 7.5, { rot: 0.3, lines: 2, bumps: 0.6 }),
-                    E('skin', 46.5, 40, 2.8, 2.8),
-                    E('polo', 28, 36, 11, 10, { pow: 2.6 }),
-                    P('white', [[23, 27], [28, 30], [25, 32]], { side: 'front' }), P('white', [[33, 27], [28, 30], [31, 32]], { side: 'front' }),
-                    E('ink', 28, 44, 10, 1.6, { pow: 4 }),
-                    E('skin', 19.5, 18, 1.8, 2.6), E('skin', 36.5, 18, 1.8, 2.6),
-                    E('skin', 28, 17, 8, 9),
-                    E('hair', 20.5, 15, 2.5, 4), E('hair', 35.5, 15, 2.5, 4),
-                    E('hair', 28, 20, 8, 5.5, { side: 'back' }),
-                    E('hair', 28, 22.5, 4.2, 1.6, { side: 'front' }),
+                    L('khaki', [[25, 42], [24.5, 52]], 2.8, 2.5), L('khaki', [[31, 42], [31.5, 52]], 2.8, 2.5),
+                    E('ink', 23.5, 54, 3.8, 1.8), E('ink', 33, 54, 3.8, 1.8),
+                    L('flannel', [[21, 29], [17, 37]], 2.6, 2.3, { tex: 'plaid' }), L('skin', [[17, 37], [16, 43]], 2, 1.8), E('skin', 16, 44.5, 2.4, 2.4),
+                    L('flannel', [[35, 29], [40, 34]], 2.6, 2.3, { tex: 'plaid' }), L('skin', [[40, 34], [42, 38]], 2, 1.8),
+                    E('pickle', 44.5, 30.5, 2.7, 7, { rot: 0.3, lines: 2, bumps: 0.6 }),
+                    E('skin', 42.5, 39, 2.5, 2.5),
+                    E('flannel', 28, 35.5, 8, 9.5, { pow: 2.8, tex: 'plaid' }),
+                    P('white', [[26, 27], [28, 31], [30, 27]], { side: 'front' }),
+                    P('flannel', [[24, 26], [28, 29], [25, 31]], { side: 'front', tex: 'plaid' }), P('flannel', [[32, 26], [28, 29], [31, 31]], { side: 'front', tex: 'plaid' }),
+                    E('ink', 28, 43.5, 7.5, 1.4, { pow: 4 }),
+                    // Hair behind the head shows around the top and sides, down past the ears
+                    E('hair', 28, 15.5, 9.3, 9.8, { side: 'front', group: 'hair' }),
+                    E('skin', 20.5, 18, 1.6, 2.4, { soft: true }), E('skin', 35.5, 18, 1.6, 2.4, { soft: true }),
+                    E('skin', 28, 17.5, 7.5, 8.5, { soft: true }),
+                    // and a neat fringe, parted on the side
+                    P('hair', [[20.6, 16], [20.4, 11], [22, 8], [25, 6.4], [28, 6], [31.5, 6.5], [34.5, 8.5], [35.6, 11.5], [35.5, 15.5], [33.8, 12.2], [31, 11], [27.5, 11.2], [24.5, 11.8], [22.3, 13.5]], { side: 'front', group: 'hair' }),
+                    E('hair', 28, 16, 8.4, 10, { side: 'back' }),
                 ],
-                decals: [D('brows', 23, 12), D('glasses', 23, 14), D('frown', 26, 24), D('buttons', 28, 31)],
+                decals: [D('brows', 23, 13), D('glasses', 23, 15), D('frown', 26, 25)],
             },
         };
 
@@ -744,17 +747,24 @@
                 if (own[i] < 0) continue;
                 const p = parts[own[i]], m = MAT[p.mat], x = i % N, y = (i / N) | 0;
                 const lam = Math.max(0, nrm[i * 3] * LIGHT[0] + nrm[i * 3 + 1] * LIGHT[1] + nrm[i * 3 + 2] * LIGHT[2]);
-                let s = p.glow ? 0.5 + 0.5 * lam : 0.1 + 0.9 * lam;
+                // soft: flatter light and no dither, so a face doesn't read as stubble
+                let s = p.glow ? 0.5 + 0.5 * lam : p.soft ? 0.45 + 0.55 * lam : 0.1 + 0.9 * lam;
                 for (const [dx, dy] of [[-1, -1], [-2, -2], [0, -2]]) {
                     const j = at(x + dx, y + dy);
                     if (j > own[i] && !together(parts[j], p)) { s -= 0.2; break; }
                 }
                 if (p.ridges) s += 0.07 * Math.cos(across[i] * p.ridges * Math.PI);
-                let k = Math.max(0, Math.min(4, Math.floor(s * 5 + (BAYER[(y % 4) * 4 + (x % 4)] / 16 - 0.5) * 0.8)));
+                let k = Math.max(0, Math.min(4, Math.floor(s * 5 + (p.soft ? 0 : (BAYER[(y % 4) * 4 + (x % 4)] / 16 - 0.5) * 0.8))));
                 // Pale stripes along the length of the pickle, like the real thing
                 if (p.lines && Math.cos(across[i] * p.lines * Math.PI) > 0.75) k = Math.min(4, k + 1);
                 if (p.tex === 'knurl' && x % 3 === 0) k = Math.max(0, k - 1);
                 if (p.tex === 'bands' && y % 4 === 0) k = Math.max(0, k - 1);
+                if (p.tex === 'plaid') {
+                    const bx = x % 6 < 2, by = y % 6 < 2;
+                    if (bx && by) k = Math.max(0, k - 2);
+                    else if (bx || by) k = Math.max(0, k - 1);
+                    else if (x % 6 === 4 || y % 6 === 4) k = Math.min(4, k + 1);
+                }
                 if (p.tex === 'scales') {
                     const row = Math.floor(y / 4), cx = (x + (row % 2) * 3) % 6, cy = y % 4;
                     if ((cy === 3 && cx >= 1 && cx <= 4) || ((cx === 0 || cx === 5) && cy === 2)) k = Math.max(0, k - 1);
@@ -1017,8 +1027,21 @@
         const YOU_PAL = { k: '#1e2a1a', r: '#d84a3a', R: '#a8322a', g: '#9ccf5e', h: '#4a3222', s: '#f2c8a0', e: '#141a12', b: '#4a6ad0', y: LIDS.jar, p: '#2c3450', f: '#3a2a22' };
         const YOU = person(YOU_PAL);
         const FAN = person({ ...YOU_PAL, r: '#9a6ad9', R: '#6e48a8', b: '#e0a020', y: '#e0a020', h: '#7a4a2a' });
-        // Bald on top, a band of hair round the sides
-        const DOUG_WALK = person({ ...YOU_PAL, r: '#e8b890', R: '#6b5a4a', g: '#fbe0c4', h: '#6b5a4a', b: '#34508a', y: '#34508a', p: '#a48f58' });
+        // Doug on the map: full hair, a plaid shirt, khakis
+        function plaid(img, shirt, dark) {
+            const c = sprite(img.width, x => x.drawImage(img, 0, 0), img.height), x = c.getContext('2d');
+            const d = x.getImageData(0, 0, c.width, c.height), [r, gr, b] = rgbOf(shirt), [dr, dg, db] = rgbOf(dark);
+            for (let i = 0; i < d.data.length; i += 4) {
+                const px = (i / 4) % c.width, py = Math.floor(i / 4 / c.width);
+                if (d.data[i] === r && d.data[i + 1] === gr && d.data[i + 2] === b && (px % 3 === 0 || py % 3 === 0)) {
+                    d.data[i] = dr; d.data[i + 1] = dg; d.data[i + 2] = db;
+                }
+            }
+            x.putImageData(d, 0, 0);
+            return c;
+        }
+        const DOUG_PLAIN = person({ ...YOU_PAL, r: '#45291a', R: '#2e1c10', g: '#5e3a24', h: '#2e1c10', b: '#c0402e', y: '#c0402e', p: '#a48f58' });
+        const DOUG_WALK = Object.fromEntries(Object.entries(DOUG_PLAIN).map(([dir, frames]) => [dir, frames.map(f => plaid(f, '#c0402e', '#6e1a14'))]));
 
         /* ---------- THE MAP ---------- */
         // T tree   . grass   , tall dill   = path   ~ brine   * flowers   F fence   S sign   C Picklémon Center   D its door
