@@ -415,10 +415,15 @@
             // The inside of a pickle, for anything sliced open
             flesh: { ramp: ['#6d7a3a', '#9aab58', '#c4d384', '#dfe9a8', '#f4f9d4'], out: '#3e4620' },
             seed: { ramp: ['#8a7a4a', '#b8a670', '#dccb94', '#efe4b8', '#fffaf0'], out: '#5a4e2a' },
+            // Doug
+            skin: { ramp: ['#5a3422', '#8a573c', '#c08562', '#e2ab86', '#f6d2b4'], out: '#2e1a10', spec: '#fff0e0' },
+            hair: { ramp: ['#2e2620', '#4a3e34', '#6b5a4a', '#8c7a68', '#b0a08c'], out: '#1a1612' },
+            polo: { ramp: ['#141f3a', '#22335c', '#34508a', '#4f6fb0', '#7d98d0'], out: '#0a1020' },
+            khaki: { ramp: ['#4a3e22', '#76653a', '#a48f58', '#c8b47c', '#e6d6a4'], out: '#2a2212' },
         };
 
         // Faces and markings, stamped on last
-        const INK = { k: '#141a12', w: '#ffffff', r: '#e0484a', R: '#9a1e22', p: '#e86a92', y: '#ffe066', t: '#2f9a94', b: '#7a5a3a', g: '#8cc25a', B: '#a08b62', s: '#5f6b4c', o: '#ff9a3a' };
+        const INK = { k: '#141a12', W: '#dfe9ef', w: '#ffffff', r: '#e0484a', R: '#9a1e22', p: '#e86a92', y: '#ffe066', t: '#2f9a94', b: '#7a5a3a', g: '#8cc25a', B: '#a08b62', s: '#5f6b4c', o: '#ff9a3a' };
         const STAMP = {
             eye: ['.kk.', 'kwkk', 'kkkk', 'kkkk', '.kk.'],
             eyeSmall: ['kw', 'kk', 'kk'],
@@ -451,6 +456,10 @@
             shineDot: ['w', 'w'],
             spark: ['..y', '.yy', 'yy.', 'y..'],
             heat: ['.o', 'o.', '.o', 'o.'],
+            glasses: ['kkkkkkkkkkk', 'kWkWk.kWkWk', 'kWWWk.kWWWk', 'kkkkk.kkkkk'],
+            brows: ['kk.......kk', '..kk...kk..'],
+            frown: ['.kk.', 'k..k'],
+            buttons: ['w', '.', 'w'],
             z: ['wwww', '..w.', '.w..', 'wwww'],
             zSmall: ['www', '.w.', 'www'],
         };
@@ -630,6 +639,26 @@
                     E('dirt', 28, 53, 25, 8.5, { flecks: ['#c9a57a', '#4a3524', '#8a8a7a'] }),
                 ],
                 decals: [D('eyeTall', 22, 24), D('eyeTall', 32, 24), D('leaf', 32, 7, { side: 'both' })],
+            },
+            // The legendary one. Not a pickle. Nobody has told him.
+            doug: {
+                parts: [
+                    L('khaki', [[23, 42], [22, 52]], 3.4, 3), L('khaki', [[33, 42], [34, 52]], 3.4, 3),
+                    E('ink', 21, 54, 4.5, 2), E('ink', 35, 54, 4.5, 2),
+                    L('polo', [[18, 30], [13, 38]], 3.2, 2.8), L('skin', [[13, 38], [12, 44]], 2.3, 2.1), E('skin', 12, 45.5, 2.7, 2.7),
+                    L('polo', [[38, 30], [44, 35]], 3.2, 2.8), L('skin', [[44, 35], [46, 39]], 2.3, 2.1),
+                    E('pickle', 48.5, 31.5, 2.9, 7.5, { rot: 0.3, lines: 2, bumps: 0.6 }),
+                    E('skin', 46.5, 40, 2.8, 2.8),
+                    E('polo', 28, 36, 11, 10, { pow: 2.6 }),
+                    P('white', [[23, 27], [28, 30], [25, 32]], { side: 'front' }), P('white', [[33, 27], [28, 30], [31, 32]], { side: 'front' }),
+                    E('ink', 28, 44, 10, 1.6, { pow: 4 }),
+                    E('skin', 19.5, 18, 1.8, 2.6), E('skin', 36.5, 18, 1.8, 2.6),
+                    E('skin', 28, 17, 8, 9),
+                    E('hair', 20.5, 15, 2.5, 4), E('hair', 35.5, 15, 2.5, 4),
+                    E('hair', 28, 20, 8, 5.5, { side: 'back' }),
+                    E('hair', 28, 22.5, 4.2, 1.6, { side: 'front' }),
+                ],
+                decals: [D('brows', 23, 12), D('glasses', 23, 14), D('frown', 26, 24), D('buttons', 28, 31)],
             },
         };
 
@@ -827,7 +856,7 @@
             mason: jarSprite(LIDS.mason, '#6aa83a'),
         };
 
-        /* ---------- THE OVERWORLD: tiles, people, the Pickle Center ---------- */
+        /* ---------- THE OVERWORLD: tiles, people, the Picklémon Center ---------- */
         const GROUND_JAR = [
             '...kkkkkk...',
             '..kYYYYYYk..',
@@ -853,7 +882,7 @@
             tufts.forEach(([a, b]) => { x.fillRect(a, b, 1, 1); x.fillRect(a + 2, b, 1, 1); x.fillRect(a + 1, b + 1, 1, 1); });
         }));
 
-        // Tall dill: where the wild pickles are
+        // Tall dill: where the wild Picklémon are
         const TUFT = ['..k..k..', '.kGkkGk.', '.kGkkGk.', 'kGLGGLGk', 'kGLGGLGk', 'kGGGGGGk', '.kGGGGk.', '..kkkk..'];
         const TUFT_SWAY = ['...k..k.', '..kGkkGk', '..kGkkGk', ...TUFT.slice(3)];
         const TUFT_PAL = { k: '#2f5a1c', G: '#5f9a3a', L: '#8cc25a' };
@@ -988,9 +1017,11 @@
         const YOU_PAL = { k: '#1e2a1a', r: '#d84a3a', R: '#a8322a', g: '#9ccf5e', h: '#4a3222', s: '#f2c8a0', e: '#141a12', b: '#4a6ad0', y: LIDS.jar, p: '#2c3450', f: '#3a2a22' };
         const YOU = person(YOU_PAL);
         const FAN = person({ ...YOU_PAL, r: '#9a6ad9', R: '#6e48a8', b: '#e0a020', y: '#e0a020', h: '#7a4a2a' });
+        // Bald on top, a band of hair round the sides
+        const DOUG_WALK = person({ ...YOU_PAL, r: '#e8b890', R: '#6b5a4a', g: '#fbe0c4', h: '#6b5a4a', b: '#34508a', y: '#34508a', p: '#a48f58' });
 
         /* ---------- THE MAP ---------- */
-        // T tree   . grass   , tall dill   = path   ~ brine   * flowers   F fence   S sign   C Pickle Center   D its door
+        // T tree   . grass   , tall dill   = path   ~ brine   * flowers   F fence   S sign   C Picklémon Center   D its door
         const MAP = [
             'TTTTTTTTTTTTTTTTTTTTTTTTTTTT',
             'T*......TT.......*..,,,,,,TT',
@@ -1022,7 +1053,7 @@
         };
 
         const SIGNS = [
-            { x: 11, y: 4, lines: ['Pickle Center: we re-brine tired pickles.'] },
+            { x: 11, y: 4, lines: ['Picklémon Center: we re-brine tired Picklémon.'] },
             { x: 19, y: 11, lines: ['Brine Lake. No swimming. Mostly vinegar.'] },
             { x: 12, y: 18, lines: ['Route 2 is closed for pickling.'] },
         ];
@@ -1032,7 +1063,10 @@
             { x: 25, y: 17, id: 'relish', lines: ['You found Sweet Relish!', 'Technically a pickle.'] },
             { x: 3, y: 17, id: 'jar', lines: ['You found a Pickle Jar!'] },
         ];
-        const npc = { x: 16, y: 13, dir: 'down', lines: ["I like pickles! They're crunchy and easy to jar!"] };
+        const npc = { x: 16, y: 13, dir: 'down', lines: ["I like Picklémon! They're crunchy and easy to jar!"] };
+        // Doug turns up now and then after a battle, somewhere on the map
+        const doug = { out: false, x: 0, y: 0, caught: false, misses: 0 };
+        const DOUG_SPOTS = [[17, 9], [22, 3], [9, 13], [22, 14], [26, 10], [14, 16]];
 
         const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
         const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };
@@ -1070,6 +1104,10 @@
             'Pop the Lid': { min: 11, max: 16, line: 'Pop! Brine everywhere.' },
             'Burrow': { min: 7, max: 11, line: 'It popped up somewhere else. Same pickle.' },
             'Dirt Toss': { min: 4, max: 8, line: 'Gritty.' },
+            'Complain': { min: 8, max: 12, line: '"This is a nightmare."' },
+            'One-Star Review': { min: 10, max: 14, line: '"I\'ve never been so angry or so well rested."' },
+            'Close the Tab': { min: 0, max: 0, line: 'He tried to close the tab. It did not work.' },
+            'Get It Out': { min: 12, max: 16, line: '"Get this thing out of here!"' },
         };
         const SPECIES = {
             dillbasaur: { name: 'Dillbasaur', moves: ['Brine Splash', 'Crunch', 'Dill Beam', 'Vinegar Glare'] },
@@ -1085,6 +1123,7 @@
             mrbrine: { name: 'Mr. Brine', moves: ['Invisible Wall', 'Brine Slap', 'Mime Jab', 'Vinegar Glare'] },
             voltjar: { name: 'Voltjar', moves: ['Pop the Lid', 'Brine Shock', 'Lid Bash', 'Vinegar Glare'] },
             dillglett: { name: 'Dillglett', moves: ['Burrow', 'Dirt Toss', 'Quick Crunch', 'Vinegar Glare'], hp: 0.8 },
+            doug: { name: 'Doug', moves: ['Complain', 'One-Star Review', 'Close the Tab', 'Get It Out'], catch: 0.3 },
         };
         // How often each one turns up in the tall dill
         const WILD = Object.entries({
@@ -1094,21 +1133,22 @@
         const movesOf = p => SPECIES[p.kind].moves;
 
         // The Picklédex, in the order the originals come in
-        const DEX = ['dillbasaur', 'gherkinzard', 'brinetle', 'picklechu', 'pickleypuff', 'dillglett', 'cornichonite', 'brinegar', 'voltjar', 'mrbrine', 'gherkarp', 'dillto', 'snorelish'];
+        const DEX = ['dillbasaur', 'gherkinzard', 'brinetle', 'picklechu', 'pickleypuff', 'dillglett', 'cornichonite', 'brinegar', 'voltjar', 'mrbrine', 'gherkarp', 'dillto', 'snorelish', 'doug'];
         const DEX_INFO = {
-            dillbasaur: { cat: 'Seed Pickle', ht: "2' 4\"", wt: '6 jars', entry: 'The dill on its back grows taller in the sun. You can smell it from three delis away.' },
-            gherkinzard: { cat: 'Flame Pickle', ht: "5' 7\"", wt: '12 jars', entry: 'Breathes fire hot enough to grill a pickle. It is a pickle. It tries not to think about that.' },
-            brinetle: { cat: 'Lid Pickle', ht: "1' 8\"", wt: '4 jars', entry: 'Hides inside its lid when it gets scared. The lid is stuck, so it has been scared for years.' },
-            picklechu: { cat: 'Zap Pickle', ht: "1' 4\"", wt: '3 jars', entry: 'Brine carries a charge, so its cheeks spark whenever it is happy. It is always happy.' },
-            pickleypuff: { cat: 'Slice Pickle', ht: "1' 8\"", wt: '2 jars', entry: 'Sings to put its foes to sleep. It sings so badly that they leave instead.' },
-            dillglett: { cat: 'Mole Pickle', ht: "0' 8\"", wt: '1 jar', entry: 'Nobody has ever seen the rest of it. Experts agree that it is probably more pickle.' },
-            cornichonite: { cat: 'Rock Pickle', ht: "1' 4\"", wt: '9 jars', entry: 'Small, warty and very crunchy. People mistake it for a rock, and it takes that as a compliment.' },
-            brinegar: { cat: 'Shadow Pickle', ht: "4' 11\"", wt: '5 jars', entry: 'Lives at the back of the fridge. If a jar of pickles has gone missing, it was Brinegar.' },
-            voltjar: { cat: 'Jar Pickle', ht: "1' 8\"", wt: '1 jar', entry: 'Looks exactly like a pickle jar. Whoever opens it gets a shock and a face full of brine.' },
-            mrbrine: { cat: 'Mime Pickle', ht: "4' 3\"", wt: '7 jars', entry: 'Mimes so well that its invisible walls turn real. It has never said a word, and never needed to.' },
-            gherkarp: { cat: 'Spicy Pickle', ht: "2' 11\"", wt: '2 jars', entry: 'The spiciest pickle there is, and the least useful. Some say it turns into something amazing one day.' },
-            dillto: { cat: 'Melt Pickle', ht: "1' 0\"", wt: '1 jar', entry: 'It can turn into any pickle it likes. It always chooses a pickle.' },
-            snorelish: { cat: 'Sleep Pickle', ht: "6' 11\"", wt: '460 jars', entry: 'Sleeps 23 hours a day and spends the last hour eating relish. Do not wake it. You cannot wake it.' },
+            dillbasaur: { cat: 'Seed Picklémon', ht: "2' 4\"", wt: '6 jars', entry: 'The dill on its back grows taller in the sun. You can smell it from three delis away.' },
+            gherkinzard: { cat: 'Flame Picklémon', ht: "5' 7\"", wt: '12 jars', entry: 'Breathes fire hot enough to grill a pickle. It is a pickle. It tries not to think about that.' },
+            brinetle: { cat: 'Lid Picklémon', ht: "1' 8\"", wt: '4 jars', entry: 'Hides inside its lid when it gets scared. The lid is stuck, so it has been scared for years.' },
+            picklechu: { cat: 'Zap Picklémon', ht: "1' 4\"", wt: '3 jars', entry: 'Brine carries a charge, so its cheeks spark whenever it is happy. It is always happy.' },
+            pickleypuff: { cat: 'Slice Picklémon', ht: "1' 8\"", wt: '2 jars', entry: 'Sings to put its foes to sleep. It sings so badly that they leave instead.' },
+            dillglett: { cat: 'Mole Picklémon', ht: "0' 8\"", wt: '1 jar', entry: 'Nobody has ever seen the rest of it. Experts agree that it is probably more pickle.' },
+            cornichonite: { cat: 'Rock Picklémon', ht: "1' 4\"", wt: '9 jars', entry: 'Small, warty and very crunchy. People mistake it for a rock, and it takes that as a compliment.' },
+            brinegar: { cat: 'Shadow Picklémon', ht: "4' 11\"", wt: '5 jars', entry: 'Lives at the back of the fridge. If a jar of pickles has gone missing, it was Brinegar.' },
+            voltjar: { cat: 'Jar Picklémon', ht: "1' 8\"", wt: '1 jar', entry: 'Looks exactly like a pickle jar. Whoever opens it gets a shock and a face full of brine.' },
+            mrbrine: { cat: 'Mime Picklémon', ht: "4' 3\"", wt: '7 jars', entry: 'Mimes so well that its invisible walls turn real. It has never said a word, and never needed to.' },
+            gherkarp: { cat: 'Spicy Picklémon', ht: "2' 11\"", wt: '2 jars', entry: 'The spiciest pickle there is, and the least useful. Some say it turns into something amazing one day.' },
+            dillto: { cat: 'Melt Picklémon', ht: "1' 0\"", wt: '1 jar', entry: 'It can turn into any pickle it likes. It always chooses a pickle.' },
+            doug: { cat: 'Doug Picklémon', ht: "5' 10\"", wt: '1 Doug', entry: 'Not a pickle. Nobody has had the heart to tell him. He would like to know how he got onto your computer.' },
+            snorelish: { cat: 'Sleep Picklémon', ht: "6' 11\"", wt: '460 jars', entry: 'Sleeps 23 hours a day and spends the last hour eating relish. Do not wake it. You cannot wake it.' },
         };
         const pad3 = n => String(n).padStart(3, '0');
 
@@ -1117,7 +1157,7 @@
             return { kind, name: SPECIES[kind].name, lvl, max, hp: max, shownHp: max };
         }
 
-        // Your team of pickles. Up to six; extras go to the Brine Box.
+        // Your team of Picklémon. Up to six; extras go to the Brine Box.
         const team = [makePickle('dillbasaur', 12), makePickle('picklechu', 9), makePickle('brinetle', 10)];
         const brineBox = [];
         let player = team[0];
@@ -1147,9 +1187,12 @@
         const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
         const pick = list => list[rand(0, list.length - 1)];
 
-        function newEnemy() {
-            const lvl = rand(5, 14);
-            enemy = makePickle(pick(WILD), lvl);
+        const foe = () => enemy.kind === 'doug' ? 'Doug' : `The wild ${enemy.name}`;
+        let battleKind = null;
+
+        function newEnemy(kind) {
+            const lvl = kind === 'doug' ? 30 : rand(5, 14);
+            enemy = makePickle(kind || pick(WILD), lvl);
             enemy.max = enemy.hp = enemy.shownHp = Math.round((18 + lvl * 2) * (SPECIES[enemy.kind].hp || 1));
             fx.enemyHide = false; fx.enemyScale = 1; fx.enemyFlash = 0; fx.jar = null;
         }
@@ -1224,7 +1267,8 @@
         /* ---------- WALKING ---------- */
         const walkable = (x, y) => '.,=*'.includes(tileAt(x, y) || 'x')
             && !ITEMS.some(it => !it.taken && it.x === x && it.y === y)
-            && !(npc.x === x && npc.y === y);
+            && !(npc.x === x && npc.y === y)
+            && !(doug.out && doug.x === x && doug.y === y);
 
         function press(dir) {
             held = held.filter(d => d !== dir);
@@ -1284,6 +1328,10 @@
                 sfx.select();
                 return say(npc.lines, () => { npc.dir = 'down'; toWalk(); });
             }
+            if (doug.out && doug.x === tx && doug.y === ty) {
+                sfx.select();
+                return say(['Doug: How did I get in here?', 'This is a nightmare. Get me out of here.'], () => startBattle('doug'));
+            }
             const sign = SIGNS.find(s => s.x === tx && s.y === ty);
             if (sign) { sfx.select(); return say(sign.lines, toWalk); }
             if (tileAt(tx, ty) === 'D') return enterCenter();
@@ -1300,10 +1348,10 @@
         function enterCenter() {
             hero.dir = 'up';
             sfx.select();
-            say(['Welcome to the Pickle Center!', 'We re-brine tired pickles. One moment.'], async () => {
+            say(['Welcome to the Picklémon Center!', 'We re-brine tired Picklémon. One moment.'], async () => {
                 mode = 'busy';
                 await healTeam();
-                say(['Your pickles are crunchy again!', 'We hope to see you again.'], toWalk);
+                say(['Your Picklémon are crunchy again!', 'We hope to see you again.'], toWalk);
             });
         }
 
@@ -1349,6 +1397,7 @@
             held = [];
             if (walkable(tx, ty)) { path = route([{ x: tx, y: ty }]) || []; return; }
             const usable = ITEMS.some(it => !it.taken && it.x === tx && it.y === ty) || (npc.x === tx && npc.y === ty)
+                || (doug.out && doug.x === tx && doug.y === ty)
                 || SIGNS.some(s => s.x === tx && s.y === ty) || '~D'.includes(tileAt(tx, ty) || 'x');
             if (!usable) return;
             const goals = Object.entries(DIRS)
@@ -1359,11 +1408,13 @@
         }
 
         /* ---------- INTO AND OUT OF BATTLE ---------- */
-        async function startBattle() {
+        async function startBattle(kind = null) {
             mode = 'busy';
+            battleKind = kind;
             setSong('battle');
             sfx.encounter();
-            await play(600, t => { fx.cover = { kind: 'flash', p: t }; });
+            // A legendary gets a longer flash
+            await play(kind ? 1100 : 600, t => { fx.cover = { kind: 'flash', p: kind ? (t * 2) % 1 : t }; });
             await play(480, t => { fx.cover = { kind: 'bars', p: t }; });
             scene = 'battle';
             enemy = null;
@@ -1371,16 +1422,30 @@
             fx.playerScale = 1;
             await play(300, t => { fx.cover = { kind: 'bars', p: 1 - t }; });
             fx.cover = null;
-            encounter();
+            encounter(kind);
         }
 
-        async function encounter() {
-            newEnemy();
+        async function encounter(kind) {
+            newEnemy(kind);
             dex.seen.add(enemy.kind);
             fx.enemyX = 200;
             mode = 'busy';
             await play(500, t => { fx.enemyX = 200 * (1 - t); });
-            say(`A wild ${enemy.name} appeared!`, () => say(`Go, ${player.name}!`));
+            const intro = kind === 'doug' ? ["It's Doug!", "He doesn't know how he got here either."] : `A wild ${enemy.name} appeared!`;
+            say(intro, () => say(`Go, ${player.name}!`));
+        }
+
+        // The rare event: after a battle, Doug sometimes wanders onto the map
+        function maybeDoug() {
+            if (doug.caught || doug.out) return false;
+            doug.misses++;
+            if (Math.random() > (doug.misses >= 8 ? 1 : 0.15)) return false;
+            const spots = DOUG_SPOTS.filter(([x, y]) => walkable(x, y) && Math.abs(x - hero.x) + Math.abs(y - hero.y) > 3 && !(x === follower.x && y === follower.y));
+            if (!spots.length) return false;
+            [doug.x, doug.y] = pick(spots);
+            doug.out = true;
+            doug.misses = 0;
+            return true;
         }
 
         async function endBattle(toCenter = false) {
@@ -1396,9 +1461,15 @@
                 Object.assign(hero, { x: 4, y: 5, dir: 'down', move: null });
                 Object.assign(follower, { x: 4, y: 5, move: null });
             }
+            const wasDoug = battleKind === 'doug';
+            battleKind = null;
+            if (wasDoug) doug.out = false;
+            const dougShowed = !wasDoug && maybeDoug();
             await play(320, t => { fx.cover = { kind: 'fade', p: 1 - t }; });
             fx.cover = null;
-            if (toCenter) return say(['The Pickle Center re-brined your whole team.', 'Everyone is crunchy again.'], toWalk);
+            if (toCenter) return say(['The Picklémon Center re-brined your whole team.', 'Everyone is crunchy again.'], toWalk);
+            if (wasDoug && !doug.caught) return say("Doug wandered off. He'll be back. He always comes back.", toWalk);
+            if (dougShowed) return say('You hear someone complaining nearby.', toWalk);
             toWalk();
         }
 
@@ -1417,7 +1488,7 @@
             if (enemy.hp <= 0) {
                 fx.enemyHide = true; draw();
                 player.lvl++; player.max += 2; player.hp += 2; player.shownHp = player.hp;
-                await sayAsync([`The wild ${enemy.name} fainted!`, 'It has been pickled to perfection.', `${player.name} grew to level ${player.lvl}!`]);
+                await sayAsync([`${foe()} fainted!`, enemy.kind === 'doug' ? "He'll be fine." : 'It has been pickled to perfection.', `${player.name} grew to level ${player.lvl}!`]);
                 return endBattle();
             }
             await enemyTurn();
@@ -1426,7 +1497,7 @@
         async function enemyTurn() {
             mode = 'busy';
             const name = pick(movesOf(enemy)), m = MOVE[name];
-            await sayAsync(`The wild ${enemy.name} used ${name}!`);
+            await sayAsync(`${foe()} used ${name}!`);
             mode = 'busy';
             await lunge('enemy');
             if (m.max > 0) {
@@ -1439,7 +1510,7 @@
                 await play(300, t => { fx.playerScale = 1 - t; });
                 await sayAsync(`${player.name} fainted!`);
                 if (team.some(p => p.hp > 0)) return openTeam('forced');
-                await sayAsync(['You have no crunchy pickles left!', 'You rushed to the Pickle Center.']);
+                await sayAsync(['You have no crunchy Picklémon left!', 'You rushed to the Picklémon Center.']);
                 return endBattle(true);
             }
             toMenu();
@@ -1492,9 +1563,10 @@
                 await play(500, t => { fx.stars = t; });
                 const caught = makePickle(enemy.kind, enemy.lvl);
                 dex.caught.add(enemy.kind);
+                if (enemy.kind === 'doug') doug.caught = true;
                 caught.hp = caught.shownHp = Math.max(1, enemy.hp);
                 const lines = [`Gotcha! ${enemy.name} was jarred!`];
-                if (team.length < 6) { team.push(caught); lines.push(`${enemy.name} joined your team of pickles.`); }
+                if (team.length < 6) { team.push(caught); lines.push(`${enemy.name} joined your team of Picklémon.`); }
                 else { brineBox.push(caught); lines.push(`Your team is full, so ${enemy.name} went to the Brine Box.`); }
                 await sayAsync(lines);
                 fx.stars = 0; fx.jar = null;
@@ -1503,7 +1575,7 @@
             sfx.nope();
             fx.jar = null; fx.enemyHide = false;
             await play(260, t => { fx.enemyScale = t; });
-            await sayAsync([wobbles ? 'Argh! It was so close to being pickled!' : 'Oh no! The pickle broke free!']);
+            await sayAsync([wobbles ? 'Argh! It was so close to being pickled!' : 'Oh no! The Picklémon broke free!']);
             await enemyTurn();
         }
 
@@ -1527,7 +1599,7 @@
 
         function openBag() { mode = 'bag'; cursor = 0; draw(); }
 
-        const START = ['Picklédex', 'Pickles', 'Close'];
+        const START = ['Picklédex', 'Picklémon', 'Close'];
 
         function openMenu(at = 0) {
             mode = 'menu';
@@ -1583,7 +1655,7 @@
         }
 
         /* ---------- MENUS ---------- */
-        const MAIN = ['Fight', 'Bag', 'Pickles', 'Flee'];
+        const MAIN = ['Fight', 'Bag', 'Picklémon', 'Flee'];
 
         function choose(i) {
             sfx.select();
@@ -1593,8 +1665,8 @@
                 if (i === 2) return openTeam('battle');
                 if (i === 3) {
                     return Math.random() < 0.5
-                        ? say("You can't escape a pickle. It rolls.", () => enemyTurn())
-                        : say('Got away safely! The pickle is still out there.', () => endBattle());
+                        ? say("You can't escape a Picklémon. It rolls.", () => enemyTurn())
+                        : say('Got away safely! The Picklémon is still out there.', () => endBattle());
                 }
             }
             if (mode === 'fight') { const moves = movesOf(player); return i === moves.length ? toMenu() : useMove(moves[i]); }
@@ -1829,6 +1901,16 @@
                 } });
             });
             actors.push({ y: npc.y * TS, draw: () => blit(FAN[npc.dir][0], npc.x * TS - cam.x, npc.y * TS - cam.y - 8) });
+            if (doug.out) {
+                actors.push({ y: doug.y * TS, draw: () => {
+                    const sx = doug.x * TS - cam.x, sy = doug.y * TS - cam.y;
+                    blit(DOUG_WALK.down[0], sx, sy - 8);
+                    if (beat(300) % 2) {
+                        g.fillStyle = '#fff6c0';
+                        g.fillRect(sx + 26, sy - 16, 2, 8); g.fillRect(sx + 23, sy - 13, 8, 2);
+                    }
+                } });
+            }
             const fp = actorPos(follower, now);
             const lead = team[0];
             const showFollower = !(follower.x === hero.x && follower.y === hero.y);
@@ -1854,6 +1936,7 @@
             };
             feetIn(hero);
             if (showFollower) feetIn(follower);
+            if (doug.out) feetIn(doug);
 
             hud = null;
             if (mode === 'walk') drawHud();
@@ -1964,7 +2047,7 @@
                 regions.push({ x: 10, y, w: W - 20, h: 34, i });
             });
             box(6, 232, W - 12, 82);
-            const prompt = teamMode === 'forced' ? 'Choose your next pickle.' : teamMode === 'battle' ? 'Choose a pickle.' : 'Pick a pickle to lead the way.';
+            const prompt = teamMode === 'forced' ? 'Choose your next Picklémon.' : teamMode === 'battle' ? 'Choose a Picklémon.' : 'Pick a Picklémon to lead the way.';
             wrap(prompt, 26, 266, 340);
             if (teamMode !== 'forced') option('Back', 410, 266, team.length, 56);
         }
@@ -2048,7 +2131,7 @@
             if (mode === 'main') {
                 wrap(`What will ${player.name} do?`, 26, 266, 210);
                 box(250, 232, 224, 82, '#ffffff');
-                MAIN.forEach((label, i) => option(label, 286 + (i % 2) * 96, 266 + Math.floor(i / 2) * 30, i, 90));
+                MAIN.forEach((label, i) => option(label, 282 + (i % 2) * 106, 266 + Math.floor(i / 2) * 30, i, i % 2 ? 66 : 96));
             } else if (mode === 'fight') {
                 movesOf(player).forEach((name, i) => option(name, 40 + (i % 2) * 190, 266 + Math.floor(i / 2) * 30, i, 180));
                 option('Back', 410, 266, movesOf(player).length, 56);
@@ -2114,7 +2197,7 @@
 
         (document.fonts ? document.fonts.load(`18px ${FONT}`) : Promise.resolve()).then(() => {
             if (SHEET) return;
-            say(['Welcome to the world of Picklémon!', 'Wild pickles live in the tall dill.'], toWalk, true);
+            say(['Welcome to the world of Picklémon!', 'Wild Picklémon live in the tall dill.'], toWalk, true);
         });
     </script>
 </body>
