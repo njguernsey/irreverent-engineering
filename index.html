@@ -856,8 +856,9 @@
                     }
 
                     vec2 g = p + vec2(0.0, u_scroll);
-                    float minor = max(gridLine(g.x, 24.0, 1.0), gridLine(g.y, 24.0, 1.0));
-                    float major = max(gridLine(g.x, 120.0, 1.4), gridLine(g.y, 120.0, 1.4));
+                    // Same 16px / 80px cells as the blueprint load-in, so its grid hands off cleanly
+                    float minor = max(gridLine(g.x, 16.0, 1.0), gridLine(g.y, 16.0, 1.0));
+                    float major = max(gridLine(g.x, 80.0, 1.4), gridLine(g.y, 80.0, 1.4));
 
                     // Midnight navy: somewhere between a blueprint and a star chart
                     vec3 sheet = vec3(0.094, 0.123, 0.213);
@@ -1555,7 +1556,7 @@ precision highp float; in vec2 vUv, vL, vR, vT, vB; out vec4 o;`;
                 x.fillStyle = '#080c1a'; x.fillRect(0,0,w,h);
                 // Faint drawing grid, so the lens has lines to bend
                 x.strokeStyle = 'rgba(255,255,255,0.045)'; x.lineWidth = 1;
-                const step = 24 * scale;
+                const step = 16 * scale;
                 x.beginPath();
                 for (let gx = 0; gx < w; gx += step) { x.moveTo(gx + .5, 0); x.lineTo(gx + .5, h); }
                 for (let gy = 0; gy < h; gy += step) { x.moveTo(0, gy + .5); x.lineTo(w, gy + .5); }
