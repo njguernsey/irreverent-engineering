@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POKé Pickle | Irreverent Engineering</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥒</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #191a1f;
+            --ink: #fff;
+            --ink-soft: rgba(255, 255, 255, 0.6);
+            --acid-lime: #c5fb29;
+            --deep-clay: #b39ddb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        p, li, blockquote { text-wrap: pretty; }
+        h1, h2 { text-wrap: balance; }
+
+        /* The game on top, pitch underneath, both on one screen: the game
+           takes whatever height the pitch leaves */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            height: 100vh;
+        }
+
+        .demo-frame {
+            display: block;
+            flex: 1 1 auto;
+            width: 100%;
+            min-height: 460px;
+            border: 0;
+            background: #fff;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 16px;
+            color: var(--acid-lime);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        html.framed .back-link { display: none; }
+
+        .stage {
+            flex: none;
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 24px 48px 28px;
+        }
+
+        /* PITCH: one row of name and rating, Doug's quote, and the button */
+        .pitch {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 20px 48px;
+            align-items: center;
+        }
+
+        .pitch-head { display: flex; flex-direction: column; gap: 10px; }
+        .pitch-body { display: flex; align-items: center; gap: 40px; }
+        .pitch-body blockquote { flex: 1; }
+        .pitch-body .download { flex: none; }
+
+        .kicker { color: var(--deep-clay); font-weight: 500; font-size: 0.9rem; margin-bottom: 4px; }
+
+        .pitch h2 {
+            font-size: 2.1rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1;
+        }
+
+        .rating { display: flex; align-items: center; gap: 10px; }
+        .stars { display: flex; gap: 3px; color: var(--acid-lime); }
+        .rating-text { font-weight: 700; }
+
+        blockquote {
+            font-size: 1.15rem;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        blockquote footer {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0;
+            color: var(--deep-clay);
+        }
+
+        .download {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            align-self: flex-start;
+            padding: 16px 22px;
+            background: var(--acid-lime);
+            color: #000;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 5px 5px 0 var(--deep-clay);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .download:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--deep-clay); }
+        .download:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--deep-clay); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .download { transition: none; }
+        }
+
+        @media (max-width: 1000px) {
+            .pitch-body { flex-direction: column; align-items: flex-start; gap: 20px; }
+        }
+
+        @media (max-width: 760px) {
+            body { height: auto; }
+            .demo-frame { flex: none; height: 78vh; }
+            .stage { padding: 28px 24px 40px; }
+            .pitch { grid-template-columns: 1fr; }
+            .pitch h2 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <iframe class="demo-frame" id="demo" src="poke-pickle-game.html" title="POKé Pickle, playable"></iframe>
+
+    <main class="stage">
+        <a href="index.html" class="back-link">&larr; Back</a>
+
+        <section class="pitch">
+            <div class="pitch-head">
+                <div>
+                    <p class="kicker">Game mod</p>
+                    <h2>POKé Pickle</h2>
+                </div>
+
+                <div class="rating" aria-label="Rated 5 out of 5 stars">
+                    <div class="stars" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7z"/></svg>
+                    </div>
+                    <span class="rating-text">5/5</span>
+                </div>
+            </div>
+
+            <div class="pitch-body">
+                <blockquote>
+                    &ldquo;I caught all 151. They&rsquo;re all the same pickle.&rdquo;
+                    <footer>&mdash; Doug, first adopter</footer>
+                </blockquote>
+
+                <a href="#" class="download" id="download">
+                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
+                    Download the mod
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        if (window.self !== window.top) document.documentElement.classList.add('framed');
+
+        // The download link is for show
+        document.getElementById('download').addEventListener('click', e => e.preventDefault());
+
+        // Esc inside the game reaches this page, so the homepage modal can close.
+        const frame = document.getElementById('demo');
+        frame.addEventListener('load', () => {
+            const demo = frame.contentDocument;
+            if (!demo) return;
+            demo.addEventListener('keydown', e => {
+                if (e.key === 'Escape') document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+            });
+        });
+    </script>
+</body>
+</html>
