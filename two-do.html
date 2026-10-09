@@ -145,6 +145,17 @@
             white-space: nowrap;
         }
 
+        /* The count is a button: it opens the list of what's been done */
+        .count { cursor: pointer; transition: transform 0.25s var(--spring), color 0.2s, background 0.25s, box-shadow 0.25s; }
+        .count:hover { color: var(--ink); transform: scale(1.04); }
+        .count:active { transform: scale(0.96); }
+        .count:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+        .count[aria-expanded="true"] {
+            color: var(--ink);
+            background: linear-gradient(145deg, #c9f53a, #b4e81b);
+            box-shadow: inset 5px 5px 10px rgba(120, 160, 20, 0.45), inset -4px -4px 10px rgba(240, 255, 190, 0.8);
+        }
+
         .count b { color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; display: inline-block; }
         .count b.pop { animation: pop 0.5s var(--spring); }
 
@@ -153,6 +164,90 @@
             40% { transform: scale(1.6) rotate(-8deg); color: #5a8a00; }
             100% { transform: scale(1); }
         }
+
+        /* Two views share one spot on the pad. The open tasks set its height; the
+           done list lies over the same space and scrolls inside it. */
+        .views { position: relative; }
+
+        .view { transition: opacity 0.35s, filter 0.35s, transform 0.45s var(--spring), visibility 0s; }
+
+        .view-done {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            opacity: 0;
+            visibility: hidden;
+            filter: blur(6px);
+            transform: scale(0.97);
+            transition-delay: 0s, 0s, 0s, 0.35s;
+        }
+
+        .pad.past-open .view-tasks { opacity: 0; visibility: hidden; filter: blur(6px); transform: scale(0.97); transition-delay: 0s, 0s, 0s, 0.35s; }
+        .pad.past-open .view-done { opacity: 1; visibility: visible; filter: none; transform: none; transition-delay: 0s; }
+
+        /* The scrollbar: a pressed-in groove with a lime thumb riding in it. Each piece
+           has a transparent border, so the paint sits inside it and the bar keeps clear
+           of the rows. Where ::-webkit-scrollbar isn't supported, a thin lime bar. */
+        .view-done::-webkit-scrollbar { width: 18px; }
+        .view-done::-webkit-scrollbar-track {
+            margin: 4px 0;
+            border: 4px solid transparent;
+            border-radius: 999px;
+            box-shadow: inset 2px 2px 4px var(--lo), inset -2px -2px 4px var(--hi);
+        }
+        .view-done::-webkit-scrollbar-thumb {
+            border: 5px solid transparent;
+            border-radius: 999px;
+            background: linear-gradient(145deg, #d6ff5a, #b5ea17) padding-box;
+        }
+        .view-done::-webkit-scrollbar-thumb:hover { background: linear-gradient(145deg, #e2ff7a, #c5fb29) padding-box; }
+        .view-done::-webkit-scrollbar-thumb:active { background: linear-gradient(145deg, #b5ea17, #a3d412) padding-box; }
+
+        @supports not selector(::-webkit-scrollbar) {
+            .view-done { scrollbar-width: thin; scrollbar-color: #b5ea17 transparent; }
+        }
+
+        /* THE DONE LIST */
+        .log { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+
+        .past {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: none;
+            height: 56px;
+            padding: 0 18px 0 14px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #dfe2e9, #eaedf2);
+            box-shadow: inset 4px 4px 8px var(--lo), inset -4px -4px 8px var(--hi);
+        }
+
+        .past .stamp {
+            flex: none;
+            display: grid;
+            place-items: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #c9f53a, #b4e81b);
+            box-shadow: inset 3px 3px 6px rgba(120, 160, 20, 0.45), inset -3px -3px 6px rgba(240, 255, 190, 0.8);
+        }
+
+        .past .stamp svg { width: 14px; height: 14px; }
+        .past .stamp path { fill: none; stroke: var(--ink); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+        .past .ink { flex: 1; min-width: 0; }
+
+        .past time {
+            flex: none;
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--ink-soft);
+            white-space: nowrap;
+        }
+
+        /* Counts and the empty state sit bare, with no well around them */
+        .past.plain { height: 40px; background: none; box-shadow: none; font-size: 14px; color: var(--ink-soft); }
 
         /* THE WELLS */
         .wells { list-style: none; display: flex; flex-direction: column; gap: 16px; }
@@ -552,7 +647,7 @@
         @media (prefers-reduced-motion: reduce) {
             .tools { animation: none; }
             .ink .c.fresh, .note.pop-in, .count b.pop, .pad.wobble, .well.squish, .plus.nope, .plus.on-again, .splash, .drop, .pen.resting .pen-body { animation: none; }
-            .pen, .pen.resting, .pen.no, .well, .knob { transition: none; }
+            .pen, .pen.resting, .pen.no, .well, .knob, .view, .count { transition: none; }
             .well.done .knob svg path { animation: none; stroke-dashoffset: 0; }
             .well.lifting .task .ink { animation: none; opacity: 0; }
         }
@@ -631,14 +726,22 @@
 
             <div class="head">
                 <h1 class="title"><span class="two">Two</span> Do</h1>
-                <p class="count" id="count" aria-live="polite"></p>
+                <button class="count" id="count" type="button" aria-expanded="false" aria-controls="past" aria-live="polite"></button>
             </div>
 
-            <ol class="wells" id="wells" aria-label="Your two things"></ol>
+            <div class="views">
+                <div class="view view-tasks" id="open-view">
+                    <ol class="wells" id="wells" aria-label="Your two things"></ol>
 
-            <div class="add-row">
-                <button class="plus" id="plus" aria-label="Add a task"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12"/></svg></button>
-                <p class="note" id="note" role="status" aria-live="polite"></p>
+                    <div class="add-row">
+                        <button class="plus" id="plus" aria-label="Add a task"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12"/></svg></button>
+                        <p class="note" id="note" role="status" aria-live="polite"></p>
+                    </div>
+                </div>
+
+                <section class="view view-done" id="past" aria-label="Done" inert>
+                    <ol class="log" id="log"></ol>
+                </section>
             </div>
         </main>
 
@@ -686,6 +789,7 @@
         if (window.self !== window.top) document.documentElement.classList.add('framed');
 
         const LIMIT = 2;
+        const LOG_MAX = 200;
         const NOPE = 'Accomplish what you already set out two do first.';
         const KEY = 'two-do';
         const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -699,11 +803,16 @@
         const plus = document.getElementById('plus');
         const pen = document.getElementById('pen');
 
-        // Saved in this browser only; starts with two things already written down
-        let state = { tasks: ['Answer that email from Tuesday', 'Water the plants'], done: 0 };
+        // Saved in this browser only; starts with two things already written down.
+        // log holds what was finished, oldest first; done also counts finished tasks
+        // from before the log existed, whose words were never kept.
+        let state = { tasks: ['Answer that email from Tuesday', 'Water the plants'], done: 0, log: [] };
         try {
             const saved = JSON.parse(localStorage.getItem(KEY));
-            if (saved && Array.isArray(saved.tasks)) state = { tasks: saved.tasks.slice(0, LIMIT), done: saved.done | 0 };
+            if (saved && Array.isArray(saved.tasks)) {
+                const log = Array.isArray(saved.log) ? saved.log.filter(l => l && typeof l.text === 'string').slice(-LOG_MAX) : [];
+                state = { tasks: saved.tasks.slice(0, LIMIT), done: Math.max(saved.done | 0, log.length), log };
+            }
         } catch (e) { /* storage unavailable */ }
         const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ } };
 
@@ -797,6 +906,52 @@
             countEl.innerHTML = `<b id="done-n">${state.done}</b> done`;
             setPlus(state.tasks.length >= LIMIT);
         }
+
+        /* ---------- THE DONE LIST ---------- */
+        const logEl = document.getElementById('log');
+        const pastView = document.getElementById('past');
+        const openView = document.getElementById('open-view');
+        let pastOpen = false;
+
+        const dayName = at => {
+            const days = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(at).setHours(0, 0, 0, 0)) / 864e5);
+            if (days <= 0) return 'Today';
+            if (days === 1) return 'Yesterday';
+            return new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        };
+
+        // Newest first; anything finished before the log existed is one line at the end
+        function renderLog() {
+            logEl.textContent = '';
+            const add = (cls, html) => {
+                const li = document.createElement('li');
+                li.className = 'past' + cls;
+                li.innerHTML = html;
+                logEl.appendChild(li);
+                return li;
+            };
+            for (let i = state.log.length - 1; i >= 0; i--) {
+                const entry = state.log[i];
+                const li = add('', `<span class="stamp">${tick}</span><span class="ink"></span><time></time>`);
+                li.querySelector('.ink').textContent = entry.text;
+                li.querySelector('time').textContent = dayName(entry.at);
+            }
+            const earlier = state.done - state.log.length;
+            if (earlier > 0) add(' plain', `${earlier} earlier`);
+            if (!state.done) add(' plain', 'Nothing yet');
+        }
+
+        function showPast(on) {
+            pastOpen = on;
+            pad.classList.toggle('past-open', on);
+            countEl.setAttribute('aria-expanded', String(on));
+            pastView.inert = !on;
+            openView.inert = on;
+            if (on) { renderLog(); pastView.scrollTop = 0; }
+            restSoon();
+        }
+
+        countEl.addEventListener('click', () => showPast(!pastOpen));
 
         /* ---------- THE + ---------- */
         let plusOff = false;
@@ -993,7 +1148,9 @@
             well.classList.add('done');
             sound('pop');
             const finish = () => {
-                state.tasks.splice(i, 1);
+                const [text] = state.tasks.splice(i, 1);
+                state.log.push({ text, at: Date.now() });
+                if (state.log.length > LOG_MAX) state.log.shift();
                 state.done++;
                 save();
                 render();
