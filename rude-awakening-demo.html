@@ -313,6 +313,7 @@
                                 <stop offset="0.8" stop-color="#26262b"/>
                                 <stop offset="1" stop-color="#121215"/>
                             </linearGradient>
+                            <clipPath id="previewShape"><path d="M5 44 V12 Q5 9 8 8.52 Q22 6.48 36 8.52 Q39 9 39 12 V44 Z"/></clipPath>
                             <linearGradient id="graphiteRim" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0" stop-color="rgba(255,255,255,0.2)"/>
                                 <stop offset="0.4" stop-color="rgba(255,255,255,0.07)"/>
@@ -325,9 +326,11 @@
                             </linearGradient>
                         </defs>
                         <g class="cap">
-                            <path d="M5 9 Q22 6 39 9 V44 H5 Z" fill="url(#graphite)"/>
-                            <rect x="5" y="8" width="34" height="13" fill="url(#baseShade)"/>
-                            <path d="M5 9 Q22 6 39 9 V13.5 Q22 10.5 5 13.5 Z" fill="url(#graphiteRim)"/>
+                            <path d="M5 44 V12 Q5 9 8 8.52 Q22 6.48 36 8.52 Q39 9 39 12 V44 Z" fill="url(#graphite)"/>
+                            <g clip-path="url(#previewShape)">
+                                <rect x="5" y="8" width="34" height="13" fill="url(#baseShade)"/>
+                                <path d="M5 9 Q22 6 39 9 V13.5 Q22 10.5 5 13.5 Z" fill="url(#graphiteRim)"/>
+                            </g>
                         </g>
                     </svg>
                 </button>
@@ -349,6 +352,7 @@
                                 <stop offset="0.9" stop-color="#75970d"/>
                                 <stop offset="1" stop-color="#4c6606"/>
                             </linearGradient>
+                            <clipPath id="stopShape"><path d="M24 60 V17 Q24 12 29 11.49 Q80 6.51 131 11.49 Q136 12 136 17 V60 Z"/></clipPath>
                             <linearGradient id="limeRim" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0" stop-color="rgba(250,255,225,0.42)"/>
                                 <stop offset="0.35" stop-color="rgba(250,255,225,0.16)"/>
@@ -361,11 +365,12 @@
                             </linearGradient>
                         </defs>
                         <g class="cap"><g class="glow">
-                            <path d="M24 12 Q80 6 136 12 V60 H24 Z" fill="url(#limeCyl)"/>
-                            <rect x="24" y="8" width="112" height="24" fill="url(#limeBase)"/>
-                            <!-- The rolled rim: a hairline of light, then the turn into shadow -->
-                            <!-- The rounded rim: a soft roll of light that fades into the cylinder -->
-                            <path d="M24 12 Q80 6 136 12 V20 Q80 14 24 20 Z" fill="url(#limeRim)"/>
+                            <path d="M24 60 V17 Q24 12 29 11.49 Q80 6.51 131 11.49 Q136 12 136 17 V60 Z" fill="url(#limeCyl)"/>
+                            <g clip-path="url(#stopShape)">
+                                <rect x="24" y="8" width="112" height="24" fill="url(#limeBase)"/>
+                                <!-- The rounded rim: a soft roll of light that fades into the cylinder -->
+                                <path d="M24 12 Q80 6 136 12 V20 Q80 14 24 20 Z" fill="url(#limeRim)"/>
+                            </g>
                         </g></g>
                     </svg>
                 </button>
