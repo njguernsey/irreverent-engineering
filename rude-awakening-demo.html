@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rude Awakening, demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --night: #080c1a;
+            --ink: #fff;
+            --ink-soft: rgba(255, 255, 255, 0.6);
+            --acid-lime: #c5fb29;
+            --deep-clay: #b39ddb;
+            --plastic: #f4f1e8;
+            --plastic-shade: #ddd6c4;
+            --printed: #8a8372;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background:
+                radial-gradient(ellipse 60% 45% at 50% 38%, rgba(179, 157, 219, 0.12), transparent 70%),
+                var(--night);
+            color: var(--ink);
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+        button:focus-visible, [role="slider"]:focus-visible { outline: 2px solid var(--acid-lime); outline-offset: 4px; }
+
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+        /* The stage is drawn at 640 x 540 and scaled to fit the frame */
+        .stage {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 640px;
+            height: 540px;
+            transform: translate(-50%, -50%) scale(var(--fit, 1));
+        }
+
+        .nightstand {
+            position: absolute;
+            left: -600px;
+            right: -600px;
+            top: 432px;
+            height: 600px;
+            background: linear-gradient(180deg, #1b2240 0, #121833 30px, #0b1024 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .ground-shadow {
+            position: absolute;
+            left: 70px;
+            width: 500px;
+            top: 418px;
+            height: 34px;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.7), transparent 70%);
+        }
+
+        /* CLOCK */
+        .clock {
+            position: absolute;
+            left: 90px;
+            top: 92px;
+            width: 460px;
+            height: 340px;
+            transform-origin: 50% 100%;
+        }
+
+        body.ringing .clock { animation: rattle 0.11s linear infinite; }
+
+        @keyframes rattle {
+            0%, 100% { transform: rotate(0) translateX(0); }
+            25% { transform: rotate(-1.4deg) translateX(-2px); }
+            75% { transform: rotate(1.4deg) translateX(2px); }
+        }
+
+        .body {
+            position: absolute;
+            left: 0;
+            top: 78px;
+            width: 460px;
+            height: 250px;
+            border-radius: 52px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0, rgba(255, 255, 255, 0) 22%),
+                linear-gradient(180deg, var(--plastic) 0, var(--plastic-shade) 100%);
+            box-shadow:
+                inset 0 2px 0 #fff,
+                inset 0 -14px 26px rgba(70, 55, 30, 0.18),
+                inset 12px 0 24px rgba(255, 255, 255, 0.35),
+                inset -12px 0 24px rgba(70, 55, 30, 0.1),
+                0 24px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .foot {
+            position: absolute;
+            top: 322px;
+            width: 54px;
+            height: 16px;
+            border-radius: 0 0 10px 10px;
+            background: linear-gradient(180deg, #3a3a40, #1c1c22);
+        }
+        .foot.l { left: 62px; }
+        .foot.r { right: 62px; }
+
+        /* The big button on top */
+        .plinth {
+            position: absolute;
+            left: 140px;
+            top: 62px;
+            width: 180px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #cfc7b2, #b9b09a);
+            box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .dome {
+            position: absolute;
+            left: 152px;
+            top: 4px;
+            width: 156px;
+            height: 76px;
+            border-radius: 78px 78px 24px 24px / 70px 70px 16px 16px;
+            background:
+                radial-gradient(ellipse 50% 40% at 36% 26%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%),
+                radial-gradient(ellipse 90% 120% at 50% 10%, #e2ff8a 0, #c5fb29 42%, #8db51c 100%);
+            box-shadow:
+                inset 0 -8px 14px rgba(60, 90, 0, 0.45),
+                0 10px 0 #6d8c12,
+                0 14px 18px rgba(0, 0, 0, 0.35);
+            transition: transform 0.08s, box-shadow 0.08s;
+        }
+
+        .dome:active {
+            transform: translateY(8px);
+            box-shadow:
+                inset 0 -6px 12px rgba(60, 90, 0, 0.5),
+                0 2px 0 #6d8c12,
+                0 4px 8px rgba(0, 0, 0, 0.35);
+        }
+
+        body.ringing .dome { animation: plead 0.5s ease-in-out infinite; }
+
+        @keyframes plead {
+            50% { filter: brightness(1.15) drop-shadow(0 0 18px rgba(197, 251, 41, 0.7)); }
+        }
+
+        .dome-label {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 30px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: rgba(40, 60, 0, 0.55);
+            pointer-events: none;
+        }
+
+        /* Display */
+        .bezel {
+            position: absolute;
+            left: 30px;
+            top: 110px;
+            width: 280px;
+            height: 140px;
+            border-radius: 22px;
+            background: linear-gradient(180deg, #2c2c33, #45454e);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 0 #fff;
+            padding: 8px;
+        }
+
+        .glass {
+            position: relative;
+            height: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            background: radial-gradient(ellipse 120% 100% at 50% 0, #0f1a10, #050806 70%);
+            box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.9);
+            padding: 14px 16px 10px;
+        }
+
+        .glass::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(115deg, rgba(255, 255, 255, 0.1) 0, rgba(255, 255, 255, 0.03) 38%, rgba(255, 255, 255, 0) 39%);
+            pointer-events: none;
+        }
+
+        .digits {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            height: 76px;
+        }
+
+        .digits svg { height: 76px; width: auto; overflow: visible; }
+        .digits .seg { fill: rgba(197, 251, 41, 0.07); }
+        .digits .seg.on { fill: var(--acid-lime); filter: drop-shadow(0 0 4px rgba(197, 251, 41, 0.75)); }
+
+        .ampm {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-left: 6px;
+            padding-top: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(197, 251, 41, 0.12);
+        }
+        .ampm .on { color: var(--acid-lime); text-shadow: 0 0 6px rgba(197, 251, 41, 0.7); }
+
+        .readout {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--acid-lime);
+            text-shadow: 0 0 6px rgba(197, 251, 41, 0.6);
+            white-space: nowrap;
+        }
+
+        .readout .bell { flex: none; opacity: 0.12; }
+        body.armed .readout .bell { opacity: 1; }
+        .readout .sound-name { overflow: hidden; text-overflow: ellipsis; }
+
+        /* Flashing while the alarm time is being set, and while it rings */
+        body.setting .digits, body.setting .ampm { animation: flicker 0.9s steps(1) infinite; }
+        body.ringing .digits { animation: flicker 0.5s steps(1) infinite; }
+        @keyframes flicker { 60% { opacity: 0.2; } }
+
+        /* Rubber keys and printed labels */
+        .keys {
+            position: absolute;
+            left: 40px;
+            top: 268px;
+            display: flex;
+            gap: 18px;
+        }
+
+        .key-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+        .key {
+            width: 74px;
+            height: 26px;
+            border-radius: 13px;
+            background: linear-gradient(180deg, #55555e, #2e2e35);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 3px 0 #1a1a1f, 0 5px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.06s, box-shadow 0.06s;
+        }
+        .key:active { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 #1a1a1f, 0 1px 2px rgba(0, 0, 0, 0.3); }
+
+        .printed {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--printed);
+        }
+
+        /* Sound dial */
+        .dial-wrap {
+            position: absolute;
+            left: 326px;
+            top: 112px;
+            width: 116px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dial-ring {
+            position: relative;
+            width: 116px;
+            height: 116px;
+        }
+
+        .tick {
+            position: absolute;
+            left: 55px;
+            top: 0;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #b4ab95;
+            transform-origin: 3px 58px;
+        }
+        .tick.on { background: #6d8c12; box-shadow: 0 0 0 2px rgba(197, 251, 41, 0.5); }
+
+        .knob {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 50% 50%, #3a3a42 0, #2a2a31 55%, transparent 56%),
+                conic-gradient(#f2f2f2, #9a9aa0, #e8e8ea, #8a8a90, #f2f2f2, #9a9aa0, #e8e8ea, #8a8a90, #f2f2f2);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+            cursor: grab;
+            touch-action: none;
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .knob.dragging { cursor: grabbing; transition: none; }
+
+        .knob::before {
+            content: "";
+            position: absolute;
+            left: 39px;
+            top: 18px;
+            width: 6px;
+            height: 22px;
+            border-radius: 3px;
+            background: var(--acid-lime);
+            box-shadow: 0 0 6px rgba(197, 251, 41, 0.6);
+        }
+
+        /* On/off slide switch */
+        .switch-wrap {
+            position: absolute;
+            left: 346px;
+            top: 268px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .switch {
+            position: relative;
+            width: 76px;
+            height: 26px;
+            border-radius: 13px;
+            background: linear-gradient(180deg, #24242a, #3c3c44);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 0 #fff;
+        }
+
+        .switch .thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 36px;
+            height: 20px;
+            border-radius: 10px;
+            background:
+                repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 5px) 10px 4px / 16px 12px no-repeat,
+                linear-gradient(180deg, #fff, #d9d2c0);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+            transition: left 0.15s;
+        }
+        body.armed .switch .thumb { left: 37px; }
+
+        .switch-labels { display: flex; gap: 30px; }
+
+        /* Demo control below the clock */
+        .skip {
+            position: absolute;
+            left: 50%;
+            top: 470px;
+            transform: translateX(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 20px;
+            border: 1px solid var(--ink-soft);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .skip:hover { border-color: var(--ink); }
+        body.ringing .skip { visibility: hidden; }
+
+        @media (prefers-reduced-motion: reduce) {
+            body.ringing .clock, body.ringing .dome, body.ringing .digits, body.setting .digits, body.setting .ampm { animation: none; }
+            .knob, .switch .thumb, .dome, .key { transition: none; }
+        }
+    </style>
+</head>
+<body class="armed">
+    <div class="stage" id="stage">
+        <div class="nightstand"></div>
+        <div class="ground-shadow"></div>
+
+        <div class="clock">
+            <div class="foot l"></div>
+            <div class="foot r"></div>
+            <div class="plinth"></div>
+            <div class="body"></div>
+
+            <button class="dome" id="dome" aria-label="Stop the alarm"><span class="dome-label">stop</span></button>
+
+            <div class="bezel">
+                <div class="glass">
+                    <div class="digits" id="digits" aria-hidden="true"></div>
+                    <p class="readout">
+                        <svg class="bell" width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.1-1.6-5.6-4.5-6.3V4a1.5 1.5 0 0 0-3 0v.7C7.6 5.4 6 7.9 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                        <span id="alarm-at">6:30 am</span>
+                        <span>&middot;</span>
+                        <span class="sound-name" id="sound-name">Cat throwing up</span>
+                    </p>
+                    <p class="sr-only" id="live" aria-live="polite"></p>
+                </div>
+            </div>
+
+            <div class="dial-wrap">
+                <div class="dial-ring" id="ring">
+                    <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Alarm sound" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" aria-valuetext="Cat throwing up"></div>
+                </div>
+                <span class="printed">sound</span>
+            </div>
+
+            <div class="keys">
+                <div class="key-wrap"><button class="key" id="hour" aria-label="Alarm hour"></button><span class="printed">hour</span></div>
+                <div class="key-wrap"><button class="key" id="min" aria-label="Alarm minute"></button><span class="printed">min</span></div>
+                <div class="key-wrap"><button class="key" id="preview" aria-label="Preview sound"></button><span class="printed">preview</span></div>
+            </div>
+
+            <div class="switch-wrap">
+                <button class="switch" id="switch" role="switch" aria-checked="true" aria-label="Alarm"><span class="thumb"></span></button>
+                <span class="printed switch-labels"><span>off</span><span>on</span></span>
+            </div>
+        </div>
+
+        <button class="skip" id="skip">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+            Skip to morning
+        </button>
+    </div>
+
+    <script>
+        const SOUNDS = [
+            { id: 'cat-throwing-up', name: 'Cat throwing up' },
+            { id: 'baby-crying', name: 'Baby crying' },
+            { id: 'fire-alarm', name: 'Fire alarm' },
+            { id: 'mosquito', name: 'Mosquito in your ear' },
+            { id: 'glass-shattering-downstairs', name: 'Glass breaking downstairs' },
+        ];
+        SOUNDS.forEach(s => { s.audio = new Audio(`audio/rude-awakening/${s.id}.mp3`); s.audio.preload = 'auto'; });
+
+        const $ = id => document.getElementById(id);
+        const body = document.body;
+        const ringing = () => body.classList.contains('ringing');
+        const state = { alarm: 6 * 60 + 30, sound: 0, offset: 0, firedFor: null, setUntil: 0 };
+        let playing = null, fade = null;
+
+        // Fit the 640 x 540 stage to the frame
+        function fit() {
+            $('stage').style.setProperty('--fit', Math.min(innerWidth / 640, innerHeight / 540, 1.6));
+        }
+        addEventListener('resize', fit);
+        fit();
+
+        // Seven-segment digits, with the unlit segments faintly visible like a real LCD
+        const SEGS = {
+            a: '9,8 13,4 37,4 41,8 37,12 13,12',
+            g: '9,45 13,41 37,41 41,45 37,49 13,49',
+            d: '9,82 13,78 37,78 41,82 37,86 13,86',
+            f: '6,10 10,14 10,39 6,43 2,39 2,14',
+            b: '44,10 48,14 48,39 44,43 40,39 40,14',
+            e: '6,47 10,51 10,76 6,80 2,76 2,51',
+            c: '44,47 48,51 48,76 44,80 40,76 40,51',
+        };
+        const MAP = ['abcdef', 'bc', 'abged', 'abgcd', 'fgbc', 'afgcd', 'afgedc', 'abc', 'abcdefg', 'abcdfg'];
+
+        const digitSVG = () => `<svg viewBox="0 0 50 90"><g transform="skewX(-6) translate(6 0)">${
+            Object.entries(SEGS).map(([k, p]) => `<polygon class="seg" data-s="${k}" points="${p}"/>`).join('')
+        }</g></svg>`;
+
+        $('digits').innerHTML = digitSVG() + digitSVG()
+            + `<svg class="colon" viewBox="0 0 12 90"><g transform="skewX(-6) translate(4 0)"><rect class="seg" x="2" y="26" width="8" height="8" rx="2"/><rect class="seg" x="2" y="56" width="8" height="8" rx="2"/></g></svg>`
+            + digitSVG() + digitSVG()
+            + `<div class="ampm"><span id="am">am</span><span id="pm">pm</span></div>`;
+
+        const digitEls = [...$('digits').querySelectorAll('svg:not(.colon)')];
+        const colonSegs = $('digits').querySelectorAll('.colon .seg');
+
+        function show(minutes, colonOn) {
+            const h24 = Math.floor(minutes / 60) % 24, m = minutes % 60;
+            const h = h24 % 12 || 12;
+            const chars = [h >= 10 ? 1 : null, h % 10, Math.floor(m / 10), m % 10];
+            digitEls.forEach((el, i) => {
+                const lit = chars[i] === null ? '' : MAP[chars[i]];
+                el.querySelectorAll('.seg').forEach(p => p.classList.toggle('on', lit.includes(p.dataset.s)));
+            });
+            colonSegs.forEach(c => c.classList.toggle('on', colonOn));
+            $('am').classList.toggle('on', h24 < 12);
+            $('pm').classList.toggle('on', h24 >= 12);
+        }
+
+        const fmt = minutes => {
+            const h24 = Math.floor(minutes / 60) % 24, m = minutes % 60;
+            return `${h24 % 12 || 12}:${String(m).padStart(2, '0')} ${h24 < 12 ? 'am' : 'pm'}`;
+        };
+
+        // The face, and the alarm going off when its minute comes round
+        function tick() {
+            const d = new Date(Date.now() + state.offset);
+            const mins = d.getHours() * 60 + d.getMinutes();
+            const setting = Date.now() < state.setUntil;
+            body.classList.toggle('setting', setting);
+            show(setting ? state.alarm : mins, setting || ringing() || d.getMilliseconds() < 500);
+
+            const stamp = d.toDateString() + mins;
+            if (body.classList.contains('armed') && !setting && mins === state.alarm && state.firedFor !== stamp) {
+                state.firedFor = stamp;
+                ring();
+            }
+        }
+        setInterval(tick, 250);
+
+        function updateReadout() {
+            $('alarm-at').textContent = fmt(state.alarm);
+            $('sound-name').textContent = SOUNDS[state.sound].name;
+        }
+
+        // Sound: the alarm loops, a preview is the first few seconds and a fade
+        function play(i, loop) {
+            stopSound();
+            const a = SOUNDS[i].audio;
+            a.loop = loop;
+            a.volume = 1;
+            a.currentTime = 0;
+            a.play().catch(() => {});
+            playing = a;
+            if (loop) return;
+            fade = setTimeout(() => {
+                const iv = setInterval(() => {
+                    if (playing !== a) return clearInterval(iv);
+                    a.volume = Math.max(0, a.volume - 0.1);
+                    if (a.volume === 0) { clearInterval(iv); stopSound(); }
+                }, 60);
+            }, 3200);
+        }
+
+        function stopSound() {
+            clearTimeout(fade);
+            if (playing) { playing.pause(); playing.volume = 1; }
+            playing = null;
+        }
+
+        function ring() {
+            body.classList.add('ringing');
+            play(state.sound, true);
+            $('live').textContent = `Alarm ringing: ${SOUNDS[state.sound].name}`;
+            $('dome').focus();
+        }
+
+        function stopRinging() {
+            body.classList.remove('ringing');
+            stopSound();
+            $('live').textContent = 'Alarm stopped';
+        }
+
+        // The big button on top
+        $('dome').addEventListener('click', () => ringing() ? stopRinging() : stopSound());
+
+        // Hour and min set the alarm; the face shows the alarm time while you set it
+        function nudge(by) {
+            state.alarm = (state.alarm + by + 1440) % 1440;
+            state.setUntil = Date.now() + 2500;
+            updateReadout();
+            tick();
+        }
+        $('hour').addEventListener('click', () => nudge(60));
+        $('min').addEventListener('click', () => nudge(state.alarm % 60 === 59 ? -59 : 1));
+        $('preview').addEventListener('click', () => { if (!ringing()) play(state.sound, false); });
+
+        $('switch').addEventListener('click', () => {
+            const on = !body.classList.contains('armed');
+            body.classList.toggle('armed', on);
+            $('switch').setAttribute('aria-checked', on);
+            if (!on) stopRinging();
+        });
+
+        // Skip to morning sets the clock five seconds before the alarm
+        $('skip').addEventListener('click', () => {
+            stopSound();
+            if (!body.classList.contains('armed')) $('switch').click();
+            const d = new Date();
+            const target = new Date(d);
+            target.setHours(Math.floor(state.alarm / 60), state.alarm % 60, 0, 0);
+            target.setTime(target.getTime() - 5000);
+            if (target < d) target.setDate(target.getDate() + 1);
+            state.offset = target - d;
+            state.firedFor = null;
+            state.setUntil = 0;
+            tick();
+        });
+
+        // The sound dial: five detents across 240 degrees
+        const ANGLES = SOUNDS.map((_, i) => -120 + i * 60);
+        const knob = $('knob');
+        ANGLES.forEach(a => {
+            const t = document.createElement('span');
+            t.className = 'tick';
+            t.style.transform = `rotate(${a}deg)`;
+            $('ring').insertBefore(t, knob);
+        });
+        const ticks = [...$('ring').querySelectorAll('.tick')];
+
+        function setSound(i, audition = true) {
+            i = (i + SOUNDS.length) % SOUNDS.length;
+            const changed = i !== state.sound;
+            state.sound = i;
+            knob.style.transform = `rotate(${ANGLES[i]}deg)`;
+            ticks.forEach((t, j) => t.classList.toggle('on', j === i));
+            knob.setAttribute('aria-valuenow', i);
+            knob.setAttribute('aria-valuetext', SOUNDS[i].name);
+            updateReadout();
+            // Turning the dial while it rings swaps the noise; otherwise you hear a preview
+            if (changed && audition) play(i, ringing());
+        }
+
+        let drag = null;
+        knob.addEventListener('pointerdown', e => {
+            const r = knob.getBoundingClientRect();
+            drag = { cx: r.left + r.width / 2, cy: r.top + r.height / 2, x: e.clientX, y: e.clientY, moved: false };
+            knob.setPointerCapture(e.pointerId);
+            knob.classList.add('dragging');
+        });
+        knob.addEventListener('pointermove', e => {
+            if (!drag) return;
+            if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 4) drag.moved = true;
+            if (!drag.moved) return;
+            const deg = Math.atan2(e.clientX - drag.cx, drag.cy - e.clientY) * 180 / Math.PI;
+            const clamped = Math.max(-120, Math.min(120, deg));
+            knob.style.transform = `rotate(${clamped}deg)`;
+            drag.nearest = Math.round((clamped + 120) / 60);
+        });
+        knob.addEventListener('pointerup', () => {
+            if (!drag) return;
+            knob.classList.remove('dragging');
+            setSound(drag.moved ? (drag.nearest ?? state.sound) : state.sound + 1);   // a click turns it one notch
+            drag = null;
+        });
+        knob.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setSound(state.sound + 1); e.preventDefault(); }
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setSound(state.sound - 1); e.preventDefault(); }
+        });
+
+        setSound(0, false);
+        tick();
+
+        // Leaving the page or closing the modal stops the noise
+        addEventListener('pagehide', stopSound);
+        document.addEventListener('visibilitychange', () => { if (document.hidden) stopSound(); });
+    </script>
+</body>
+</html>
