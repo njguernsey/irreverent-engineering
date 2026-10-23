@@ -14,10 +14,7 @@
             --ink: #fff;
             --ink-soft: rgba(255, 255, 255, 0.6);
             --acid-lime: #c5fb29;
-            --deep-clay: #b39ddb;
-            --plastic: #f4f1e8;
-            --plastic-shade: #ddd6c4;
-            --printed: #8a8372;
+            --led: #ffc45a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,19 +24,27 @@
         body {
             font-family: 'Inter', sans-serif;
             background:
-                radial-gradient(ellipse 60% 45% at 50% 38%, rgba(179, 157, 219, 0.12), transparent 70%),
+                radial-gradient(ellipse 60% 45% at 50% 40%, rgba(179, 157, 219, 0.12), transparent 70%),
                 var(--night);
             color: var(--ink);
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
         button:focus-visible, [role="slider"]:focus-visible { outline: 2px solid var(--acid-lime); outline-offset: 4px; }
 
         .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+        .defs { position: absolute; width: 0; height: 0; }
 
-        /* The stage is drawn at 640 x 540 and scaled to fit the frame */
+        /* The stage is drawn at 640 x 540 and scaled to fit the frame.
+           PERSPECTIVE: one camera, straight at the face, eye level with its
+           centre (320, 310). That point is the vanishing point: anything
+           standing out from the face shows its side toward it, anything sunk
+           into the face shows its inner wall away from it, and nothing on top
+           shows its top, because the eye is below it.
+           LIGHT: one soft light, above and in front. */
         .stage {
             position: absolute;
             left: 50%;
@@ -49,331 +54,151 @@
             transform: translate(-50%, -50%) scale(var(--fit, 1));
         }
 
-        .nightstand {
-            position: absolute;
-            left: -600px;
-            right: -600px;
-            top: 432px;
-            height: 600px;
-            background: linear-gradient(180deg, #1b2240 0, #121833 30px, #0b1024 100%);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
+        .scene, .art { position: absolute; left: 0; top: 0; overflow: visible; }
 
-        .ground-shadow {
+        /* The throwable carries the clock through the air; only the body and
+           the controls take the pointer, so the empty room never grabs it */
+        .throwable {
             position: absolute;
-            left: 70px;
-            width: 500px;
-            top: 418px;
-            height: 34px;
-            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.7), transparent 70%);
+            inset: 0;
+            transform-origin: 320px 310px;
+            pointer-events: none;
+            touch-action: none;
+            will-change: transform;
         }
+        .throwable button, .throwable .puck { pointer-events: auto; }
+        .throwable .art { pointer-events: none; }
+        .grip { cursor: grab; }
+        .throwable.held .grip { cursor: grabbing; }
+        .throwable.away { visibility: hidden; }
 
-        /* CLOCK */
         .clock {
             position: absolute;
-            left: 90px;
-            top: 92px;
-            width: 460px;
-            height: 340px;
-            transform-origin: 50% 100%;
+            inset: 0;
+            transform-origin: 320px 450px;
+            will-change: transform;
         }
 
         body.ringing .clock { animation: rattle 0.11s linear infinite; }
 
         @keyframes rattle {
             0%, 100% { transform: rotate(0) translateX(0); }
-            25% { transform: rotate(-1.4deg) translateX(-2px); }
-            75% { transform: rotate(1.4deg) translateX(2px); }
+            25% { transform: rotate(-1.2deg) translateX(-2px); }
+            75% { transform: rotate(1.2deg) translateX(2px); }
         }
 
-        .body {
+        .shadow, .spill { transform-origin: 320px 450px; }
+
+        /* Light from the screen falling on the nightstand */
+        .spill {
             position: absolute;
-            left: 0;
-            top: 78px;
-            width: 460px;
-            height: 250px;
-            border-radius: 52px;
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0, rgba(255, 255, 255, 0) 22%),
-                linear-gradient(180deg, var(--plastic) 0, var(--plastic-shade) 100%);
-            box-shadow:
-                inset 0 2px 0 #fff,
-                inset 0 -14px 26px rgba(70, 55, 30, 0.18),
-                inset 12px 0 24px rgba(255, 255, 255, 0.35),
-                inset -12px 0 24px rgba(70, 55, 30, 0.1),
-                0 24px 40px rgba(0, 0, 0, 0.45);
+            left: 70px;
+            top: 450px;
+            width: 230px;
+            height: 50px;
+            background: radial-gradient(ellipse at 50% 0, rgba(255, 170, 60, 0.11), transparent 70%);
+            pointer-events: none;
+        }
+        body.ringing .spill { animation: flicker 0.5s steps(1) infinite; }
+
+        /* ROUND LED WINDOW. The glass sits deeper than the bezel, so it moves
+           toward the vanishing point. */
+        .led, .glare {
+            position: absolute;
+            left: 74.5px;
+            top: 202px;
+            width: 216px;
+            height: 216px;
+            pointer-events: none;
         }
 
-        .foot {
-            position: absolute;
-            top: 322px;
-            width: 54px;
-            height: 16px;
-            border-radius: 0 0 10px 10px;
-            background: linear-gradient(180deg, #3a3a40, #1c1c22);
-        }
-        .foot.l { left: 62px; }
-        .foot.r { right: 62px; }
-
-        /* The big button on top */
-        .plinth {
-            position: absolute;
-            left: 140px;
-            top: 62px;
-            width: 180px;
-            height: 26px;
+        /* Smoked acrylic: a soft sheen across the top, the bezel's shadow inside the rim */
+        .glare {
             border-radius: 50%;
-            background: linear-gradient(180deg, #cfc7b2, #b9b09a);
-            box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2);
-        }
-
-        .dome {
-            position: absolute;
-            left: 152px;
-            top: 4px;
-            width: 156px;
-            height: 76px;
-            border-radius: 78px 78px 24px 24px / 70px 70px 16px 16px;
             background:
-                radial-gradient(ellipse 50% 40% at 36% 26%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%),
-                radial-gradient(ellipse 90% 120% at 50% 10%, #e2ff8a 0, #c5fb29 42%, #8db51c 100%);
-            box-shadow:
-                inset 0 -8px 14px rgba(60, 90, 0, 0.45),
-                0 10px 0 #6d8c12,
-                0 14px 18px rgba(0, 0, 0, 0.35);
-            transition: transform 0.08s, box-shadow 0.08s;
+                radial-gradient(ellipse 80% 46% at 40% 12%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.025) 55%, rgba(255, 255, 255, 0) 72%),
+                radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.55) 100%);
+            box-shadow: inset 4px 3px 8px rgba(0, 0, 0, 0.7);
         }
 
-        .dome:active {
-            transform: translateY(8px);
-            box-shadow:
-                inset 0 -6px 12px rgba(60, 90, 0, 0.5),
-                0 2px 0 #6d8c12,
-                0 4px 8px rgba(0, 0, 0, 0.35);
-        }
-
-        body.ringing .dome { animation: plead 0.5s ease-in-out infinite; }
-
-        @keyframes plead {
-            50% { filter: brightness(1.15) drop-shadow(0 0 18px rgba(197, 251, 41, 0.7)); }
-        }
-
-        .dome-label {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 30px;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 800;
-            letter-spacing: -0.01em;
-            color: rgba(40, 60, 0, 0.55);
-            pointer-events: none;
-        }
-
-        /* Display */
-        .bezel {
-            position: absolute;
-            left: 30px;
-            top: 110px;
-            width: 280px;
-            height: 140px;
-            border-radius: 22px;
-            background: linear-gradient(180deg, #2c2c33, #45454e);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 0 #fff;
-            padding: 8px;
-        }
-
-        .glass {
-            position: relative;
-            height: 100%;
-            border-radius: 15px;
-            overflow: hidden;
-            background: radial-gradient(ellipse 120% 100% at 50% 0, #0f1a10, #050806 70%);
-            box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.9);
-            padding: 14px 16px 10px;
-        }
-
-        .glass::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(115deg, rgba(255, 255, 255, 0.1) 0, rgba(255, 255, 255, 0.03) 38%, rgba(255, 255, 255, 0) 39%);
-            pointer-events: none;
-        }
-
-        .digits {
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
-            height: 76px;
-        }
-
-        .digits svg { height: 76px; width: auto; overflow: visible; }
-        .digits .seg { fill: rgba(197, 251, 41, 0.07); }
-        .digits .seg.on { fill: var(--acid-lime); filter: drop-shadow(0 0 4px rgba(197, 251, 41, 0.75)); }
-
-        .ampm {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-left: 6px;
-            padding-top: 4px;
-            font-size: 11px;
-            font-weight: 700;
-            color: rgba(197, 251, 41, 0.12);
-        }
-        .ampm .on { color: var(--acid-lime); text-shadow: 0 0 6px rgba(197, 251, 41, 0.7); }
-
-        .readout {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            margin-top: 10px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--acid-lime);
-            text-shadow: 0 0 6px rgba(197, 251, 41, 0.6);
-            white-space: nowrap;
-        }
-
-        .readout .bell { flex: none; opacity: 0.12; }
-        body.armed .readout .bell { opacity: 1; }
-        .readout .sound-name { overflow: hidden; text-overflow: ellipsis; }
-
-        /* Flashing while the alarm time is being set, and while it rings */
-        body.setting .digits, body.setting .ampm { animation: flicker 0.9s steps(1) infinite; }
-        body.ringing .digits { animation: flicker 0.5s steps(1) infinite; }
-        @keyframes flicker { 60% { opacity: 0.2; } }
-
-        /* Rubber keys and printed labels */
-        .keys {
-            position: absolute;
-            left: 40px;
-            top: 268px;
-            display: flex;
-            gap: 18px;
-        }
-
-        .key-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-
-        .key {
-            width: 74px;
-            height: 26px;
-            border-radius: 13px;
-            background: linear-gradient(180deg, #55555e, #2e2e35);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 3px 0 #1a1a1f, 0 5px 8px rgba(0, 0, 0, 0.3);
-            transition: transform 0.06s, box-shadow 0.06s;
-        }
-        .key:active { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 #1a1a1f, 0 1px 2px rgba(0, 0, 0, 0.3); }
-
-        .printed {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--printed);
-        }
-
-        /* Sound dial */
-        .dial-wrap {
-            position: absolute;
-            left: 326px;
-            top: 112px;
-            width: 116px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
+        /* SOUND PUCK. It stands out from the face, so its side shows on the
+           side facing the vanishing point: the left. Six notches all the way
+           round, so it turns like a real rotary switch. */
         .dial-ring {
-            position: relative;
-            width: 116px;
-            height: 116px;
+            position: absolute;
+            left: 366px;
+            top: 244px;
+            width: 124px;
+            height: 124px;
+            pointer-events: none;
         }
 
         .tick {
             position: absolute;
-            left: 55px;
+            left: 59px;
             top: 0;
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #b4ab95;
-            transform-origin: 3px 58px;
+            background: radial-gradient(circle at 50% 35%, #0b0c0e, #2a2b30);
+            box-shadow: 0 0.6px 0 rgba(255, 255, 255, 0.12);
+            transform-origin: 3px 62px;
         }
-        .tick.on { background: #6d8c12; box-shadow: 0 0 0 2px rgba(197, 251, 41, 0.5); }
+        .tick.on {
+            background: radial-gradient(circle at 50% 40%, #fff6dd, var(--led) 55%, #d98a1c);
+            box-shadow: 0 0 6px rgba(255, 170, 60, 0.7);
+        }
 
-        .knob {
+        .puck {
             position: absolute;
-            left: 16px;
-            top: 16px;
+            left: 386px;
+            top: 264px;
             width: 84px;
             height: 84px;
             border-radius: 50%;
-            background:
-                radial-gradient(circle at 50% 50%, #3a3a42 0, #2a2a31 55%, transparent 56%),
-                conic-gradient(#f2f2f2, #9a9aa0, #e8e8ea, #8a8a90, #f2f2f2, #9a9aa0, #e8e8ea, #8a8a90, #f2f2f2);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.25);
             cursor: grab;
             touch-action: none;
-            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .knob.dragging { cursor: grabbing; transition: none; }
+        .puck.dragging { cursor: grabbing; }
+        .puck svg { position: absolute; left: -14px; top: -14px; overflow: visible; pointer-events: none; }
 
-        .knob::before {
-            content: "";
+        /* The groove you turn it by */
+        .notch {
             position: absolute;
             left: 39px;
-            top: 18px;
+            top: 8px;
             width: 6px;
             height: 22px;
             border-radius: 3px;
-            background: var(--acid-lime);
-            box-shadow: 0 0 6px rgba(197, 251, 41, 0.6);
+            background: linear-gradient(180deg, #a89e86, #c4bba5);
+            box-shadow: inset 0 0 2px rgba(80, 65, 35, 0.6);
+            transform-origin: 3px 34px;
+            transition: transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
+            pointer-events: none;
         }
+        .puck.dragging .notch { transition: none; }
 
-        /* On/off slide switch */
-        .switch-wrap {
-            position: absolute;
-            left: 346px;
-            top: 268px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
+        /* BUTTONS ON TOP. They are above eye level, so their tops are out of
+           sight: the top edge is the front of the rim, a shallow arc seen from
+           below. They sit behind the shell, so pressing one sinks it in. */
+        .push, .tbtn { position: absolute; }
+        .push svg, .tbtn svg { display: block; overflow: visible; }
+        .push { left: 240px; top: 140px; width: 160px; height: 32px; }
+        .tbtn { left: 448px; top: 152px; width: 44px; height: 20px; }
 
-        .switch {
-            position: relative;
-            width: 76px;
-            height: 26px;
-            border-radius: 13px;
-            background: linear-gradient(180deg, #24242a, #3c3c44);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 0 #fff;
-        }
+        .push .cap { transition: transform 0.07s ease-out; }
+        .push:active .cap, .push.down .cap { transform: translateY(12px); }
+        .tbtn .cap { transition: transform 0.07s ease-out; }
+        .tbtn:active .cap { transform: translateY(5px); }
 
-        .switch .thumb {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 36px;
-            height: 20px;
-            border-radius: 10px;
-            background:
-                repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 5px) 10px 4px / 16px 12px no-repeat,
-                linear-gradient(180deg, #fff, #d9d2c0);
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
-            transition: left 0.15s;
-        }
-        body.armed .switch .thumb { left: 37px; }
-
-        .switch-labels { display: flex; gap: 30px; }
+        body.ringing .push .glow { animation: plead 0.5s ease-in-out infinite; }
+        @keyframes plead { 50% { filter: brightness(1.15) drop-shadow(0 0 12px rgba(197, 251, 41, 0.8)); } }
 
         /* Demo control below the clock */
         .skip {
             position: absolute;
             left: 50%;
-            top: 470px;
+            top: 482px;
             transform: translateX(-50%);
             display: inline-flex;
             align-items: center;
@@ -386,54 +211,239 @@
         .skip:hover { border-color: var(--ink); }
         body.ringing .skip { visibility: hidden; }
 
+        @keyframes flicker { 60% { opacity: 0.25; } }
+
         @media (prefers-reduced-motion: reduce) {
-            body.ringing .clock, body.ringing .dome, body.ringing .digits, body.setting .digits, body.setting .ampm { animation: none; }
-            .knob, .switch .thumb, .dome, .key { transition: none; }
+            body.ringing .clock, body.ringing .spill, body.ringing .push .glow { animation: none; }
+            .notch, .push .cap, .tbtn .cap { transition: none; }
         }
     </style>
 </head>
-<body class="armed">
+<body>
+    <!-- Shared lighting. Each filter blurs a shape's outline into a height
+         map and lights it from above, so every edge rounds off smoothly. -->
+    <svg class="defs" aria-hidden="true">
+        <defs>
+            <filter id="lightShell" x="-4%" y="-6%" width="108%" height="112%" color-interpolation-filters="sRGB">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="h"/>
+                <feDiffuseLighting in="h" surfaceScale="22" diffuseConstant="1" lighting-color="#fff6e6" result="d">
+                    <feDistantLight azimuth="270" elevation="55"/>
+                </feDiffuseLighting>
+                <feSpecularLighting in="h" surfaceScale="22" specularConstant="0.5" specularExponent="34" lighting-color="#fff" result="s">
+                    <feDistantLight azimuth="270" elevation="55"/>
+                </feSpecularLighting>
+                <feComposite in="SourceGraphic" in2="d" operator="arithmetic" k1="0.8" k2="0.36" k3="0" k4="0" result="lit"/>
+                <feComposite in="s" in2="SourceAlpha" operator="in" result="sp"/>
+                <feComposite in="lit" in2="sp" operator="arithmetic" k1="0" k2="1" k3="0.7" k4="0"/>
+            </filter>
+            <filter id="lightPuck" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="2.6" result="h"/>
+                <feDiffuseLighting in="h" surfaceScale="9" diffuseConstant="1" lighting-color="#fff" result="d">
+                    <feDistantLight azimuth="270" elevation="55"/>
+                </feDiffuseLighting>
+                <feSpecularLighting in="h" surfaceScale="9" specularConstant="0.32" specularExponent="30" lighting-color="#fff" result="s">
+                    <feDistantLight azimuth="270" elevation="55"/>
+                </feSpecularLighting>
+                <feComposite in="SourceGraphic" in2="d" operator="arithmetic" k1="0.86" k2="0.3" k3="0" k4="0" result="lit"/>
+                <feComposite in="s" in2="SourceAlpha" operator="in" result="sp"/>
+                <feComposite in="lit" in2="sp" operator="arithmetic" k1="0" k2="1" k3="0.8" k4="0"/>
+            </filter>
+            <filter id="lightBezel" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="h"/>
+                <feDiffuseLighting in="h" surfaceScale="7" diffuseConstant="1" lighting-color="#fff" result="d">
+                    <feDistantLight azimuth="270" elevation="50"/>
+                </feDiffuseLighting>
+                <feSpecularLighting in="h" surfaceScale="7" specularConstant="0.9" specularExponent="26" lighting-color="#fff" result="s">
+                    <feDistantLight azimuth="270" elevation="50"/>
+                </feSpecularLighting>
+                <feComposite in="SourceGraphic" in2="d" operator="arithmetic" k1="0.8" k2="0.35" k3="0" k4="0" result="lit"/>
+                <feComposite in="s" in2="SourceAlpha" operator="in" result="sp"/>
+                <feComposite in="lit" in2="sp" operator="arithmetic" k1="0" k2="1" k3="0.7" k4="0"/>
+            </filter>
+            <filter id="grain" x="0" y="0" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="4"/>
+                <feColorMatrix values="0 0 0 0 0.35  0 0 0 0 0.28  0 0 0 0 0.15  0 0 0 0.13 0"/>
+                <feComposite in2="SourceGraphic" operator="in"/>
+            </filter>
+            <filter id="blur1"><feGaussianBlur stdDeviation="1"/></filter>
+            <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
+            <filter id="blur6" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6"/></filter>
+        </defs>
+    </svg>
+
     <div class="stage" id="stage">
-        <div class="nightstand"></div>
-        <div class="ground-shadow"></div>
+        <!-- The room: nightstand and the clock's shadow -->
+        <svg class="scene" width="640" height="540" viewBox="0 0 640 540" aria-hidden="true">
+            <defs>
+                <linearGradient id="stand" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#1f2747"/>
+                    <stop offset="0.06" stop-color="#141a36"/>
+                    <stop offset="1" stop-color="#0a0f22"/>
+                </linearGradient>
+                <filter id="soft" x="-30%" y="-300%" width="160%" height="700%"><feGaussianBlur stdDeviation="12"/></filter>
+                <filter id="tight" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="3"/></filter>
+            </defs>
+            <rect x="-900" y="448" width="2440" height="900" fill="url(#stand)"/>
+            <rect x="-900" y="448" width="2440" height="1" fill="rgba(255,255,255,0.1)"/>
+            <g class="shadow" id="shadow">
+                <ellipse cx="320" cy="456" rx="280" ry="16" fill="rgba(0,0,0,0.55)" filter="url(#soft)"/>
+                <ellipse cx="320" cy="450" rx="150" ry="4" fill="rgba(0,0,0,0.85)" filter="url(#tight)"/>
+            </g>
+        </svg>
 
-        <div class="clock">
-            <div class="foot l"></div>
-            <div class="foot r"></div>
-            <div class="plinth"></div>
-            <div class="body"></div>
+        <div class="spill" id="spill"></div>
 
-            <button class="dome" id="dome" aria-label="Stop the alarm"><span class="dome-label">stop</span></button>
+        <div class="throwable" id="throwable">
+            <div class="clock">
+                <!-- Top buttons first, so the shell covers their bases -->
+                <button class="tbtn" id="preview" aria-label="Preview the alarm sound">
+                    <svg width="44" height="20" viewBox="0 0 44 20" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="graphite" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0" stop-color="#141417"/>
+                                <stop offset="0.14" stop-color="#26262b"/>
+                                <stop offset="0.34" stop-color="#4a4a52"/>
+                                <stop offset="0.44" stop-color="#5a5a63"/>
+                                <stop offset="0.56" stop-color="#43434a"/>
+                                <stop offset="0.8" stop-color="#26262b"/>
+                                <stop offset="1" stop-color="#121215"/>
+                            </linearGradient>
+                            <linearGradient id="baseShade" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="rgba(0,0,0,0)"/>
+                                <stop offset="0.55" stop-color="rgba(0,0,0,0)"/>
+                                <stop offset="1" stop-color="rgba(0,0,0,0.5)"/>
+                            </linearGradient>
+                        </defs>
+                        <g class="cap">
+                            <path d="M8 10 Q22 7.6 36 10 V40 H8 Z" fill="url(#graphite)"/>
+                            <rect x="8" y="9" width="28" height="11" fill="url(#baseShade)"/>
+                            <path d="M8.6 10 Q22 7.9 35.4 10" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.9"/>
+                        </g>
+                    </svg>
+                </button>
 
-            <div class="bezel">
-                <div class="glass">
-                    <div class="digits" id="digits" aria-hidden="true"></div>
-                    <p class="readout">
-                        <svg class="bell" width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.1-1.6-5.6-4.5-6.3V4a1.5 1.5 0 0 0-3 0v.7C7.6 5.4 6 7.9 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-                        <span id="alarm-at">6:30 am</span>
-                        <span>&middot;</span>
-                        <span class="sound-name" id="sound-name">Cat throwing up</span>
-                    </p>
-                    <p class="sr-only" id="live" aria-live="polite"></p>
+                <button class="push" id="push" aria-label="Stop the alarm">
+                    <svg width="160" height="32" viewBox="0 0 160 32" aria-hidden="true">
+                        <defs>
+                            <!-- A vertical cylinder lit from the front: bright down the middle, rolling off to each side -->
+                            <linearGradient id="limeCyl" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0" stop-color="#4f6a07"/>
+                                <stop offset="0.07" stop-color="#6f900c"/>
+                                <stop offset="0.18" stop-color="#97c215"/>
+                                <stop offset="0.3" stop-color="#bce624"/>
+                                <stop offset="0.4" stop-color="#d6fb52"/>
+                                <stop offset="0.46" stop-color="#e9ff9a"/>
+                                <stop offset="0.52" stop-color="#d9fd5c"/>
+                                <stop offset="0.64" stop-color="#bfe82a"/>
+                                <stop offset="0.78" stop-color="#9cc617"/>
+                                <stop offset="0.9" stop-color="#75970d"/>
+                                <stop offset="1" stop-color="#4c6606"/>
+                            </linearGradient>
+                            <linearGradient id="limeBase" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="rgba(30,45,0,0)"/>
+                                <stop offset="0.5" stop-color="rgba(30,45,0,0)"/>
+                                <stop offset="1" stop-color="rgba(25,35,0,0.42)"/>
+                            </linearGradient>
+                        </defs>
+                        <g class="cap"><g class="glow">
+                            <path d="M24 12 Q80 6 136 12 V60 H24 Z" fill="url(#limeCyl)"/>
+                            <rect x="24" y="8" width="112" height="24" fill="url(#limeBase)"/>
+                            <!-- The rolled rim: a hairline of light, then the turn into shadow -->
+                            <path d="M24.8 12 Q80 6.4 135.2 12" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.3"/>
+                            <path d="M25.5 14.2 Q80 8.6 134.5 14.2" fill="none" stroke="rgba(60,85,0,0.16)" stroke-width="2" filter="url(#blur1)"/>
+                        </g></g>
+                    </svg>
+                </button>
+
+                <svg class="art" width="640" height="540" viewBox="0 0 640 540" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="cream" gradientUnits="userSpaceOnUse" x1="0" y1="170" x2="0" y2="450">
+                            <stop offset="0" stop-color="#f6eedc"/>
+                            <stop offset="1" stop-color="#e8dec8"/>
+                        </linearGradient>
+                        <linearGradient id="plate" gradientUnits="userSpaceOnUse" x1="0" y1="186" x2="0" y2="434">
+                            <stop offset="0" stop-color="#202125"/>
+                            <stop offset="0.55" stop-color="#25262a"/>
+                            <stop offset="1" stop-color="#1e1f22"/>
+                        </linearGradient>
+                        <radialGradient id="wellFloor" cx="0.45" cy="0.4" r="0.65">
+                            <stop offset="0" stop-color="#18191c"/>
+                            <stop offset="1" stop-color="#101113"/>
+                        </radialGradient>
+                        <clipPath id="hole"><rect x="58" y="188" width="524" height="244" rx="122"/></clipPath>
+                        <clipPath id="shellClip"><path d="M180 170 H460 A140 140 0 0 1 460 450 H180 A140 140 0 0 1 180 170 Z"/></clipPath>
+                    </defs>
+
+                    <g class="grip" pointer-events="visiblePainted">
+                        <!-- Face plate, sitting below the shell's opening -->
+                        <rect x="52" y="182" width="536" height="256" rx="128" fill="url(#plate)"/>
+                        <g clip-path="url(#hole)">
+                            <!-- The shell's lip shades the top of the plate -->
+                            <rect x="58" y="188" width="524" height="244" rx="122" fill="none" stroke="rgba(0,0,0,0.8)" stroke-width="14" filter="url(#blur6)" transform="translate(0 5)"/>
+                        </g>
+
+                        <!-- Speaker holes arcing round the right end -->
+                        <g id="speaker"></g>
+
+                        <!-- Well for the puck: its floor slides toward the vanishing point, so its wall shows on the right -->
+                        <circle cx="428" cy="306" r="52" fill="#0b0c0e"/>
+                        <circle cx="425.5" cy="306" r="51" fill="url(#wellFloor)"/>
+                        <path d="M378 312 A51 51 0 0 0 478 312" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.2" transform="translate(-2.5 0)"/>
+
+                        <!-- Round window: a raised graphite bezel, then smoked glass set back toward the vanishing point -->
+                        <path d="M180 192 A118 118 0 1 1 179.99 192 Z M182.5 202 A108 108 0 1 0 182.51 202 Z" fill="#2a2b30" fill-rule="evenodd" filter="url(#lightBezel)"/>
+                        <circle cx="182.5" cy="310" r="108" fill="#070605"/>
+
+                        <!-- Maker's mark, moulded dark on dark -->
+                        <g font-family="Inter, sans-serif" font-size="11" font-weight="800" text-anchor="middle">
+                            <text x="428" y="405" fill="rgba(255,255,255,0.07)">rude awakening</text>
+                            <text x="428" y="404" fill="#131416">rude awakening</text>
+                        </g>
+
+                        <!-- Shell: one ring of cream, lit so its outer edge and inner lip both round off -->
+                        <path d="M180 170 H460 A140 140 0 0 1 460 450 H180 A140 140 0 0 1 180 170 Z
+                                 M180 188 A122 122 0 0 0 180 432 H460 A122 122 0 0 0 460 188 Z"
+                              fill="url(#cream)" fill-rule="evenodd" filter="url(#lightShell)"/>
+                        <path d="M180 170 H460 A140 140 0 0 1 460 450 H180 A140 140 0 0 1 180 170 Z
+                                 M180 188 A122 122 0 0 0 180 432 H460 A122 122 0 0 0 460 188 Z"
+                              fill="#000" fill-rule="evenodd" filter="url(#grain)"/>
+                    </g>
+                </svg>
+
+                <canvas class="led" id="led" aria-hidden="true"></canvas>
+                <div class="glare"></div>
+                <p class="sr-only" id="live" aria-live="polite"></p>
+
+                <div class="dial-ring" id="ring"></div>
+                <div class="puck" id="knob" role="slider" tabindex="0" aria-label="Alarm sound" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" aria-valuetext="Cat throwing up">
+                    <svg width="112" height="112" viewBox="-56 -56 112 112" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="puckSide" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0" stop-color="#8a7f67"/>
+                                <stop offset="0.35" stop-color="#b3a990"/>
+                                <stop offset="1" stop-color="#c9c0aa"/>
+                            </linearGradient>
+                            <linearGradient id="puckSideShade" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="rgba(255,255,255,0.18)"/>
+                                <stop offset="0.5" stop-color="rgba(255,255,255,0)"/>
+                                <stop offset="1" stop-color="rgba(40,30,10,0.35)"/>
+                            </linearGradient>
+                            <radialGradient id="puckFace" cx="0.5" cy="0.5" r="0.5">
+                                <stop offset="0" stop-color="#ddd6c6"/>
+                                <stop offset="0.75" stop-color="#e6e0d2"/>
+                                <stop offset="1" stop-color="#e1dacb"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- Shadow on the plate below -->
+                        <ellipse cx="-3" cy="9" rx="40" ry="40" fill="rgba(0,0,0,0.6)" filter="url(#blur6)"/>
+                        <!-- Side: the face swept back toward the vanishing point -->
+                        <path d="M-6 -42 H0 A42 42 0 0 1 0 42 H-6 A42 42 0 0 1 -6 -42 Z" fill="url(#puckSide)"/>
+                        <path d="M-6 -42 H0 A42 42 0 0 1 0 42 H-6 A42 42 0 0 1 -6 -42 Z" fill="url(#puckSideShade)"/>
+                        <!-- Face, with its edge rounded by the light -->
+                        <circle r="42" fill="url(#puckFace)" filter="url(#lightPuck)"/>
+                    </svg>
+                    <div class="notch" id="notch"></div>
                 </div>
-            </div>
-
-            <div class="dial-wrap">
-                <div class="dial-ring" id="ring">
-                    <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Alarm sound" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" aria-valuetext="Cat throwing up"></div>
-                </div>
-                <span class="printed">sound</span>
-            </div>
-
-            <div class="keys">
-                <div class="key-wrap"><button class="key" id="hour" aria-label="Alarm hour"></button><span class="printed">hour</span></div>
-                <div class="key-wrap"><button class="key" id="min" aria-label="Alarm minute"></button><span class="printed">min</span></div>
-                <div class="key-wrap"><button class="key" id="preview" aria-label="Preview sound"></button><span class="printed">preview</span></div>
-            </div>
-
-            <div class="switch-wrap">
-                <button class="switch" id="switch" role="switch" aria-checked="true" aria-label="Alarm"><span class="thumb"></span></button>
-                <span class="printed switch-labels"><span>off</span><span>on</span></span>
             </div>
         </div>
 
@@ -444,90 +454,324 @@
     </div>
 
     <script>
+        /* Each sound has a 13 x 13 dot icon for the LED panel */
         const SOUNDS = [
-            { id: 'cat-throwing-up', name: 'Cat throwing up' },
-            { id: 'baby-crying', name: 'Baby crying' },
-            { id: 'fire-alarm', name: 'Fire alarm' },
-            { id: 'mosquito', name: 'Mosquito in your ear' },
-            { id: 'glass-shattering-downstairs', name: 'Glass breaking downstairs' },
-            { id: 'crypto-guy', name: 'Crypto guy' },
+            { id: 'cat-throwing-up', name: 'Cat throwing up', icon: [
+                '.#.........#.',
+                '.##.......##.',
+                '.###.....###.',
+                '.###########.',
+                '#############',
+                '###..###..###',
+                '###..###..###',
+                '#############',
+                '######.######',
+                '#####...#####',
+                '.###########.',
+                '..#########..',
+                '....#####....'] },
+            { id: 'baby-crying', name: 'Baby crying', icon: [
+                '......##.....',
+                '.....#..#....',
+                '...#######...',
+                '..#########..',
+                '.###########.',
+                '.##..###..##.',
+                '.###########.',
+                '.##.#####.##.',
+                '.####...####.',
+                '.####...####.',
+                '..####.####..',
+                '...#######...',
+                '.....###.....'] },
+            { id: 'fire-alarm', name: 'Fire alarm', icon: [
+                '......#......',
+                '.....##......',
+                '.....###.....',
+                '....####.....',
+                '....#####.#..',
+                '...#######...',
+                '..#########..',
+                '..####.####..',
+                '.####...####.',
+                '.###.....###.',
+                '.####...####.',
+                '..#########..',
+                '...#######...'] },
+            { id: 'mosquito', name: 'Mosquito in your ear', icon: [
+                '.##.......##.',
+                '####.....####',
+                '####.....####',
+                '.###.....###.',
+                '...##.#.##...',
+                '.....###.....',
+                '#...#####...#',
+                '.#...###...#.',
+                '..#..###..#..',
+                '.#...###...#.',
+                '#.....#.....#',
+                '......#......',
+                '......#......'] },
+            { id: 'glass-shattering-downstairs', name: 'Glass breaking downstairs', icon: [
+                '..#########..',
+                '..####.####..',
+                '..###.#####..',
+                '..####.####..',
+                '...###.###...',
+                '...####.##...',
+                '....#####....',
+                '.....###.....',
+                '......#......',
+                '......#......',
+                '......#......',
+                '....#####....',
+                '...#######...'] },
+            { id: 'crypto-guy', name: 'Crypto guy', icon: [
+                '...##.##.....',
+                '.#########...',
+                '.##.....###..',
+                '.##......##..',
+                '.##.....###..',
+                '.#########...',
+                '.##......###.',
+                '.##.......##.',
+                '.##......###.',
+                '.##########..',
+                '.#########...',
+                '...##.##.....',
+                '.............'] },
         ];
+        const BELL = [
+            '......#......',
+            '.....###.....',
+            '....#####....',
+            '...#######...',
+            '...#######...',
+            '...#######...',
+            '...#######...',
+            '..#########..',
+            '.###########.',
+            '.............',
+            '.....###.....',
+            '......#......',
+            '.............'];
         SOUNDS.forEach(s => { s.audio = new Audio(`audio/rude-awakening/${s.id}.mp3`); s.audio.preload = 'auto'; });
 
         const $ = id => document.getElementById(id);
+        const SVGNS = 'http://www.w3.org/2000/svg';
         const body = document.body;
         const ringing = () => body.classList.contains('ringing');
-        const state = { alarm: 6 * 60 + 30, sound: 0, offset: 0, firedFor: null, setUntil: 0 };
+        const state = { alarm: 6 * 60 + 30, sound: 0, offset: 0, firedFor: null };
         let playing = null, fade = null;
 
         // Fit the 640 x 540 stage to the frame
+        let fitScale = 1;
         function fit() {
-            $('stage').style.setProperty('--fit', Math.min(innerWidth / 640, innerHeight / 540, 1.6));
+            fitScale = Math.min(innerWidth / 640, innerHeight / 540, 1.6);
+            $('stage').style.setProperty('--fit', fitScale);
+            sizeLed();
         }
-        addEventListener('resize', fit);
-        fit();
 
-        // Seven-segment digits, with the unlit segments faintly visible like a real LCD
-        const SEGS = {
-            a: '9,8 13,4 37,4 41,8 37,12 13,12',
-            g: '9,45 13,41 37,41 41,45 37,49 13,49',
-            d: '9,82 13,78 37,78 41,82 37,86 13,86',
-            f: '6,10 10,14 10,39 6,43 2,39 2,14',
-            b: '44,10 48,14 48,39 44,43 40,39 40,14',
-            e: '6,47 10,51 10,76 6,80 2,76 2,51',
-            c: '44,47 48,51 48,76 44,80 40,76 40,51',
+        // Speaker holes on three arcs round the right end, each with a lit lower lip
+        [96, 105, 114].forEach((r, row) => {
+            const step = 8.4 / r, span = 1.2;
+            for (let t = -span + (row % 2) * step / 2; t <= span; t += step) {
+                const x = 460 + Math.cos(t) * r, y = 310 + Math.sin(t) * r;
+                const lip = document.createElementNS(SVGNS, 'circle');
+                lip.setAttribute('cx', x); lip.setAttribute('cy', y + 0.7); lip.setAttribute('r', 1.8);
+                lip.setAttribute('fill', 'rgba(255,255,255,0.07)');
+                const hole = document.createElementNS(SVGNS, 'circle');
+                hole.setAttribute('cx', x); hole.setAttribute('cy', y); hole.setAttribute('r', 1.7);
+                hole.setAttribute('fill', '#09090b');
+                $('speaker').append(lip, hole);
+            }
+        });
+
+        /* ROUND LED PANEL: a 90 x 90 grid of fine gold dots behind smoked
+           acrylic. Each dot has a brightness, so the digits keep smooth edges.
+           The time is Inter, rasterised onto the dots; under it, the bell and
+           the sound's icon. Light blooms through the acrylic in two layers. */
+        const N = 90, PITCH = 216 / N, MID = (N - 1) / 2, RAD = 44.2;
+        const led = $('led'), ctx = led.getContext('2d');
+        const grid = document.createElement('canvas');
+        const glow = document.createElement('canvas'), gctx = glow.getContext('2d');
+        const haze = document.createElement('canvas'), hctx = haze.getContext('2d');
+        glow.width = glow.height = N;
+        haze.width = haze.height = Math.round(N / 4);
+        const inside = new Uint8Array(N * N);
+        for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) inside[y * N + x] = (x - MID) ** 2 + (y - MID) ** 2 <= RAD * RAD;
+        const cov = new Float32Array(N * N);
+        let ledScale = 1;
+        const lite = (x, y, c = 1) => {
+            if (x >= 0 && x < N && y >= 0 && y < N && inside[y * N + x]) cov[y * N + x] = Math.max(cov[y * N + x], c);
         };
-        const MAP = ['abcdef', 'bc', 'abged', 'abgcd', 'fgbc', 'afgcd', 'afgedc', 'abc', 'abcdefg', 'abcdfg'];
 
-        const digitSVG = () => `<svg viewBox="0 0 50 90"><g transform="skewX(-6) translate(6 0)">${
-            Object.entries(SEGS).map(([k, p]) => `<polygon class="seg" data-s="${k}" points="${p}"/>`).join('')
-        }</g></svg>`;
+        function sizeLed() {
+            ledScale = Math.max(1, (devicePixelRatio || 1) * fitScale);
+            led.width = grid.width = Math.round(216 * ledScale);
+            led.height = grid.height = Math.round(216 * ledScale);
+            // The unlit dots never change, so they are drawn once
+            const g = grid.getContext('2d');
+            g.setTransform(ledScale, 0, 0, ledScale, 0, 0);
+            g.fillStyle = 'rgba(255, 196, 130, 0.05)';
+            g.beginPath();
+            for (let i = 0; i < inside.length; i++) if (inside[i]) {
+                const x = (i % N + 0.5) * PITCH, y = (Math.floor(i / N) + 0.5) * PITCH;
+                g.moveTo(x + 0.82, y);
+                g.arc(x, y, 0.82, 0, Math.PI * 2);
+            }
+            g.fill();
+            draw();
+        }
 
-        $('digits').innerHTML = digitSVG() + digitSVG()
-            + `<svg class="colon" viewBox="0 0 12 90"><g transform="skewX(-6) translate(4 0)"><rect class="seg" x="2" y="26" width="8" height="8" rx="2"/><rect class="seg" x="2" y="56" width="8" height="8" rx="2"/></g></svg>`
-            + digitSVG() + digitSVG()
-            + `<div class="ampm"><span id="am">am</span><span id="pm">pm</span></div>`;
+        // Time: drawn large on a hidden canvas, then each dot takes the share
+        // of its square the digits cover. The ink is centred in the window.
+        const OVER = 6, FONT_DOTS = 28, BASELINE = 44;
+        const raster = document.createElement('canvas');
+        raster.width = raster.height = N * OVER;
+        const rctx = raster.getContext('2d', { willReadFrequently: true });
+        let timeCache = { key: '', digits: [], colon: [] };
 
-        const digitEls = [...$('digits').querySelectorAll('svg:not(.colon)')];
-        const colonSegs = $('digits').querySelectorAll('.colon .seg');
+        function sample() {
+            const img = rctx.getImageData(0, 0, raster.width, raster.height).data;
+            const dots = [];
+            for (let gy = 0; gy < N; gy++) for (let gx = 0; gx < N; gx++) {
+                let sum = 0;
+                for (let sy = 0; sy < OVER; sy++) for (let sx = 0; sx < OVER; sx++) {
+                    sum += img[(((gy * OVER + sy) * raster.width) + gx * OVER + sx) * 4 + 3];
+                }
+                const c = sum / (OVER * OVER * 255);
+                if (c > 0.12) dots.push([gx, gy, Math.min(1, (c - 0.12) / 0.5)]);
+            }
+            return dots;
+        }
 
-        function show(minutes, colonOn) {
-            const h24 = Math.floor(minutes / 60) % 24, m = minutes % 60;
-            const h = h24 % 12 || 12;
-            const chars = [h >= 10 ? 1 : null, h % 10, Math.floor(m / 10), m % 10];
-            digitEls.forEach((el, i) => {
-                const lit = chars[i] === null ? '' : MAP[chars[i]];
-                el.querySelectorAll('.seg').forEach(p => p.classList.toggle('on', lit.includes(p.dataset.s)));
+        function timeDots(text) {
+            if (timeCache.key === text) return timeCache;
+            rctx.font = `500 ${FONT_DOTS * OVER}px Inter, sans-serif`;
+            rctx.fillStyle = '#fff';
+            rctx.textBaseline = 'alphabetic';
+            const cell = Math.max(...'0123456789'.split('').map(c => rctx.measureText(c).width));
+            const colonW = rctx.measureText(':').width * 1.1;
+            const chars = [...text];
+            const widths = chars.map(c => c === ':' ? colonW : cell);
+            const total = widths.reduce((a, b) => a + b, 0);
+            // Centre on the ink, not on the advance widths
+            const m0 = rctx.measureText(chars[0]), mN = rctx.measureText(chars[chars.length - 1]);
+            const inkLeft = (cell - m0.width) / 2 + m0.actualBoundingBoxLeft * -1;
+            const inkRight = (cell - mN.width) / 2 + (mN.width - mN.actualBoundingBoxRight);
+            const start = (raster.width - total) / 2 + (inkRight - inkLeft) / 2;
+            const pass = wantColon => {
+                rctx.clearRect(0, 0, raster.width, raster.height);
+                let x = start;
+                chars.forEach((c, i) => {
+                    if ((c === ':') === wantColon) rctx.fillText(c, x + (widths[i] - rctx.measureText(c).width) / 2, BASELINE * OVER - (c === ':' ? 1.2 * OVER : 0));
+                    x += widths[i];
+                });
+                return sample();
+            };
+            timeCache = { key: text, digits: pass(false), colon: pass(true) };
+            return timeCache;
+        }
+
+        function icon(rows, ox, oy) {
+            rows.forEach((r, y) => [...r].forEach((c, x) => { if (c === '#') lite(ox + x, oy + y); }));
+        }
+
+        const ICON_TOP = 53, ICON_GAP = 9;
+        let frame = 0;
+        function draw() {
+            cov.fill(0);
+            const d = new Date(Date.now() + state.offset);
+            const h = d.getHours() % 12 || 12, m = String(d.getMinutes()).padStart(2, '0');
+            const colonOn = ringing() || d.getMilliseconds() < 500;
+            const blinkOff = ringing() && frame % 6 > 3;
+
+            if (!blinkOff) {
+                const t = timeDots(`${h}:${m}`);
+                for (const [x, y, c] of t.digits) lite(x, y, c);
+                if (colonOn) for (const [x, y, c] of t.colon) lite(x, y, c);
+            }
+
+            // The bell shivers while it rings
+            const left = Math.round(MID + 0.5 - (13 * 2 + ICON_GAP) / 2);
+            const shake = ringing() ? (frame % 2 ? 1 : -1) : 0;
+            icon(BELL, left + shake, ICON_TOP);
+            icon(SOUNDS[state.sound].icon, left + 13 + ICON_GAP, ICON_TOP);
+            frame++;
+            paint();
+        }
+
+        function paint() {
+            // Bloom source: one pixel per dot, gold, as bright as the dot
+            const img = gctx.createImageData(N, N);
+            for (let i = 0; i < cov.length; i++) {
+                const c = cov[i];
+                if (!c) continue;
+                img.data[i * 4] = 255; img.data[i * 4 + 1] = 160; img.data[i * 4 + 2] = 48; img.data[i * 4 + 3] = c * 255;
+            }
+            gctx.putImageData(img, 0, 0);
+            hctx.clearRect(0, 0, haze.width, haze.height);
+            hctx.imageSmoothingQuality = 'high';
+            hctx.drawImage(glow, 0, 0, haze.width, haze.height);
+
+            const W = led.width;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, W, W);
+            ctx.drawImage(grid, 0, 0);
+
+            // Wide haze, then the tight glow round each dot
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalAlpha = 0.32;
+            ctx.drawImage(haze, 0, 0, W, W);
+            ctx.globalAlpha = 0.42;
+            ctx.drawImage(glow, 0, 0, W, W);
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = 'source-over';
+
+            // The dots themselves, grouped by brightness
+            ctx.setTransform(ledScale, 0, 0, ledScale, 0, 0);
+            const levels = [0.25, 0.5, 0.75, 1];
+            levels.forEach((lv, li) => {
+                const lo = li ? levels[li - 1] : 0;
+                ctx.beginPath();
+                for (let i = 0; i < cov.length; i++) {
+                    const c = cov[i];
+                    if (c > lo && c <= lv) {
+                        const x = (i % N + 0.5) * PITCH, y = (Math.floor(i / N) + 0.5) * PITCH;
+                        ctx.moveTo(x + 0.9, y);
+                        ctx.arc(x, y, 0.9, 0, Math.PI * 2);
+                    }
+                }
+                ctx.fillStyle = `rgba(255, 196, 90, ${0.25 + 0.75 * lv})`;
+                ctx.fill();
             });
-            colonSegs.forEach(c => c.classList.toggle('on', colonOn));
-            $('am').classList.toggle('on', h24 < 12);
-            $('pm').classList.toggle('on', h24 >= 12);
+            // Hot centres on the fully lit dots
+            ctx.beginPath();
+            for (let i = 0; i < cov.length; i++) if (cov[i] > 0.75) {
+                const x = (i % N + 0.5) * PITCH, y = (Math.floor(i / N) + 0.5) * PITCH;
+                ctx.moveTo(x + 0.42, y);
+                ctx.arc(x, y, 0.42, 0, Math.PI * 2);
+            }
+            ctx.fillStyle = 'rgba(255, 244, 214, 0.9)';
+            ctx.fill();
         }
 
-        const fmt = minutes => {
-            const h24 = Math.floor(minutes / 60) % 24, m = minutes % 60;
-            return `${h24 % 12 || 12}:${String(m).padStart(2, '0')} ${h24 < 12 ? 'am' : 'pm'}`;
-        };
-
-        // The face, and the alarm going off when its minute comes round
+        // The alarm going off when its minute comes round, and a tick each minute
+        let lastMinute = null;
         function tick() {
             const d = new Date(Date.now() + state.offset);
             const mins = d.getHours() * 60 + d.getMinutes();
-            const setting = Date.now() < state.setUntil;
-            body.classList.toggle('setting', setting);
-            show(setting ? state.alarm : mins, setting || ringing() || d.getMilliseconds() < 500);
-
-            const stamp = d.toDateString() + mins;
-            if (body.classList.contains('armed') && !setting && mins === state.alarm && state.firedFor !== stamp) {
-                state.firedFor = stamp;
+            if (lastMinute !== null && mins !== lastMinute) d.getMinutes() === 0 ? sfx.hour() : sfx.minute();
+            lastMinute = mins;
+            const key = d.toDateString() + mins;
+            if (mins === state.alarm && state.firedFor !== key) {
+                state.firedFor = key;
                 ring();
             }
-        }
-        setInterval(tick, 250);
-
-        function updateReadout() {
-            $('alarm-at').textContent = fmt(state.alarm);
-            $('sound-name').textContent = SOUNDS[state.sound].name;
+            draw();
         }
 
         // Sound: the alarm loops, a preview is the first few seconds and a fade
@@ -559,7 +803,7 @@
             body.classList.add('ringing');
             play(state.sound, true);
             $('live').textContent = `Alarm ringing: ${SOUNDS[state.sound].name}`;
-            $('dome').focus();
+            $('push').focus({ preventScroll: true });
         }
 
         function stopRinging() {
@@ -568,31 +812,25 @@
             $('live').textContent = 'Alarm stopped';
         }
 
-        // The big button on top
-        $('dome').addEventListener('click', () => ringing() ? stopRinging() : stopSound());
+        // The big button on top. Keyboard presses get the same travel as a click.
+        const push = $('push');
+        push.addEventListener('click', () => ringing() ? stopRinging() : stopSound());
+        push.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') push.classList.add('down'); });
+        push.addEventListener('keyup', () => push.classList.remove('down'));
+        push.addEventListener('blur', () => push.classList.remove('down'));
 
-        // Hour and min set the alarm; the face shows the alarm time while you set it
-        function nudge(by) {
-            state.alarm = (state.alarm + by + 1440) % 1440;
-            state.setUntil = Date.now() + 2500;
-            updateReadout();
-            tick();
-        }
-        $('hour').addEventListener('click', () => nudge(60));
-        $('min').addEventListener('click', () => nudge(state.alarm % 60 === 59 ? -59 : 1));
         $('preview').addEventListener('click', () => { if (!ringing()) play(state.sound, false); });
 
-        $('switch').addEventListener('click', () => {
-            const on = !body.classList.contains('armed');
-            body.classList.toggle('armed', on);
-            $('switch').setAttribute('aria-checked', on);
-            if (!on) stopRinging();
-        });
+        // Every button clicks on the way down and on the way back up
+        push.addEventListener('pointerdown', () => sfx.press(true));
+        push.addEventListener('pointerup', () => sfx.release(true));
+        $('preview').addEventListener('pointerdown', () => sfx.press(false));
+        $('preview').addEventListener('pointerup', () => sfx.release(false));
+        push.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) sfx.press(true); });
 
         // Skip to morning sets the clock five seconds before the alarm
         $('skip').addEventListener('click', () => {
             stopSound();
-            if (!body.classList.contains('armed')) $('switch').click();
             const d = new Date();
             const target = new Date(d);
             target.setHours(Math.floor(state.alarm / 60), state.alarm % 60, 0, 0);
@@ -600,64 +838,293 @@
             if (target < d) target.setDate(target.getDate() + 1);
             state.offset = target - d;
             state.firedFor = null;
-            state.setUntil = 0;
             tick();
         });
 
-        // The sound dial: one detent per sound across 240 degrees
-        const STEP = 240 / (SOUNDS.length - 1);
-        const ANGLES = SOUNDS.map((_, i) => -120 + i * STEP);
-        const knob = $('knob');
-        ANGLES.forEach(a => {
+        /* THE SOUND PUCK: six detents evenly round the full circle. The angle
+           only ever accumulates, so going from the last sound to the first
+           keeps turning the same way. Pressing anywhere on it points the
+           groove at the cursor; dragging keeps it following. */
+        const STEP = 360 / SOUNDS.length;
+        const knob = $('knob'), notch = $('notch');
+        const mod = (a, n) => ((a % n) + n) % n;
+        let dial = 0;    // degrees, unbounded
+        SOUNDS.forEach((_, i) => {
             const t = document.createElement('span');
             t.className = 'tick';
-            t.style.transform = `rotate(${a}deg)`;
-            $('ring').insertBefore(t, knob);
+            t.style.transform = `rotate(${i * STEP}deg)`;
+            $('ring').appendChild(t);
         });
         const ticks = [...$('ring').querySelectorAll('.tick')];
 
+        function showDial(deg) { notch.style.transform = `rotate(${deg}deg)`; }
+
         function setSound(i, audition = true) {
-            i = (i + SOUNDS.length) % SOUNDS.length;
+            i = mod(i, SOUNDS.length);
             const changed = i !== state.sound;
             state.sound = i;
-            knob.style.transform = `rotate(${ANGLES[i]}deg)`;
             ticks.forEach((t, j) => t.classList.toggle('on', j === i));
             knob.setAttribute('aria-valuenow', i);
             knob.setAttribute('aria-valuetext', SOUNDS[i].name);
-            updateReadout();
-            // Turning the dial while it rings swaps the noise; otherwise you hear a preview
+            draw();
+            // Turning the puck while it rings swaps the noise; otherwise you hear a preview
             if (changed && audition) play(i, ringing());
         }
 
+        // Turn by whole detents from wherever the dial is
+        function turn(by) {
+            dial = Math.round(dial / STEP) * STEP + by * STEP;
+            showDial(dial);
+            sfx.detent(Math.round(dial / STEP));
+            setSound(Math.round(dial / STEP));
+        }
+
         let drag = null;
-        knob.addEventListener('pointerdown', e => {
+        const pointerAngle = e => {
             const r = knob.getBoundingClientRect();
-            drag = { cx: r.left + r.width / 2, cy: r.top + r.height / 2, x: e.clientX, y: e.clientY, moved: false };
-            knob.setPointerCapture(e.pointerId);
+            return Math.atan2(e.clientX - (r.left + r.width / 2), (r.top + r.height / 2) - e.clientY) * 180 / Math.PI;
+        };
+        // The nearest way round from the dial's current angle to a pointer angle
+        const toward = a => dial + (mod(a - dial + 180, 360) - 180);
+
+        knob.addEventListener('pointerdown', e => {
+            e.stopPropagation();
+            try { knob.setPointerCapture(e.pointerId); } catch (err) { /* synthetic pointer */ }
             knob.classList.add('dragging');
+            const before = Math.round(dial / STEP);
+            dial = toward(pointerAngle(e));
+            showDial(dial);
+            if (Math.round(dial / STEP) !== before) sfx.detent(Math.round(dial / STEP));
+            drag = { detent: Math.round(dial / STEP) };
         });
         knob.addEventListener('pointermove', e => {
             if (!drag) return;
-            if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 4) drag.moved = true;
-            if (!drag.moved) return;
-            const deg = Math.atan2(e.clientX - drag.cx, drag.cy - e.clientY) * 180 / Math.PI;
-            const clamped = Math.max(-120, Math.min(120, deg));
-            knob.style.transform = `rotate(${clamped}deg)`;
-            drag.nearest = Math.round((clamped + 120) / STEP);
+            dial = toward(pointerAngle(e));
+            showDial(dial);
+            // A click each time it passes a detent
+            const detent = Math.round(dial / STEP);
+            if (detent !== drag.detent) { sfx.detent(detent); drag.detent = detent; }
         });
-        knob.addEventListener('pointerup', () => {
+        const release = () => {
             if (!drag) return;
             knob.classList.remove('dragging');
-            setSound(drag.moved ? (drag.nearest ?? state.sound) : state.sound + 1);   // a click turns it one notch
+            dial = Math.round(dial / STEP) * STEP;
+            showDial(dial);
+            setSound(Math.round(dial / STEP));
             drag = null;
-        });
+        };
+        knob.addEventListener('pointerup', release);
+        knob.addEventListener('pointercancel', release);
         knob.addEventListener('keydown', e => {
-            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setSound(state.sound + 1); e.preventDefault(); }
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setSound(state.sound - 1); e.preventDefault(); }
+            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { turn(1); e.preventDefault(); }
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { turn(-1); e.preventDefault(); }
         });
 
+        /* THROWING IT: grab the body, fling it, it leaves the room, and after a
+           pause it falls back in from above and lands on the nightstand. */
+        const throwable = $('throwable'), shadow = $('shadow'), spill = $('spill');
+        const G = 2800;                       // gravity, stage px per second squared
+        const body3 = { x: 0, y: 0, a: 0, vx: 0, vy: 0, va: 0, mode: 'rest' };
+        let grab = null, trail = [], last = 0, running = false;
+
+        function place() {
+            throwable.style.transform = `translate(${body3.x}px, ${body3.y}px) rotate(${body3.a}deg)`;
+            const lift = Math.max(0, -body3.y);
+            const k = Math.max(0, 1 - lift / 320);
+            shadow.style.transform = `translateX(${body3.x}px) scale(${0.6 + 0.4 * k}, 1)`;
+            shadow.style.opacity = k;
+            spill.style.transform = `translateX(${body3.x}px)`;
+            spill.style.opacity = k;
+        }
+
+        const toStage = e => {
+            const r = $('stage').getBoundingClientRect();
+            return { x: (e.clientX - r.left) / fitScale, y: (e.clientY - r.top) / fitScale };
+        };
+
+        throwable.addEventListener('pointerdown', e => {
+            if (e.target.closest('button, [role="slider"]') || body3.mode === 'away') return;
+            const p = toStage(e);
+            grab = { dx: p.x - body3.x, dy: p.y - body3.y };
+            trail = [{ ...p, t: performance.now() }];
+            body3.mode = 'held';
+            throwable.classList.add('held');
+            try { throwable.setPointerCapture(e.pointerId); } catch (err) { /* synthetic pointer */ }
+            loop();
+        });
+
+        throwable.addEventListener('pointermove', e => {
+            if (body3.mode !== 'held') return;
+            const p = toStage(e);
+            const now = performance.now();
+            trail.push({ ...p, t: now });
+            while (trail.length > 2 && now - trail[0].t > 90) trail.shift();
+            body3.x = p.x - grab.dx;
+            body3.y = Math.min(0, p.y - grab.dy);
+        });
+
+        function letGo() {
+            if (body3.mode !== 'held') return;
+            throwable.classList.remove('held');
+            const a = trail[0], b = trail[trail.length - 1];
+            const dt = Math.max(0.016, (b.t - a.t) / 1000);
+            body3.vx = (b.x - a.x) / dt;
+            body3.vy = (b.y - a.y) / dt;
+            body3.va = body3.vx * 0.35;
+            body3.mode = 'fly';
+        }
+        throwable.addEventListener('pointerup', letGo);
+        throwable.addEventListener('pointercancel', letGo);
+
+        function loop() {
+            if (running) return;
+            running = true;
+            last = performance.now();
+            window.requestAnimationFrame(step);
+        }
+
+        function step(now) {
+            const dt = Math.min(1 / 30, (now - last) / 1000);
+            last = now;
+            const halfW = innerWidth / 2 / fitScale, halfH = innerHeight / 2 / fitScale;
+
+            if (body3.mode === 'held') {
+                // Swing a little while it is carried
+                const a = trail[0], b = trail[trail.length - 1];
+                const vx = (b.x - a.x) / Math.max(0.016, (b.t - a.t) / 1000);
+                body3.a += (Math.max(-25, Math.min(25, vx * 0.02)) - body3.a) * 0.2;
+            }
+
+            if (body3.mode === 'fly' || body3.mode === 'drop') {
+                body3.vy += G * dt;
+                body3.x += body3.vx * dt;
+                body3.y += body3.vy * dt;
+                body3.a += body3.va * dt;
+
+                // Gone off an edge: wait, then drop it back in from above
+                const off = Math.abs(body3.x) > halfW + 420 || body3.y < -halfH - 900 || body3.y > halfH + 400;
+                if (off && body3.mode === 'fly') {
+                    body3.mode = 'away';
+                    throwable.classList.add('away');
+                    setTimeout(dropIn, 1100);
+                }
+
+                // The nightstand
+                if (body3.y >= 0 && body3.vy > 0) {
+                    const hit = body3.vy;
+                    body3.y = 0;
+                    body3.vy = -hit * 0.32;
+                    body3.vx *= 0.6;
+                    body3.va *= 0.4;
+                    if (hit > 260) thud(Math.min(1, hit / 2200));
+                    if (hit < 220) { body3.mode = 'settle'; body3.vy = 0; }
+                }
+            }
+
+            if (body3.mode === 'settle') {
+                body3.x += body3.vx * dt;
+                body3.vx *= 0.82;
+                body3.a *= 0.78;
+                const limit = Math.max(0, halfW - 300);
+                body3.x = Math.max(-limit, Math.min(limit, body3.x));
+                if (Math.abs(body3.a) < 0.2 && Math.abs(body3.vx) < 4) { body3.a = 0; body3.mode = 'rest'; }
+            }
+
+            // Falling back in, it rights itself a little on the way down
+            if (body3.mode === 'drop') body3.a *= 0.97;
+
+            place();
+            if (body3.mode === 'rest' || body3.mode === 'away') { running = false; return; }
+            window.requestAnimationFrame(step);
+        }
+
+        function dropIn() {
+            const halfH = innerHeight / 2 / fitScale;
+            Object.assign(body3, { x: 0, y: -halfH - 520, vx: 0, vy: 0, a: (Math.random() - 0.5) * 16, va: (Math.random() - 0.5) * 30, mode: 'drop' });
+            throwable.classList.remove('away');
+            loop();
+        }
+
+        /* LITTLE SOUNDS, all made on the spot. The browser only lets audio
+           start after a tap, so the first minute ticks may be silent. */
+        let audio = null;
+        function ac() {
+            audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+            if (audio.state === 'suspended') audio.resume();
+            return audio;
+        }
+        addEventListener('pointerdown', () => { try { ac(); } catch (e) { /* no audio */ } }, { capture: true });
+
+        // A short burst of filtered noise: a click, a tick, a clack
+        function click(freq, level, dur = 0.02, q = 5) {
+            try {
+                const a = ac(), len = Math.floor(a.sampleRate * dur);
+                const b = a.createBuffer(1, len, a.sampleRate), d = b.getChannelData(0);
+                for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / len * 7);
+                const src = a.createBufferSource(), bp = a.createBiquadFilter(), g = a.createGain();
+                bp.type = 'bandpass';
+                bp.frequency.value = freq;
+                bp.Q.value = q;
+                g.gain.value = level;
+                src.buffer = b;
+                src.connect(bp).connect(g).connect(a.destination);
+                src.start();
+            } catch (e) { /* no audio */ }
+        }
+
+        // A soft electronic beep, like the clock's own speaker
+        function beep(freq, level, dur, delay = 0) {
+            try {
+                const a = ac(), t0 = a.currentTime + delay;
+                const o = a.createOscillator(), g = a.createGain();
+                o.type = 'sine';
+                o.frequency.value = freq;
+                g.gain.setValueAtTime(0, t0);
+                g.gain.linearRampToValueAtTime(level, t0 + 0.006);
+                g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+                o.connect(g).connect(a.destination);
+                o.start(t0);
+                o.stop(t0 + dur + 0.02);
+            } catch (e) { /* no audio */ }
+        }
+
+        const sfx = {
+            // Each detent a touch higher, so you can hear where you are
+            detent: i => click(2600 + mod(i, SOUNDS.length) * 180, 0.35, 0.014, 8),
+            press: big => { click(big ? 700 : 1600, big ? 0.7 : 0.4, big ? 0.05 : 0.025, 2); if (big) beep(150, 0.18, 0.07); },
+            release: big => click(big ? 1900 : 3000, big ? 0.3 : 0.2, 0.018, 6),
+            minute: () => beep(2400, 0.05, 0.05),
+            hour: () => { beep(1568, 0.09, 0.14); beep(2093, 0.09, 0.2, 0.16); },
+        };
+
+        // A plastic thud on the nightstand
+        function thud(level) {
+            try {
+                const a = ac();
+                const len = Math.floor(a.sampleRate * 0.25);
+                const b = a.createBuffer(1, len, a.sampleRate), d = b.getChannelData(0);
+                for (let i = 0; i < len; i++) {
+                    const t = i / a.sampleRate;
+                    d[i] = (Math.random() * 2 - 1) * Math.exp(-t * 40) * 0.6 + Math.sin(2 * Math.PI * 90 * t) * Math.exp(-t * 18);
+                }
+                const src = a.createBufferSource(), lp = a.createBiquadFilter(), g = a.createGain();
+                lp.type = 'lowpass';
+                lp.frequency.value = 900;
+                g.gain.value = 0.9 * level;
+                src.buffer = b;
+                src.connect(lp).connect(g).connect(a.destination);
+                src.start();
+            } catch (e) { /* no audio, no thud */ }
+        }
+
+        addEventListener('resize', fit);
+        fit();
         setSound(0, false);
-        tick();
+        showDial(0);
+        place();
+        setInterval(tick, 80);
+        // The time is drawn from Inter, so redraw once the font has arrived
+        document.fonts && document.fonts.ready.then(() => { timeCache.key = ''; draw(); });
 
         // Leaving the page or closing the modal stops the noise
         addEventListener('pagehide', stopSound);
