@@ -14,7 +14,7 @@
             --ink: #fff;
             --ink-soft: rgba(255, 255, 255, 0.6);
             --acid-lime: #c5fb29;
-            --led: #ffc45a;
+            --led: #c5fb29;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -96,7 +96,7 @@
             top: 450px;
             width: 230px;
             height: 50px;
-            background: radial-gradient(ellipse at 50% 0, rgba(255, 170, 60, 0.11), transparent 70%);
+            background: radial-gradient(ellipse at 50% 0, rgba(197, 251, 41, 0.1), transparent 70%);
             pointer-events: none;
         }
         body.ringing .spill { animation: flicker 0.5s steps(1) infinite; }
@@ -140,13 +140,13 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: radial-gradient(circle at 50% 35%, #0b0c0e, #2a2b30);
-            box-shadow: 0 0.6px 0 rgba(255, 255, 255, 0.12);
+            background: radial-gradient(circle at 50% 30%, #070809 0, #121316 55%, #26272c 100%);
+            box-shadow: inset 0 1px 1.5px rgba(0, 0, 0, 0.9), 0 0.8px 0 rgba(255, 255, 255, 0.13);
             transform-origin: 3px 62px;
         }
         .tick.on {
-            background: radial-gradient(circle at 50% 40%, #fff6dd, var(--led) 55%, #d98a1c);
-            box-shadow: 0 0 6px rgba(255, 170, 60, 0.7);
+            background: radial-gradient(circle at 50% 40%, #f2ffd0, var(--led) 55%, #8db51c);
+            box-shadow: 0 0 6px rgba(197, 251, 41, 0.65), 0 0 1px rgba(197, 251, 41, 0.9);
         }
 
         .puck {
@@ -184,7 +184,7 @@
         .push, .tbtn { position: absolute; }
         .push svg, .tbtn svg { display: block; overflow: visible; }
         .push { left: 240px; top: 140px; width: 160px; height: 32px; }
-        .tbtn { left: 448px; top: 152px; width: 44px; height: 20px; }
+        .tbtn { left: 448px; top: 151px; width: 44px; height: 22px; }
 
         .push .cap { transition: transform 0.07s ease-out; }
         .push:active .cap, .push.down .cap { transform: translateY(12px); }
@@ -265,6 +265,11 @@
                 <feColorMatrix values="0 0 0 0 0.35  0 0 0 0 0.28  0 0 0 0 0.15  0 0 0 0.13 0"/>
                 <feComposite in2="SourceGraphic" operator="in"/>
             </filter>
+            <filter id="softTouch" x="0" y="0" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="9"/>
+                <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.05 0"/>
+                <feComposite in2="SourceGraphic" operator="in"/>
+            </filter>
             <filter id="blur1"><feGaussianBlur stdDeviation="1"/></filter>
             <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
             <filter id="blur6" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6"/></filter>
@@ -297,7 +302,7 @@
             <div class="clock">
                 <!-- Top buttons first, so the shell covers their bases -->
                 <button class="tbtn" id="preview" aria-label="Preview the alarm sound">
-                    <svg width="44" height="20" viewBox="0 0 44 20" aria-hidden="true">
+                    <svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true">
                         <defs>
                             <linearGradient id="graphite" x1="0" y1="0" x2="1" y2="0">
                                 <stop offset="0" stop-color="#141417"/>
@@ -308,6 +313,11 @@
                                 <stop offset="0.8" stop-color="#26262b"/>
                                 <stop offset="1" stop-color="#121215"/>
                             </linearGradient>
+                            <linearGradient id="graphiteRim" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="rgba(255,255,255,0.2)"/>
+                                <stop offset="0.4" stop-color="rgba(255,255,255,0.07)"/>
+                                <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+                            </linearGradient>
                             <linearGradient id="baseShade" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0" stop-color="rgba(0,0,0,0)"/>
                                 <stop offset="0.55" stop-color="rgba(0,0,0,0)"/>
@@ -315,9 +325,9 @@
                             </linearGradient>
                         </defs>
                         <g class="cap">
-                            <path d="M8 10 Q22 7.6 36 10 V40 H8 Z" fill="url(#graphite)"/>
-                            <rect x="8" y="9" width="28" height="11" fill="url(#baseShade)"/>
-                            <path d="M8.6 10 Q22 7.9 35.4 10" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.9"/>
+                            <path d="M5 9 Q22 6 39 9 V44 H5 Z" fill="url(#graphite)"/>
+                            <rect x="5" y="8" width="34" height="13" fill="url(#baseShade)"/>
+                            <path d="M5 9 Q22 6 39 9 V13.5 Q22 10.5 5 13.5 Z" fill="url(#graphiteRim)"/>
                         </g>
                     </svg>
                 </button>
@@ -339,6 +349,11 @@
                                 <stop offset="0.9" stop-color="#75970d"/>
                                 <stop offset="1" stop-color="#4c6606"/>
                             </linearGradient>
+                            <linearGradient id="limeRim" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="rgba(250,255,225,0.42)"/>
+                                <stop offset="0.35" stop-color="rgba(250,255,225,0.16)"/>
+                                <stop offset="1" stop-color="rgba(250,255,225,0)"/>
+                            </linearGradient>
                             <linearGradient id="limeBase" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0" stop-color="rgba(30,45,0,0)"/>
                                 <stop offset="0.5" stop-color="rgba(30,45,0,0)"/>
@@ -349,8 +364,8 @@
                             <path d="M24 12 Q80 6 136 12 V60 H24 Z" fill="url(#limeCyl)"/>
                             <rect x="24" y="8" width="112" height="24" fill="url(#limeBase)"/>
                             <!-- The rolled rim: a hairline of light, then the turn into shadow -->
-                            <path d="M24.8 12 Q80 6.4 135.2 12" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.3"/>
-                            <path d="M25.5 14.2 Q80 8.6 134.5 14.2" fill="none" stroke="rgba(60,85,0,0.16)" stroke-width="2" filter="url(#blur1)"/>
+                            <!-- The rounded rim: a soft roll of light that fades into the cylinder -->
+                            <path d="M24 12 Q80 6 136 12 V20 Q80 14 24 20 Z" fill="url(#limeRim)"/>
                         </g></g>
                     </svg>
                 </button>
@@ -366,6 +381,10 @@
                             <stop offset="0.55" stop-color="#25262a"/>
                             <stop offset="1" stop-color="#1e1f22"/>
                         </linearGradient>
+                        <radialGradient id="plateLight" gradientUnits="userSpaceOnUse" cx="320" cy="150" r="300">
+                            <stop offset="0" stop-color="rgba(255,255,255,0.06)"/>
+                            <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+                        </radialGradient>
                         <radialGradient id="wellFloor" cx="0.45" cy="0.4" r="0.65">
                             <stop offset="0" stop-color="#18191c"/>
                             <stop offset="1" stop-color="#101113"/>
@@ -377,6 +396,8 @@
                     <g class="grip" pointer-events="visiblePainted">
                         <!-- Face plate, sitting below the shell's opening -->
                         <rect x="52" y="182" width="536" height="256" rx="128" fill="url(#plate)"/>
+                        <rect x="52" y="182" width="536" height="256" rx="128" fill="url(#plateLight)"/>
+                        <rect x="52" y="182" width="536" height="256" rx="128" fill="#000" filter="url(#softTouch)"/>
                         <g clip-path="url(#hole)">
                             <!-- The shell's lip shades the top of the plate -->
                             <rect x="58" y="188" width="524" height="244" rx="122" fill="none" stroke="rgba(0,0,0,0.8)" stroke-width="14" filter="url(#blur6)" transform="translate(0 5)"/>
@@ -392,7 +413,7 @@
 
                         <!-- Round window: a raised graphite bezel, then smoked glass set back toward the vanishing point -->
                         <path d="M180 192 A118 118 0 1 1 179.99 192 Z M182.5 202 A108 108 0 1 0 182.51 202 Z" fill="#2a2b30" fill-rule="evenodd" filter="url(#lightBezel)"/>
-                        <circle cx="182.5" cy="310" r="108" fill="#070605"/>
+                        <circle cx="182.5" cy="310" r="108" fill="#050705"/>
 
                         <!-- Maker's mark, moulded dark on dark -->
                         <g font-family="Inter, sans-serif" font-size="11" font-weight="800" text-anchor="middle">
@@ -587,7 +608,7 @@
             }
         });
 
-        /* ROUND LED PANEL: a 90 x 90 grid of fine gold dots behind smoked
+        /* ROUND LED PANEL: a 90 x 90 grid of fine green dots behind smoked
            acrylic. Each dot has a brightness, so the digits keep smooth edges.
            The time is Inter, rasterised onto the dots; under it, the bell and
            the sound's icon. Light blooms through the acrylic in two layers. */
@@ -613,7 +634,7 @@
             // The unlit dots never change, so they are drawn once
             const g = grid.getContext('2d');
             g.setTransform(ledScale, 0, 0, ledScale, 0, 0);
-            g.fillStyle = 'rgba(255, 196, 130, 0.05)';
+            g.fillStyle = 'rgba(200, 240, 150, 0.05)';
             g.beginPath();
             for (let i = 0; i < inside.length; i++) if (inside[i]) {
                 const x = (i % N + 0.5) * PITCH, y = (Math.floor(i / N) + 0.5) * PITCH;
@@ -626,7 +647,7 @@
 
         // Time: drawn large on a hidden canvas, then each dot takes the share
         // of its square the digits cover. The ink is centred in the window.
-        const OVER = 6, FONT_DOTS = 28, BASELINE = 44;
+        const OVER = 6, FONT_DOTS = 24, BASELINE = 43;
         const raster = document.createElement('canvas');
         raster.width = raster.height = N * OVER;
         const rctx = raster.getContext('2d', { willReadFrequently: true });
@@ -678,7 +699,7 @@
             rows.forEach((r, y) => [...r].forEach((c, x) => { if (c === '#') lite(ox + x, oy + y); }));
         }
 
-        const ICON_TOP = 53, ICON_GAP = 9;
+        const ICON_TOP = 52, ICON_GAP = 9;
         let frame = 0;
         function draw() {
             cov.fill(0);
@@ -703,12 +724,12 @@
         }
 
         function paint() {
-            // Bloom source: one pixel per dot, gold, as bright as the dot
+            // Bloom source: one pixel per dot, green, as bright as the dot
             const img = gctx.createImageData(N, N);
             for (let i = 0; i < cov.length; i++) {
                 const c = cov[i];
                 if (!c) continue;
-                img.data[i * 4] = 255; img.data[i * 4 + 1] = 160; img.data[i * 4 + 2] = 48; img.data[i * 4 + 3] = c * 255;
+                img.data[i * 4] = 150; img.data[i * 4 + 1] = 240; img.data[i * 4 + 2] = 30; img.data[i * 4 + 3] = c * 255;
             }
             gctx.putImageData(img, 0, 0);
             hctx.clearRect(0, 0, haze.width, haze.height);
@@ -745,7 +766,7 @@
                         ctx.arc(x, y, 0.9, 0, Math.PI * 2);
                     }
                 }
-                ctx.fillStyle = `rgba(255, 196, 90, ${0.25 + 0.75 * lv})`;
+                ctx.fillStyle = `rgba(197, 251, 41, ${0.25 + 0.75 * lv})`;
                 ctx.fill();
             });
             // Hot centres on the fully lit dots
@@ -755,7 +776,7 @@
                 ctx.moveTo(x + 0.42, y);
                 ctx.arc(x, y, 0.42, 0, Math.PI * 2);
             }
-            ctx.fillStyle = 'rgba(255, 244, 214, 0.9)';
+            ctx.fillStyle = 'rgba(240, 255, 205, 0.9)';
             ctx.fill();
         }
 
