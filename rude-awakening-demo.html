@@ -420,7 +420,7 @@
 
             <div class="dial-wrap">
                 <div class="dial-ring" id="ring">
-                    <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Alarm sound" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" aria-valuetext="Cat throwing up"></div>
+                    <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Alarm sound" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" aria-valuetext="Cat throwing up"></div>
                 </div>
                 <span class="printed">sound</span>
             </div>
@@ -450,6 +450,7 @@
             { id: 'fire-alarm', name: 'Fire alarm' },
             { id: 'mosquito', name: 'Mosquito in your ear' },
             { id: 'glass-shattering-downstairs', name: 'Glass breaking downstairs' },
+            { id: 'crypto-guy', name: 'Crypto guy' },
         ];
         SOUNDS.forEach(s => { s.audio = new Audio(`audio/rude-awakening/${s.id}.mp3`); s.audio.preload = 'auto'; });
 
@@ -603,8 +604,9 @@
             tick();
         });
 
-        // The sound dial: five detents across 240 degrees
-        const ANGLES = SOUNDS.map((_, i) => -120 + i * 60);
+        // The sound dial: one detent per sound across 240 degrees
+        const STEP = 240 / (SOUNDS.length - 1);
+        const ANGLES = SOUNDS.map((_, i) => -120 + i * STEP);
         const knob = $('knob');
         ANGLES.forEach(a => {
             const t = document.createElement('span');
@@ -641,7 +643,7 @@
             const deg = Math.atan2(e.clientX - drag.cx, drag.cy - e.clientY) * 180 / Math.PI;
             const clamped = Math.max(-120, Math.min(120, deg));
             knob.style.transform = `rotate(${clamped}deg)`;
-            drag.nearest = Math.round((clamped + 120) / 60);
+            drag.nearest = Math.round((clamped + 120) / STEP);
         });
         knob.addEventListener('pointerup', () => {
             if (!drag) return;
